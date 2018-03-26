@@ -51,10 +51,11 @@ void Player::update(Uint32 ticks) {
     (*ptr)->setPlayerPos( getPosition() );
     ++ptr;
   }
+
   for(Light* l: lights){
     l->setPosition(Vector2f(
-      getPosition()[0],
-      getPosition()[1]
+      getPosition()[0] + getScaledWidth()/2,
+      getPosition()[1] + getScaledHeight()/2
     ));
   }
   stop();
