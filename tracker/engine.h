@@ -6,7 +6,6 @@
 #include "viewport.h"
 #include "hud.h"
 #include "wall.h"
-// #include "light.h"
 
 class Player;
 class CollisionStrategy;
@@ -33,8 +32,6 @@ private:
   std::vector<SmartSprite*> sprites;
   Player* player;
   std::vector<CollisionStrategy*> strategies;
-  // std::vector<Wall*> walls;
-  // Light* light;
 
   int currentStrategy;
   int currentSprite;

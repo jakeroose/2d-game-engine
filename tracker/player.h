@@ -15,7 +15,7 @@ public:
   Player(const Player&);
   ~Player();
 
-  void draw() const { player.draw(); }
+  void draw() const;
   void update(Uint32 ticks);
   const MultiSprite* getPlayer() const { return &player; }
   void attach(SmartSprite* o) { observers.push_back(o); }
@@ -57,6 +57,7 @@ private:
   std::vector<Light*> lights;
   int worldWidth;
   int worldHeight;
+  bool updateLighting;
 
   Player& operator=(const Player&) = delete;
 };

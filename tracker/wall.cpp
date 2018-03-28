@@ -1,29 +1,35 @@
 #include <vector>
 #include <SDL.h>
+#include <string>
+
 #include "wall.h"
 #include "viewport.h"
 #include "renderContext.h"
 #include "vector2f.h"
+#include "levelManager.h"
 
-int UNIT_SIZE = 64; // READ IN FROM XML
 int Wall::count = 0;
 
 Wall::Wall(int x1, int y1, int x2, int y2) :
+  // convert from coords to rect with 1 width
   rect({
-    x1*UNIT_SIZE,
-    y1*UNIT_SIZE,
-    (x2 == 0 ? 1 : x2*UNIT_SIZE),
-    (y2 == 0 ? 1 : y2*UNIT_SIZE) }),
-    id("wall_" + Wall::count) {
+    x1*LevelManager::UNIT_SIZE,
+    y1*LevelManager::UNIT_SIZE,
+    (x2 == x1 ? 1 : (x2-x1)*LevelManager::UNIT_SIZE),
+    (y2 == y1 ? 1 : (y2-y1)*LevelManager::UNIT_SIZE) }),
+    id("wall_" + std::to_string(Wall::count)) {
   count++;
 }
 
-Wall::Wall(const SDL_Rect& r) : rect(r), id("wall_"+Wall::count){
+Wall::Wall(const SDL_Rect& r) : rect(r), id("wall_"+std::to_string(Wall::count)){
   count++;
 }
 
 std::ostream& operator<<(std::ostream out, const Wall& w){
   return out << w.getId();
+}
+std::ostream& operator<<(std::ostream out, const Wall* w){
+  return out << w->getId();
 }
 
 void Wall::draw() const {

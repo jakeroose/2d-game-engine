@@ -9,17 +9,12 @@
 #include "gamedata.h"
 #include "wall.h"
 #include "ioMod.h"
+#include "levelManager.h"
 
 // TODO:
-// Right now lighting only works for static sprites. will need to update
-//   decompose so that it updates it's line segments when called, or a way to
-//   consistently do this (since it should just update the dictionary).
-//   For example, could just add the distance an object has moved to the segment
-//   vectors instead of reallocating a new vector. Would have to account for
-//   orientation changes (if ever implemented).
-// Test with in game sprites. Since it's based off of view height not sure a
-//   light source from outside the view would work.
-// Doesn't handle overlapping rects very well.
+// - remove segments and just use LevelManager::walls. Then we can get rid
+//   of decomposeWalls so that it takes care of itself.
+// - move initialization from Engine to Player after ^
 
 // fill polygon implementation
 // http://alienryderflex.com/polygon/
@@ -54,26 +49,19 @@ std::ostream& operator<<(std::ostream& out, const Intersection& i){
 }
 
 Light::~Light(){
-  delete rects;
   delete segments;
-  for(auto w: walls){
-    delete w.second;
-  }
 }
 
-Light::Light(const Vector2f& p) : rects(new std::vector<SDL_Rect>),
+Light::Light(const Vector2f& p) :
   position(p),
   rc(RenderContext::getInstance()),
   renderer(rc->getRenderer()),
   segments(new std::map<int, std::vector<Vector2f> >()),
-  walls(std::map<int, Wall* >()),
   lightPolygon(std::vector<Intersection>()),
   debug(Gamedata::getInstance().getXmlBool("lights/debug")),
-  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")) {
-    lightPolygon.reserve(256);
-    // testing just adding a line
-    // std::vector<Vector2f> v = {Vector2f(0, 64), Vector2f(128, 64)};
-    // segments->emplace(0, v);
+  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights"))
+  {
+  lightPolygon.reserve(256);
 }
 
 /* Returns the point of intersection between ray(r1, r2) and the line(s1, s2)
@@ -90,7 +78,6 @@ Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vect
 	float s_py = s1[1];
 	float s_dx = s2[0]-s_px;
 	float s_dy = s2[1]-s_py;
-
 
 	// Are they parallel? If so, no intersect
 	float r_mag = sqrt(r_dx*r_dx+r_dy*r_dy);
@@ -123,7 +110,6 @@ Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vect
 void Light::decompose(SDL_Rect r){
   int id = segments->size();
   std::vector<Vector2f> segs;
-  // Wall* w = new Wall();
 
   segs.reserve(4);
   // top left
@@ -140,7 +126,7 @@ void Light::decompose(SDL_Rect r){
 }
 
 void Light::decomposeWalls(){
-  for(auto it = walls.begin(); it != walls.end(); it++){
+  for(auto it = LevelManager::getInstance().getWalls().begin(); it != LevelManager::getInstance().getWalls().end(); it++){
     decompose(it->second->getRect());
   }
 }
@@ -181,38 +167,16 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
   return closestIntersect;
 }
 
-/* Calculate based on walls instead of segments */
-// Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
-//   // Find CLOSEST intersection
-// 	Intersection* closestIntersect = NULL;
-//   Vector2f seg1, seg2;
-//
-//   // Loop through each wall segment and see if ray intersects with it
-//   for(auto it = walls.begin(); it != walls.end(); it++){
-//
-//     for(int i = 0; i < it->second->numberOfCorners() - 1; i++){
-//       // get intersection of ray (coord1, coord2) and the line segment (coordi, coordj) from our shape vector<coords_of_shape>
-//       Wall* w = it->second;
-//       Intersection* intersect = getIntersection(ray[0], ray[1], w->getCorners()[i], w->getCorners()[i + 1]);
-//       if(intersect && (!closestIntersect || intersect->param < closestIntersect->param)){
-//         delete closestIntersect;
-//   			closestIntersect = intersect;
-//       } else {
-//         delete intersect;
-//       }
-//     }
-//   }
-//
-//   return closestIntersect;
-// }
-
-/* returns all of the points in rects
+/* returns all of the points in for the level's walls
   NOTE: very similar to decompose...
+  TODO: Have levelManager keep track of all of its coordinates so that Light
+  doesn't have to calculate it every time. Maybe have Wall keep track of it's
+  two coordinates since we will also use them when converting
+  getSegmentIntersections to use LevelManager::Walls
 */
 std::vector<Intersection>* Light::getAllPoints(){
   std::vector<Intersection>* segs = new std::vector<Intersection>();
-  // for(SDL_Rect r: *rects){
-  for(auto w: walls){
+  for(auto w: LevelManager::getInstance().getWalls()){
     SDL_Rect r = w.second->getRect();
     // top left
     segs->push_back( Intersection(r.x, r.y) );
@@ -229,6 +193,7 @@ std::vector<Intersection>* Light::getAllPoints(){
   return segs;
 }
 
+/* Makes sure intersection is within the game */
 bool validIntersect(Intersection* i){
   if(i != NULL && i->x >= -5 && i->y >= -5 &&
     i->x <= (Viewport::getInstance().getWorldWidth() +10) &&
@@ -253,7 +218,6 @@ void Light::update() {
   delete up; // tricky garbage collection :/
 
 	// Get all angles
-  // FIXME: I think this is causing it to glitch out by not removing duplicate angles. Only happens when 2 vertices are vertically aligned.
   std::vector<float> uniqueAngles = std::vector<float>();
   uniqueAngles.reserve(64);
   // offset to get new ray around the intersect
@@ -286,8 +250,6 @@ void Light::update() {
     ray[1] = Vector2f(x + dx, y + dy);
 
     // Find CLOSEST intersection
-    // BUG: glitch happens when ray from an offset angle shoots through a wall
-    //      that it shouldn't be able to shoot through.
     Intersection* closestIntersect = getSegmentIntersections(ray);
 
     // add to list of lightPolygon
@@ -305,7 +267,7 @@ void Light::update() {
 /* Draws all of the cool light stuff!
 */
 void Light::draw() {
-  update();
+  // update();
 
   int minx = 999999, miny=999999, maxx = -1, maxy = -1;
   int vx = Viewport::getInstance().getX(), vy = Viewport::getInstance().getY();
@@ -380,7 +342,7 @@ void Light::draw() {
   /* === Render debug lines & points === */
   if(debug){
     SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255/2 );
-    for(auto w : walls){
+    for(auto w : LevelManager::getInstance().getWalls()){
       w.second->draw();
     }
     SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );

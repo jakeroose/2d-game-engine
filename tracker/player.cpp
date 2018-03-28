@@ -10,7 +10,8 @@ Player::Player( const std::string& name) :
   observers(std::list<SmartSprite*>()),
   lights(std::vector<Light*>()),
   worldWidth(Gamedata::getInstance().getXmlInt("world/width")),
-  worldHeight(Gamedata::getInstance().getXmlInt("world/height"))
+  worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
+  updateLighting(true)
 { }
 
 Player::~Player(){
@@ -19,29 +20,35 @@ Player::~Player(){
 
 void Player::stop() {
   player.setVelocity( Vector2f(0, 0) );
+  updateLighting = false;
 }
 
 void Player::right() {
   if ( player.getX() < worldWidth-getScaledWidth()) {
     player.setVelocityX(initialVelocity[0]);
   }
+  updateLighting = true;
 }
+
 void Player::left()  {
   if ( player.getX() > 0) {
     player.setVelocityX(-initialVelocity[0]);
   }
+  updateLighting = true;
 }
 
 void Player::up()    {
   if ( player.getY() > 0) {
     player.setVelocityY( -initialVelocity[1] );
   }
+  updateLighting = true;
 }
 
 void Player::down()  {
   if ( player.getY() < worldHeight-getScaledHeight()) {
     player.setVelocityY( initialVelocity[1] );
   }
+  updateLighting = true;
 }
 
 void Player::update(Uint32 ticks) {
@@ -51,14 +58,24 @@ void Player::update(Uint32 ticks) {
     (*ptr)->setPlayerPos( getPosition() );
     ++ptr;
   }
-
-  for(Light* l: lights){
-    l->setPosition(Vector2f(
-      getPosition()[0] + getScaledWidth()/2,
-      getPosition()[1] + getScaledHeight()/2
-    ));
+  if(updateLighting){
+    for(Light* l: lights){
+      l->setPosition(Vector2f(
+        getPosition()[0] + getScaledWidth()/2,
+        getPosition()[1] + getScaledHeight()/2
+      ));
+      l->update();
+    }
+    updateLighting = false;
   }
   stop();
+}
+
+void Player::draw() const {
+  for(Light* l: lights){
+    l->draw();
+  }
+  player.draw();
 }
 
 void Player::detach( SmartSprite *o){
