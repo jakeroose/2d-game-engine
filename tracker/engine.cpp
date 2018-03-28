@@ -265,6 +265,8 @@ void Engine::play() {
         SDL_GetMouseState( &x, &y);
         addSprite(x, y);
       }
+
+      // move player with mouse
       // if(event.type == SDL_MOUSEMOTION) {
       //   // get mouse position
       //   int x, y;

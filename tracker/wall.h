@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include "vector2f.h"
 
-
 // 1px wide rect representing a wall.
 // currenlty can only have vertical and horizontal walls, no diagonals.
 class Wall {
@@ -16,8 +15,10 @@ public:
   void display(){
     std::cout << rect.x << "," << rect.y << "," << rect.w << "," << rect.h << std::endl;
   }
+  const std::string& getId() const { return id; }
 private:
   SDL_Rect rect;
   static int count;
+  std::string id;
 };
 #endif

@@ -28,6 +28,7 @@ OBJS = \
 	smartSprite.o \
 	light.o \
 	wall.o \
+	levelManager.o \
 	main.o
 EXEC = run
 

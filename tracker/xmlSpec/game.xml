@@ -17,9 +17,9 @@
 </view>
 
 <world>
-  <width>3000</width>
-  <height>1400</height>
-  <unitSize>64</unitSize> <!-- length of 1 in game unit in pixels -->
+  <width>1280</width>
+  <height>720</height>
+  <unitSize>128</unitSize> <!-- length of 1 in game unit in pixels -->
 </world>
 
 <test>

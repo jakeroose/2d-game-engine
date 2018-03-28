@@ -8,6 +8,7 @@
 #include "viewport.h"
 #include "gamedata.h"
 #include "wall.h"
+#include "ioMod.h"
 
 // TODO:
 // Right now lighting only works for static sprites. will need to update
@@ -228,6 +229,15 @@ std::vector<Intersection>* Light::getAllPoints(){
   return segs;
 }
 
+bool validIntersect(Intersection* i){
+  if(i != NULL && i->x >= -5 && i->y >= -5 &&
+    i->x <= (Viewport::getInstance().getWorldWidth() +10) &&
+    i->y <= (Viewport::getInstance().getViewHeight() + 10)){
+      return true;
+    }
+  return false;
+}
+
 /* updates the lightPolygon
 */
 void Light::update() {
@@ -246,7 +256,9 @@ void Light::update() {
   // FIXME: I think this is causing it to glitch out by not removing duplicate angles. Only happens when 2 vertices are vertically aligned.
   std::vector<float> uniqueAngles = std::vector<float>();
   uniqueAngles.reserve(64);
+  // offset to get new ray around the intersect
   float offset = 0.0001;
+
   for(Intersection p: uniquePoints){
 		float angle = atan2(p.y-y, p.x-x);
     p.angle = angle;
@@ -254,11 +266,15 @@ void Light::update() {
     // if angle is not in uniqueAngles then add it
     if(uniqueAngles.empty() || !(std::find(uniqueAngles.begin(), uniqueAngles.end(), angle) !=  uniqueAngles.end())){
       uniqueAngles.push_back(angle-offset);
-      uniqueAngles.push_back(angle);
       uniqueAngles.push_back(angle+offset);
+      uniqueAngles.push_back(angle);
 
     }
 	}
+
+  // light position
+  std::vector<Vector2f> ray = std::vector<Vector2f>(2);
+  ray[0] = Vector2f(x, y);
 
   // RAYS IN ALL DIRECTIONS
   for(float angle: uniqueAngles){
@@ -266,16 +282,16 @@ void Light::update() {
 		float dx = cos(angle);
 		float dy = sin(angle);
 
-    // Ray from center of screen to mouse
-    std::vector<Vector2f> ray = std::vector<Vector2f>(2);
-    ray[0] = Vector2f(x, y);
+    // ray from position -> offset from angle
     ray[1] = Vector2f(x + dx, y + dy);
 
     // Find CLOSEST intersection
+    // BUG: glitch happens when ray from an offset angle shoots through a wall
+    //      that it shouldn't be able to shoot through.
     Intersection* closestIntersect = getSegmentIntersections(ray);
 
     // add to list of lightPolygon
-    if(closestIntersect){
+    if(validIntersect(closestIntersect)){
       closestIntersect->angle = angle;
       lightPolygon.push_back(*closestIntersect);
     }
@@ -294,7 +310,9 @@ void Light::draw() {
   int minx = 999999, miny=999999, maxx = -1, maxy = -1;
   int vx = Viewport::getInstance().getX(), vy = Viewport::getInstance().getY();
   /* Optimization so that we only draw what is in the viewport and within a
-     rectangle surrounding the lightPolygon */
+     rectangle surrounding the lightPolygon
+     NOTE: May be able to do this when calculating the lightPolygon. Consider
+     doing this if lightPolygon has consderable number of vertices */
   for(Intersection i: lightPolygon){
     if(i.x < minx){ minx = i.x; }
     if(i.y < miny){ miny = i.y; }
@@ -361,29 +379,42 @@ void Light::draw() {
 
   /* === Render debug lines & points === */
   if(debug){
+    SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255/2 );
+    for(auto w : walls){
+      w.second->draw();
+    }
     SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
     Intersection lastIntersect = lightPolygon[0];
     for(Intersection intersect: lightPolygon){
       SDL_SetRenderDrawColor( renderer, 0, 255, 0, 255/2 );
 
-      // Draw red laser
+      // Draw ray laser
       SDL_RenderDrawLine(renderer, position[0]-vx, position[1]-vy, intersect.x - vx, intersect.y - vy);
 
-      // Draw red dot
+      // Draw Intersection dot
       SDL_Rect r = {(int)intersect.x-2-vx, (int)intersect.y-2-vy, 4, 4};
       SDL_RenderFillRect(renderer, &r);
-
 
       // Connect Polygon
       if(intersect == lightPolygon[0]) continue;
       SDL_RenderDrawLine(renderer, lastIntersect.x - vx, lastIntersect.y-vy, intersect.x-vx, intersect.y-vy);
       lastIntersect = intersect;
     }
+
+    // draw outline of lightPolygon
+    int j = lightPolygon.size()-1;
+    for(int i = 0; i < (int)lightPolygon.size(); i++){
+      SDL_SetRenderDrawColor( renderer, 0, i*10 % 256, 255, 255 );
+      // draws line segment draw order
+      // IoMod::getInstance().writeText(std::to_string(i),
+      //  (lightPolygon[i].x + lightPolygon[j].x)/2 + vx,
+      //  (lightPolygon[i].y + lightPolygon[j].y)/2 + vy);
+      SDL_RenderDrawLine(renderer, lightPolygon[i].x - vx, lightPolygon[i].y-vy, lightPolygon[j].x-vx, lightPolygon[j].y-vy);
+      j=i;
+    }
   }
 
-  // for(auto w : walls){
-  //   w.second->draw();
-  // }
+
 
   // OPTIONAL CODE
   // float radius = 10000, distSq;
