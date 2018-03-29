@@ -23,6 +23,8 @@ public:
   void decomposeWalls();
   void toggleDebug(){ debug = !debug; }
   void setPosition(const Vector2f& pos){ position = pos; }
+  void cleanPolygon();
+  void cleanPolygonX();
 private:
   Vector2f position;
   const RenderContext* rc;

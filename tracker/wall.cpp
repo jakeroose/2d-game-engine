@@ -32,6 +32,8 @@ std::ostream& operator<<(std::ostream out, const Wall* w){
   return out << w->getId();
 }
 
+
+
 void Wall::draw() const {
   SDL_Renderer* renderer = RenderContext::getInstance()->getRenderer();
   SDL_Rect r = {

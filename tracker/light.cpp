@@ -149,10 +149,9 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
     int j = it->second.size()-1;
 
     for(unsigned i = 0; i < it->second.size(); i++){
-      // if it is a line segment then don't try to connect the first and last points
-      if(it->second.size() == 2 && i == 1) break;
 
-      // get intersection of ray (coord1, coord2) and the line segment (coordi, coordj) from our shape vector<coords_of_shape>
+      // get intersection of ray (coord1, coord2) and the line
+      // segment (coordi, coordj) from our shape vector<coords_of_shape>
       Intersection* intersect = getIntersection(ray[0], ray[1], it->second[j], it->second[i]);
       if(intersect && (!closestIntersect || intersect->param < closestIntersect->param)){
         delete closestIntersect;
@@ -201,6 +200,61 @@ bool validIntersect(Intersection* i){
       return true;
     }
   return false;
+}
+
+bool sameLine(Intersection& i1, Intersection& i2){
+  // return !(static_cast<int>(i1.x) == static_cast<int>(i2.x)) !=
+    //  !(static_cast<int>(i1.y) == static_cast<int>(i2.y));
+  return static_cast<int>(i1.x) == static_cast<int>(i2.x);
+}
+
+/* cleanPolygon is used to remove duplicate points on the same line of
+   our lightPolygon to reduce its complexity
+   It works by checking for 3 points in a row with the same x/y and removing
+   the middle point.
+*/
+// this does work, janks up the memory though bc of the erase call.
+// still saves us 10-15 fps!
+// TODO: figure out how to get rid of erase call.
+void Light::cleanPolygon(){
+  int i = 0, j = lightPolygon.size() - 1;
+  // std::cout << "start: " << j+1;
+  while(i < (int)lightPolygon.size()){
+    if(sameLine(lightPolygon[j], lightPolygon[i])){
+      while(i < (int)lightPolygon.size() &&
+       sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
+       sameLine(lightPolygon[j], lightPolygon[i])
+    ){
+        // std::cout << lightPolygon[i] << std::endl;
+        lightPolygon.erase(lightPolygon.begin() + i);
+      }
+      j = i++;
+    } else {
+      j = (j+1)%lightPolygon.size();
+      i++;
+    }
+  }
+  cleanPolygonX();
+}
+void Light::cleanPolygonX(){
+
+  int i = 0, j = lightPolygon.size() - 1;
+  while(i < (int)lightPolygon.size()){
+    if((int)lightPolygon[j].y == (int)lightPolygon[i].y){
+      while(i < (int)lightPolygon.size() &&
+       static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()].y) ==
+       static_cast<int>(lightPolygon[i].y)){
+        lightPolygon.erase(lightPolygon.begin() + i);
+      }
+      j = i++;
+    } else {
+      j = (j+1)%lightPolygon.size();
+      i++;
+    }
+  }
+  // std::cout << ", stop: " << lightPolygon.size() << std::endl;
+  // std::cout << j << std::endl;
+
 }
 
 /* updates the lightPolygon
@@ -262,6 +316,9 @@ void Light::update() {
 
   // sort lightPolygon by angle
   std::sort(lightPolygon.begin(), lightPolygon.end());
+
+  // remove dupes
+  cleanPolygon();
 }
 
 /* Draws all of the cool light stuff!
