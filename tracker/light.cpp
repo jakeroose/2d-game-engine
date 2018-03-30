@@ -64,7 +64,11 @@ Light::Light(const Vector2f& p) :
 }
 
 Light::~Light(){
-  for(Intersection* i: lightPolygon) delete i;
+  // ensures no double frees, but that shouldn't happen anyways if I do
+  // everything correctly :D
+  for(Intersection* i: lightPolygon) intersectionPool.push_back(i);
+  intersectionPool.sort();
+  intersectionPool.unique();
   for(Intersection* i: intersectionPool) delete i;
 }
 
@@ -132,17 +136,16 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
       // segment (coordi, coordj) from our shape vector<coords_of_shape>
       Intersection* intersect = getIntersection(ray[0], ray[1], it->second[j], it->second[i]);
       if(intersect && (!closestIntersect || intersect->param < closestIntersect->param)){
-        // delete closestIntersect;
+        // recycle old closestIntersect;
         if(closestIntersect) intersectionPool.push_back(closestIntersect);
   			closestIntersect = intersect;
       } else {
-        // delete intersect;
+        // recycle intersect;
         if(intersect) intersectionPool.push_back(intersect);
       }
       j = i;
     }
   }
-  // std::cout << "here" << std::endl;
   return closestIntersect;
 }
 
@@ -161,64 +164,75 @@ bool sameLine(Intersection* i1, Intersection* i2){
     //  !(static_cast<int>(i1.y) == static_cast<int>(i2.y));
   return static_cast<int>(i1->x) == static_cast<int>(i2->x);
 }
-
+Intersection* Light::getFreeIntersection(float x, float y, float p, float a){
+  if(intersectionPool.empty() == false){
+    Intersection* i = intersectionPool.front();
+    intersectionPool.pop_front();
+    i->x = x;
+    i->y = y;
+    i->param = p;
+    i->angle = a;
+    return i;
+  } else {
+    return new Intersection(x, y, p, a);
+  }
+}
 /* cleanPolygon is used to remove duplicate points on the same line of
    our lightPolygon to reduce its complexity
    It works by checking for 3 points in a row with the same x/y and removing
    the middle point.
-   FIXME!!!!
 */
 void Light::cleanPolygon(){
-  // int i = 0, j = lightPolygon.size() - 1;
-  // std::vector<Intersection*> newPoly = std::vector<Intersection*>();
-  // newPoly.reserve(lightPolygon.size()/2);
-  // if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
-  // while(i < (int)lightPolygon.size()){
-  //   // always add j to the new list
-  //   newPoly.push_back(lightPolygon[j]);
-  //
-  //   if(sameLine(lightPolygon[j], lightPolygon[i])){
-  //     while(i < (int)lightPolygon.size() &&
-  //      sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
-  //      sameLine(lightPolygon[j], lightPolygon[i])
-  //   ){
-  //       // std::cout << lightPolygon[i] << std::endl;
-  //       // lightPolygon.erase(lightPolygon.begin() + i);
-  //       // intersectionPool.push_back(lightPolygon[i]);
-  //       i++;
-  //     }
-  //     j = i++;
-  //   } else {
-  //     j = (j+1)%lightPolygon.size();
-  //     i++;
-  //   }
-  // }
-  // lightPolygon = newPoly;
-  // cleanPolygonX();
+  int i = 0, j = lightPolygon.size() - 1;
+  std::vector<Intersection*> newPoly = std::vector<Intersection*>();
+  newPoly.reserve(lightPolygon.size()/2);
+  if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
+  while(i < (int)lightPolygon.size()){
+    // always add j to the new list
+    newPoly.push_back(getFreeIntersection(lightPolygon[j]->x, lightPolygon[j]->y, lightPolygon[j]->param, lightPolygon[j]->angle));
+
+    if(sameLine(lightPolygon[j], lightPolygon[i])){
+      while(i < (int)lightPolygon.size() &&
+       sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
+       sameLine(lightPolygon[j], lightPolygon[i])
+    ){
+        // lightPolygon.erase(lightPolygon.begin() + i);
+        i++;
+      }
+      j = i++;
+    } else {
+      j = (j+1)%lightPolygon.size();
+      i++;
+    }
+  }
+
+  // recycle old lightPolygon
+  for(Intersection* i : lightPolygon) intersectionPool.push_back(i);
+
+  lightPolygon = newPoly;
+  cleanPolygonX();
 }
 
 void Light::cleanPolygonX(){
-  // int i = 0, j = lightPolygon.size() - 1;
-  // std::vector<Intersection*> newPoly = std::vector<Intersection*>();
-  // while(i < (int)lightPolygon.size()){
-  //   newPoly.push_back(lightPolygon[j]);
-  //   if((int)lightPolygon[j]->y == (int)lightPolygon[i]->y){
-  //     while(i < (int)lightPolygon.size() &&
-  //      static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()]->y) ==
-  //      static_cast<int>(lightPolygon[i]->y)){
-  //       // lightPolygon.erase(lightPolygon.begin() + i);
-  //       // intersectionPool.push_back(lightPolygon[i]);
-  //
-  //       i++;
-  //     }
-  //     j = i++;
-  //   } else {
-  //     j = (j+1)%lightPolygon.size();
-  //     i++;
-  //   }
-  // }
-  // lightPolygon = newPoly;
-  // if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
+  int i = 0, j = lightPolygon.size() - 1;
+  std::vector<Intersection*> newPoly = std::vector<Intersection*>();
+  while(i < (int)lightPolygon.size()){
+    newPoly.push_back(getFreeIntersection(lightPolygon[j]->x, lightPolygon[j]->y, lightPolygon[j]->param, lightPolygon[j]->angle));
+    if((int)lightPolygon[j]->y == (int)lightPolygon[i]->y){
+      while(i < (int)lightPolygon.size() &&
+       static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()]->y) ==
+       static_cast<int>(lightPolygon[i]->y)){
+        i++;
+      }
+      j = i++;
+    } else {
+      j = (j+1)%lightPolygon.size();
+      i++;
+    }
+  }
+  for(Intersection* i : lightPolygon){ intersectionPool.push_back(i); }
+  lightPolygon = newPoly;
+  if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
 }
 
 /* updates the lightPolygon
@@ -338,7 +352,6 @@ void Light::draw() {
       }
 
       //  Sort the nodes, via a simple “Bubble” sort.
-      // TODO: don't use bubble sort...
       i=0;
       while (i<nodes-1) {
         if (nodeX[i]>nodeX[i+1]) {
