@@ -32,7 +32,17 @@ std::ostream& operator<<(std::ostream out, const Wall* w){
   return out << w->getId();
 }
 
+std::vector<Vector2f> Wall::getVertices(){
+  std::vector<Vector2f> v = {
+    Vector2f(rect.x, rect.y), // top left
+    Vector2f(rect.x + rect.w, rect.y), // top right
+    Vector2f(rect.x + rect.w, rect.y + rect.h), // bottom right
+    Vector2f(rect.x, rect.y + rect.h)  // bottom left
+  };
 
+  return v;
+
+}
 
 void Wall::draw() const {
   SDL_Renderer* renderer = RenderContext::getInstance()->getRenderer();

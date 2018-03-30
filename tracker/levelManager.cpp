@@ -25,3 +25,8 @@ LevelManager::~LevelManager(){
     delete w.second;
   }
 }
+
+void LevelManager::addWall(Wall* w){
+  walls.emplace(w->getId(), w);
+  wallVertices.emplace(w->getId(), w->getVertices());
+}

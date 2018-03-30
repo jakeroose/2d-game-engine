@@ -12,9 +12,7 @@
 #include "levelManager.h"
 
 // TODO:
-// - remove segments and just use LevelManager::walls. Then we can get rid
-//   of decomposeWalls so that it takes care of itself.
-// - move initialization from Engine to Player after ^
+// - object pooling for lightPolygon
 
 // fill polygon implementation
 // http://alienryderflex.com/polygon/
@@ -48,20 +46,21 @@ std::ostream& operator<<(std::ostream& out, const Intersection& i){
   return out << i.x << ", " << i.y << ", " << i.angle;
 }
 
-Light::~Light(){
-  delete segments;
-}
 
+/* =============================== */
+/* ==== START OF LIGHT CLASS  ==== */
+/* =============================== */
 Light::Light(const Vector2f& p) :
   position(p),
   rc(RenderContext::getInstance()),
   renderer(rc->getRenderer()),
-  segments(new std::map<int, std::vector<Vector2f> >()),
   lightPolygon(std::vector<Intersection>()),
   debug(Gamedata::getInstance().getXmlBool("lights/debug")),
-  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights"))
-  {
+  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")){
   lightPolygon.reserve(256);
+}
+
+Light::~Light(){
 }
 
 /* Returns the point of intersection between ray(r1, r2) and the line(s1, s2)
@@ -103,49 +102,15 @@ Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vect
   return i;
 }
 
-
-/* Takes an SDL_Rect and decomposes it into a vector of coordinates that is
-  added to our dictionary Light::segments
-*/
-void Light::decompose(SDL_Rect r){
-  int id = segments->size();
-  std::vector<Vector2f> segs;
-
-  segs.reserve(4);
-  // top left
-  segs.push_back(Vector2f(r.x, r.y));
-  // bottom left
-  segs.push_back(Vector2f(r.x, r.y+r.h));
-  // bottom right
-  segs.push_back(Vector2f(r.x+r.w, r.y+r.h));
-  // top right
-  segs.push_back(Vector2f(r.x+r.w, r.y));
-
-  // add segments with a unique ID so we can individually update
-  segments->emplace(id, segs);
-}
-
-void Light::decomposeWalls(){
-  for(auto it = LevelManager::getInstance().getWalls().begin(); it != LevelManager::getInstance().getWalls().end(); it++){
-    decompose(it->second->getRect());
-  }
-}
-
-void Light::decompose(const std::vector<Vector2f>& segs){
-  int id = segments->size();
-  segments->emplace(id, segs);
-}
-
 /* returns the closest intersection of ray and all of our shapes
-   represented in Light::segments
-   assumes each entry in Light::segments is a polygon!
 */
 Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
   // Find CLOSEST intersection
 	Intersection* closestIntersect = NULL;
   Vector2f seg1, seg2;
 
-  for(auto it = segments->begin(); it != segments->end(); it++){
+  for(auto it = LevelManager::getInstance().getWallVertices().begin();
+      it != LevelManager::getInstance().getWallVertices().end(); it++){
     int j = it->second.size()-1;
 
     for(unsigned i = 0; i < it->second.size(); i++){
@@ -164,32 +129,6 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
   }
 
   return closestIntersect;
-}
-
-/* returns all of the points in for the level's walls
-  NOTE: very similar to decompose...
-  TODO: Have levelManager keep track of all of its coordinates so that Light
-  doesn't have to calculate it every time. Maybe have Wall keep track of it's
-  two coordinates since we will also use them when converting
-  getSegmentIntersections to use LevelManager::Walls
-*/
-std::vector<Intersection>* Light::getAllPoints(){
-  std::vector<Intersection>* segs = new std::vector<Intersection>();
-  for(auto w: LevelManager::getInstance().getWalls()){
-    SDL_Rect r = w.second->getRect();
-    // top left
-    segs->push_back( Intersection(r.x, r.y) );
-
-    // bottom left
-    segs->push_back(Intersection(r.x, r.y+r.h));
-
-    // bottom right
-    segs->push_back( Intersection(r.x+r.w, r.y+r.h) );
-
-    // top right
-    segs->push_back( Intersection(r.x+r.w, r.y) );
-  }
-  return segs;
 }
 
 /* Makes sure intersection is within the game */
@@ -213,9 +152,6 @@ bool sameLine(Intersection& i1, Intersection& i2){
    It works by checking for 3 points in a row with the same x/y and removing
    the middle point.
 */
-// this does work, janks up the memory though bc of the erase call.
-// still saves us 10-15 fps!
-// TODO: figure out how to get rid of erase call.
 void Light::cleanPolygon(){
   int i = 0, j = lightPolygon.size() - 1;
   std::vector<Intersection> newPoly = std::vector<Intersection>();
@@ -272,28 +208,24 @@ void Light::update() {
   int x = position[0];
   int y = position[1];
 
-  // Get all unique points
-  std::vector<Intersection>* up = getAllPoints();
-  std::vector<Intersection> uniquePoints = *(up);
-  delete up; // tricky garbage collection :/
-
 	// Get all angles
   std::vector<float> uniqueAngles = std::vector<float>();
   uniqueAngles.reserve(64);
   // offset to get new ray around the intersect
   float offset = 0.0001;
 
-  for(Intersection p: uniquePoints){
-		float angle = atan2(p.y-y, p.x-x);
-    p.angle = angle;
+  for(auto e: LevelManager::getInstance().getWallVertices()){
+    for(Vector2f p: e.second){
+      float angle = atan2(p[1]-y, p[0]-x);
 
-    // if angle is not in uniqueAngles then add it
-    if(uniqueAngles.empty() || !(std::find(uniqueAngles.begin(), uniqueAngles.end(), angle) !=  uniqueAngles.end())){
-      uniqueAngles.push_back(angle-offset);
-      uniqueAngles.push_back(angle+offset);
-      uniqueAngles.push_back(angle);
+      // if angle is not in uniqueAngles then add it
+      if(uniqueAngles.empty() || !(std::find(uniqueAngles.begin(), uniqueAngles.end(), angle) !=  uniqueAngles.end())){
+        uniqueAngles.push_back(angle-offset);
+        uniqueAngles.push_back(angle+offset);
+        uniqueAngles.push_back(angle);
+      }
     }
-	}
+  }
 
   // light position
   std::vector<Vector2f> ray = std::vector<Vector2f>(2);
@@ -329,14 +261,14 @@ void Light::update() {
 /* Draws all of the cool light stuff!
 */
 void Light::draw() {
-  // update();
-
-  int minx = 999999, miny=999999, maxx = -1, maxy = -1;
-  int vx = Viewport::getInstance().getX(), vy = Viewport::getInstance().getY();
+  int minx = 999999, miny=999999, maxx = -1, maxy = -1,
+      vx = Viewport::getInstance().getX(),
+      vy = Viewport::getInstance().getY();
   /* Optimization so that we only draw what is in the viewport and within a
      rectangle surrounding the lightPolygon
      NOTE: May be able to do this when calculating the lightPolygon. Consider
-     doing this if lightPolygon has consderable number of vertices */
+     doing this if lightPolygon has consderable number of vertices
+  */
   for(Intersection i: lightPolygon){
     if(i.x < minx){ minx = i.x; }
     if(i.y < miny){ miny = i.y; }
@@ -414,7 +346,8 @@ void Light::draw() {
       SDL_SetRenderDrawColor( renderer, 0, 255, 0, 255/2 );
 
       // Draw ray laser
-      SDL_RenderDrawLine(renderer, position[0]-vx, position[1]-vy, intersect.x - vx, intersect.y - vy);
+      SDL_RenderDrawLine(renderer, position[0]-vx, position[1]-vy,
+                         intersect.x - vx, intersect.y - vy);
 
       // Draw Intersection dot
       SDL_Rect r = {(int)intersect.x-2-vx, (int)intersect.y-2-vy, 4, 4};
@@ -422,7 +355,8 @@ void Light::draw() {
 
       // Connect Polygon
       if(intersect == lightPolygon[0]) continue;
-      SDL_RenderDrawLine(renderer, lastIntersect.x - vx, lastIntersect.y-vy, intersect.x-vx, intersect.y-vy);
+      SDL_RenderDrawLine(renderer, lastIntersect.x - vx, lastIntersect.y-vy,
+                         intersect.x-vx, intersect.y-vy);
       lastIntersect = intersect;
     }
 
@@ -430,11 +364,8 @@ void Light::draw() {
     int j = lightPolygon.size()-1;
     for(int i = 0; i < (int)lightPolygon.size(); i++){
       SDL_SetRenderDrawColor( renderer, 0, i*10 % 256, 255, 255 );
-      // draws line segment draw order
-      // IoMod::getInstance().writeText(std::to_string(i),
-      //  (lightPolygon[i].x + lightPolygon[j].x)/2 + vx,
-      //  (lightPolygon[i].y + lightPolygon[j].y)/2 + vy);
-      SDL_RenderDrawLine(renderer, lightPolygon[i].x - vx, lightPolygon[i].y-vy, lightPolygon[j].x-vx, lightPolygon[j].y-vy);
+      SDL_RenderDrawLine(renderer, lightPolygon[i].x - vx,
+         lightPolygon[i].y-vy, lightPolygon[j].x-vx, lightPolygon[j].y-vy);
       j=i;
     }
   }

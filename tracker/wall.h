@@ -16,6 +16,7 @@ public:
     std::cout << rect.x << "," << rect.y << "," << rect.w << "," << rect.h << std::endl;
   }
   const std::string& getId() const { return id; }
+  std::vector<Vector2f> getVertices();
 private:
   SDL_Rect rect;
   static int count;

@@ -11,8 +11,9 @@ Player::Player( const std::string& name) :
   lights(std::vector<Light*>()),
   worldWidth(Gamedata::getInstance().getXmlInt("world/width")),
   worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
-  updateLighting(true)
-{ }
+  updateLighting(true){
+    addLight(new Light(getPosition()));
+}
 
 Player::~Player(){
   for(Light* l : lights) delete l;

@@ -77,12 +77,6 @@ Engine::Engine() :
   LevelManager::getInstance().addWall(0, 5, 5, 5);
   LevelManager::getInstance().addWall(1, 5, 1, 3);
 
-  // Initialize lighting
-  player->addLight(new Light(player->getPosition()));
-  for(Light* light: player->getLights()){
-    light->decomposeWalls();
-  }
-
   strategies.push_back( new RectangularCollisionStrategy );
   strategies.push_back( new PerPixelCollisionStrategy );
   strategies.push_back( new MidPointCollisionStrategy );

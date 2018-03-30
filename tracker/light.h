@@ -18,9 +18,6 @@ public:
   const Light& operator=(const Light& l) {
      rc = l.rc; return *this;
   }
-  void decompose(SDL_Rect r);
-  void decompose(const std::vector<Vector2f>& s);
-  void decomposeWalls();
   void toggleDebug(){ debug = !debug; }
   void setPosition(const Vector2f& pos){ position = pos; }
   void cleanPolygon();
@@ -29,7 +26,6 @@ private:
   Vector2f position;
   const RenderContext* rc;
   SDL_Renderer* const renderer;
-  std::map<int, std::vector<Vector2f> >* segments;
   std::vector<Intersection> lightPolygon;
   bool debug;
   bool renderLights;
