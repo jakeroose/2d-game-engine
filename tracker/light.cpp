@@ -190,7 +190,7 @@ void Light::cleanPolygon(){
   int i = 0, j = lightPolygon.size() - 1;
   std::vector<Intersection*> newPoly = std::vector<Intersection*>();
   newPoly.reserve(lightPolygon.size()/2);
-  if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
+  // if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
   while(i < (int)lightPolygon.size()){
     // always add j to the new list
     newPoly.push_back(getFreeIntersection(lightPolygon[j]->x, lightPolygon[j]->y, lightPolygon[j]->param, lightPolygon[j]->angle));
@@ -236,7 +236,7 @@ void Light::cleanPolygonX(){
   }
   for(Intersection* i : lightPolygon){ intersectionPool.push_back(i); }
   lightPolygon = newPoly;
-  if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
+  // if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
 }
 
 /* updates the lightPolygon
@@ -305,8 +305,8 @@ void Light::update() {
 
   // remove dupes
   cleanPolygon();
-  if(debug) std::cout << "Pool Size: " << intersectionPool.size() <<
-    ", Polygon Size: " << lightPolygon.size() << std::endl;
+  // if(debug) std::cout << "Pool Size: " << intersectionPool.size() <<
+  //   ", Polygon Size: " << lightPolygon.size() << std::endl;
 
 }
 

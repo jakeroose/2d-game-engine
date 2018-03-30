@@ -70,7 +70,7 @@
 
 <UFO>
   <file>assets/arrow.png</file>
-  <startLoc x="50" y="100"/>
+  <startLoc x="64" y="192"/>
   <frames>8</frames>
   <frameInterval>175</frameInterval>
   <speedX>300</speedX>

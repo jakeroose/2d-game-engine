@@ -56,9 +56,18 @@ void LevelManager::loadLevel(const std::string& name){
     levelData.close();
   }
   // border of the screen
-  SDL_Rect worldBorder = { 0, 0,
-    Gamedata::getInstance().getXmlInt("world/width"),
-    Gamedata::getInstance().getXmlInt("world/height")
+  SDL_Rect worldBorder[] = {
+    { 0, 0, Gamedata::getInstance().getXmlInt("world/width"), // top
+      1 },
+    { Gamedata::getInstance().getXmlInt("world/width"), 0, 1, // right
+      Gamedata::getInstance().getXmlInt("world/height") },
+    { 0, Gamedata::getInstance().getXmlInt("world/height"),
+      Gamedata::getInstance().getXmlInt("world/width"), 1 }, // bottom
+    { 0, 0, 1,
+      Gamedata::getInstance().getXmlInt("world/height") },
   };
-  addWall(worldBorder);
+  for(SDL_Rect r: worldBorder){
+    addWall(r);
+
+  }
 }

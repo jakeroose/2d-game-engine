@@ -43,6 +43,10 @@ public:
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
 
+  bool checkWallCollision(Wall* w);
+  bool checkForCollisions();
+
+
   void right();
   void left();
   void up();
@@ -55,6 +59,7 @@ private:
   Vector2f initialVelocity;
   std::list<SmartSprite*> observers;
   std::vector<Light*> lights;
+  std::list<Wall*> collisions;
   int worldWidth;
   int worldHeight;
   bool updateLighting;
