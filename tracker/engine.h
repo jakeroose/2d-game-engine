@@ -5,7 +5,6 @@
 #include "world.h"
 #include "viewport.h"
 #include "hud.h"
-#include "wall.h"
 
 class Player;
 class CollisionStrategy;

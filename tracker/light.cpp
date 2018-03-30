@@ -22,7 +22,7 @@
 // inspiration for lighting
 // http://ncase.me/sight-and-light/
 
-class Intersection{
+class Intersection {
 public:
   Intersection(float _x=0, float _y=0, float p=0, float a=0) : x(_x), y(_y), param(p), angle(a){}
   float x;
@@ -60,7 +60,6 @@ Light::Light(const Vector2f& p) :
   debug(Gamedata::getInstance().getXmlBool("lights/debug")),
   renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")){
     lightPolygon.reserve(256);
-    // intersectionPool.reserve(256);
 }
 
 Light::~Light(){
@@ -153,7 +152,7 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
 bool validIntersect(Intersection* i){
   if(i != NULL && i->x >= -5 && i->y >= -5 &&
     i->x <= (Viewport::getInstance().getWorldWidth() +10) &&
-    i->y <= (Viewport::getInstance().getViewHeight() + 10)){
+    i->y <= (Viewport::getInstance().getWorldHeight() + 10)){
       return true;
     }
   return false;
@@ -164,6 +163,10 @@ bool sameLine(Intersection* i1, Intersection* i2){
     //  !(static_cast<int>(i1.y) == static_cast<int>(i2.y));
   return static_cast<int>(i1->x) == static_cast<int>(i2->x);
 }
+
+/* Checks the Intersection object pool for a free Intersection. If none
+   available it creates a new one.
+*/
 Intersection* Light::getFreeIntersection(float x, float y, float p, float a){
   if(intersectionPool.empty() == false){
     Intersection* i = intersectionPool.front();
@@ -177,6 +180,7 @@ Intersection* Light::getFreeIntersection(float x, float y, float p, float a){
     return new Intersection(x, y, p, a);
   }
 }
+
 /* cleanPolygon is used to remove duplicate points on the same line of
    our lightPolygon to reduce its complexity
    It works by checking for 3 points in a row with the same x/y and removing
@@ -243,7 +247,7 @@ void Light::update() {
     intersectionPool.push_back(e);
   }
   lightPolygon.clear();
-  std::cout << "Pool Size: " << intersectionPool.size() << std::endl;
+  // if(debug) std::cout << "Pool Size: " << intersectionPool.size() << std::endl;
 
   int x = position[0];
   int y = position[1];
@@ -259,6 +263,8 @@ void Light::update() {
       float angle = atan2(p[1]-y, p[0]-x);
 
       // if angle is not in uniqueAngles then add it
+      // NOTE: May be able to remove this check since we clean up the
+      // polygon later.
       if(uniqueAngles.empty() || !(std::find(uniqueAngles.begin(), uniqueAngles.end(), angle) !=  uniqueAngles.end())){
         uniqueAngles.push_back(angle-offset);
         uniqueAngles.push_back(angle+offset);
@@ -299,21 +305,20 @@ void Light::update() {
 
   // remove dupes
   cleanPolygon();
-  std::cout << "Pool Size: " << intersectionPool.size() << ", Polygon Size: " <<
-    lightPolygon.size() << std::endl;
+  if(debug) std::cout << "Pool Size: " << intersectionPool.size() <<
+    ", Polygon Size: " << lightPolygon.size() << std::endl;
 
 }
 
 /* Draws all of the cool light stuff!
 */
-void Light::draw() {
+void Light::draw() const {
   int minx = 999999, miny=999999, maxx = -1, maxy = -1,
       vx = Viewport::getInstance().getX(),
       vy = Viewport::getInstance().getY();
-  /* Optimization so that we only draw what is in the viewport and within a
+
+  /* Optimization so that we only DRAW what is in the viewport and within a
      rectangle surrounding the lightPolygon
-     NOTE: May be able to do this when calculating the lightPolygon. Consider
-     doing this if lightPolygon has consderable number of vertices
   */
   for(Intersection* i: lightPolygon){
     if(i->x < minx){ minx = i->x; }

@@ -9,12 +9,13 @@
 
 class LevelManager {
 public:
-  LevelManager() : walls(), wallVertices() {}
+  LevelManager() : walls(), wallVertices() {loadLevel("levels/level_1");}
   LevelManager(const LevelManager&) = delete;
   ~LevelManager();
   static LevelManager& getInstance();
 
-  void addWall(Wall* w); //{walls.emplace(w->getId(), w); }
+  void addWall(Wall* w); 
+  void addWall(const std::string& s);
   void addWall(int x1, int y1, int x2, int y2){
     addWall(new Wall(x1, y1, x2, y2));
   }
@@ -26,6 +27,7 @@ public:
     return wallVertices;
   }
   const Wall* getWall(const std::string& s){ return walls.find(s)->second; }
+  void loadLevel(const std::string& s);
   static int UNIT_SIZE;
 private:
   std::map<std::string, Wall*> walls;

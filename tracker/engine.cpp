@@ -15,8 +15,6 @@
 #include "player.h"
 #include "collisionStrategy.h"
 #include "viewport.h"
-#include "light.h"
-#include "wall.h"
 #include "levelManager.h"
 
 Engine::~Engine() {
@@ -58,24 +56,6 @@ Engine::Engine() :
   for(int i = 0; i < spriteCount; i++){
     addSprite();
   }
-
-  SDL_Rect rects[] = {
-    {0, 0, Gamedata::getInstance().getXmlInt("world/width"),
-      Gamedata::getInstance().getXmlInt("world/height")},   // border of the screen
-    {Gamedata::getInstance().getXmlInt("world/width")/2,
-      Gamedata::getInstance().getXmlInt("world/height")/2, 100, 100 }
-  };
-
-  // Initialize level
-  for(SDL_Rect r: rects){
-    LevelManager::getInstance().addWall(r);
-  }
-  LevelManager::getInstance().addWall(0, 1, 3, 1);
-  LevelManager::getInstance().addWall(3, 1, 3, 4);
-  LevelManager::getInstance().addWall(0, 2, 2, 2);
-  LevelManager::getInstance().addWall(2, 2, 2, 4);
-  LevelManager::getInstance().addWall(0, 5, 5, 5);
-  LevelManager::getInstance().addWall(1, 5, 1, 3);
 
   strategies.push_back( new RectangularCollisionStrategy );
   strategies.push_back( new PerPixelCollisionStrategy );

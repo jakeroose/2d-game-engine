@@ -12,14 +12,14 @@
 <username>malloy</username>
 
 <view>
-  <width>1280</width>
-  <height>720</height>
+  <width>800</width>
+  <height>450</height>
 </view>
 
 <world>
   <width>1280</width>
   <height>720</height>
-  <unitSize>64</unitSize> <!-- length of 1 in game unit in pixels -->
+  <unitSize>128</unitSize> <!-- length of 1 in game unit in pixels -->
 </world>
 
 <test>

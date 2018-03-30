@@ -13,7 +13,7 @@ public:
   Light(const Vector2f& p);
   Light(const Light&) = delete;
   ~Light();
-  void draw();
+  void draw() const;
   void update();
   const Light& operator=(const Light& l) {
      rc = l.rc; return *this;
