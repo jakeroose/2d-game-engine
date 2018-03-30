@@ -218,15 +218,19 @@ bool sameLine(Intersection& i1, Intersection& i2){
 // TODO: figure out how to get rid of erase call.
 void Light::cleanPolygon(){
   int i = 0, j = lightPolygon.size() - 1;
-  // std::cout << "start: " << j+1;
+  std::vector<Intersection> newPoly = std::vector<Intersection>();
+  newPoly.reserve(lightPolygon.size()/2);
+  if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
   while(i < (int)lightPolygon.size()){
+    newPoly.push_back(lightPolygon[j]);
     if(sameLine(lightPolygon[j], lightPolygon[i])){
       while(i < (int)lightPolygon.size() &&
        sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
        sameLine(lightPolygon[j], lightPolygon[i])
     ){
         // std::cout << lightPolygon[i] << std::endl;
-        lightPolygon.erase(lightPolygon.begin() + i);
+        // lightPolygon.erase(lightPolygon.begin() + i);
+        i++;
       }
       j = i++;
     } else {
@@ -234,17 +238,20 @@ void Light::cleanPolygon(){
       i++;
     }
   }
+  lightPolygon = newPoly;
   cleanPolygonX();
 }
 void Light::cleanPolygonX(){
-
   int i = 0, j = lightPolygon.size() - 1;
+  std::vector<Intersection> newPoly = std::vector<Intersection>();
   while(i < (int)lightPolygon.size()){
+    newPoly.push_back(lightPolygon[j]);
     if((int)lightPolygon[j].y == (int)lightPolygon[i].y){
       while(i < (int)lightPolygon.size() &&
        static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()].y) ==
        static_cast<int>(lightPolygon[i].y)){
-        lightPolygon.erase(lightPolygon.begin() + i);
+        // lightPolygon.erase(lightPolygon.begin() + i);
+        i++;
       }
       j = i++;
     } else {
@@ -252,9 +259,8 @@ void Light::cleanPolygonX(){
       i++;
     }
   }
-  // std::cout << ", stop: " << lightPolygon.size() << std::endl;
-  // std::cout << j << std::endl;
-
+  lightPolygon = newPoly;
+  if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
 }
 
 /* updates the lightPolygon
@@ -286,7 +292,6 @@ void Light::update() {
       uniqueAngles.push_back(angle-offset);
       uniqueAngles.push_back(angle+offset);
       uniqueAngles.push_back(angle);
-
     }
 	}
 
@@ -369,6 +374,7 @@ void Light::draw() {
       }
 
       //  Sort the nodes, via a simple “Bubble” sort.
+      // TODO: don't use bubble sort...
       i=0;
       while (i<nodes-1) {
         if (nodeX[i]>nodeX[i+1]) {
