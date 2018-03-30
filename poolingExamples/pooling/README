@@ -1,0 +1,39 @@
+Name: Jake Roose
+
+Course: CPSC 4160
+
+Clemson Email Address: jroose@g.clemson.edu
+
+Project no: 4
+
+Project due date: 04/06/2018
+
+Project description:
+Created a Player object via composition that uses WASD to move.
+Added collision detection to player & smart sprites.
+Added avoidance AI to smart sprites.
+Built a HUD that displays controls and toggle-able with F1.
+NOTE: I used a placeholder sprite for the smart sprites because it was difficult
+  to see the bird sprites that I had before. I most likely won't be using any of
+  these sprites for my final game.
+
+The easiest part of this project:
+Creating the player.
+
+Problems that I had in completing this project:
+Getting the collision detection to work properly. It was really difficult trying
+to debug to figure out where it was breaking.
+
+Game Level Description:
+I would like to create a level where there player is a ball of light/energy and
+they have to solve mazes & jumping puzzles while avoiding enemies. The level will
+be dark so the player can only see the walls and floor with the light they emit.
+They will have to gather more light energies throughout the level to jump higher
+to be able to complete the level. The light energies will surround the player so
+they will be able to see how many they have.
+The score will be based on either how fast they complete the level, how much
+light they collect, or a combination of both.
+I think I will have 2 kinds of enemies: those attracted to light and those scared
+of it. Getting hit will cause you to lose light energy. If you get stuck in an
+area there will be some way to suicide and either start at the beginning or at a
+checkpoint.
