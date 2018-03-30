@@ -1,6 +1,6 @@
 #ifndef LIGHT__H
 #define LIGHT__H
-
+#include <list>
 #include "vector2f.h"
 #include "renderContext.h"
 #include "wall.h"
@@ -26,7 +26,8 @@ private:
   Vector2f position;
   const RenderContext* rc;
   SDL_Renderer* const renderer;
-  std::vector<Intersection> lightPolygon;
+  std::vector<Intersection*> lightPolygon;
+  std::list<Intersection*> intersectionPool;
   bool debug;
   bool renderLights;
 

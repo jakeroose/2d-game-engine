@@ -1,6 +1,7 @@
 #include <math.h>
 #include <iostream>
 #include <algorithm>
+#include <list>
 
 #include "renderContext.h"
 #include "light.h"
@@ -54,13 +55,17 @@ Light::Light(const Vector2f& p) :
   position(p),
   rc(RenderContext::getInstance()),
   renderer(rc->getRenderer()),
-  lightPolygon(std::vector<Intersection>()),
+  lightPolygon(std::vector<Intersection*>()),
+  intersectionPool(),
   debug(Gamedata::getInstance().getXmlBool("lights/debug")),
   renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")){
-  lightPolygon.reserve(256);
+    lightPolygon.reserve(256);
+    // intersectionPool.reserve(256);
 }
 
 Light::~Light(){
+  for(Intersection* i: lightPolygon) delete i;
+  for(Intersection* i: intersectionPool) delete i;
 }
 
 /* Returns the point of intersection between ray(r1, r2) and the line(s1, s2)
@@ -98,8 +103,16 @@ Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vect
 	if(T2<0 || T2>1) return NULL;
 
 	// Return the POINT OF INTERSECTION
-  Intersection* i = new Intersection(r_px+r_dx*T1, r_py+r_dy*T1, T1);
-  return i;
+  if(intersectionPool.empty() == false){
+    Intersection* i = intersectionPool.front();
+    intersectionPool.pop_front();
+    i->x = r_px+r_dx*T1;
+    i->y = r_py+r_dy*T1;
+    i->param = T1;
+    return i;
+  } else {
+    return new Intersection(r_px+r_dx*T1, r_py+r_dy*T1, T1);
+  }
 }
 
 /* returns the closest intersection of ray and all of our shapes
@@ -119,15 +132,17 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
       // segment (coordi, coordj) from our shape vector<coords_of_shape>
       Intersection* intersect = getIntersection(ray[0], ray[1], it->second[j], it->second[i]);
       if(intersect && (!closestIntersect || intersect->param < closestIntersect->param)){
-        delete closestIntersect;
+        // delete closestIntersect;
+        if(closestIntersect) intersectionPool.push_back(closestIntersect);
   			closestIntersect = intersect;
       } else {
-        delete intersect;
+        // delete intersect;
+        if(intersect) intersectionPool.push_back(intersect);
       }
       j = i;
     }
   }
-
+  // std::cout << "here" << std::endl;
   return closestIntersect;
 }
 
@@ -141,69 +156,80 @@ bool validIntersect(Intersection* i){
   return false;
 }
 
-bool sameLine(Intersection& i1, Intersection& i2){
+bool sameLine(Intersection* i1, Intersection* i2){
   // return !(static_cast<int>(i1.x) == static_cast<int>(i2.x)) !=
     //  !(static_cast<int>(i1.y) == static_cast<int>(i2.y));
-  return static_cast<int>(i1.x) == static_cast<int>(i2.x);
+  return static_cast<int>(i1->x) == static_cast<int>(i2->x);
 }
 
 /* cleanPolygon is used to remove duplicate points on the same line of
    our lightPolygon to reduce its complexity
    It works by checking for 3 points in a row with the same x/y and removing
    the middle point.
+   FIXME!!!!
 */
 void Light::cleanPolygon(){
-  int i = 0, j = lightPolygon.size() - 1;
-  std::vector<Intersection> newPoly = std::vector<Intersection>();
-  newPoly.reserve(lightPolygon.size()/2);
-  if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
-  while(i < (int)lightPolygon.size()){
-    newPoly.push_back(lightPolygon[j]);
-    if(sameLine(lightPolygon[j], lightPolygon[i])){
-      while(i < (int)lightPolygon.size() &&
-       sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
-       sameLine(lightPolygon[j], lightPolygon[i])
-    ){
-        // std::cout << lightPolygon[i] << std::endl;
-        // lightPolygon.erase(lightPolygon.begin() + i);
-        i++;
-      }
-      j = i++;
-    } else {
-      j = (j+1)%lightPolygon.size();
-      i++;
-    }
-  }
-  lightPolygon = newPoly;
-  cleanPolygonX();
+  // int i = 0, j = lightPolygon.size() - 1;
+  // std::vector<Intersection*> newPoly = std::vector<Intersection*>();
+  // newPoly.reserve(lightPolygon.size()/2);
+  // if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
+  // while(i < (int)lightPolygon.size()){
+  //   // always add j to the new list
+  //   newPoly.push_back(lightPolygon[j]);
+  //
+  //   if(sameLine(lightPolygon[j], lightPolygon[i])){
+  //     while(i < (int)lightPolygon.size() &&
+  //      sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
+  //      sameLine(lightPolygon[j], lightPolygon[i])
+  //   ){
+  //       // std::cout << lightPolygon[i] << std::endl;
+  //       // lightPolygon.erase(lightPolygon.begin() + i);
+  //       // intersectionPool.push_back(lightPolygon[i]);
+  //       i++;
+  //     }
+  //     j = i++;
+  //   } else {
+  //     j = (j+1)%lightPolygon.size();
+  //     i++;
+  //   }
+  // }
+  // lightPolygon = newPoly;
+  // cleanPolygonX();
 }
+
 void Light::cleanPolygonX(){
-  int i = 0, j = lightPolygon.size() - 1;
-  std::vector<Intersection> newPoly = std::vector<Intersection>();
-  while(i < (int)lightPolygon.size()){
-    newPoly.push_back(lightPolygon[j]);
-    if((int)lightPolygon[j].y == (int)lightPolygon[i].y){
-      while(i < (int)lightPolygon.size() &&
-       static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()].y) ==
-       static_cast<int>(lightPolygon[i].y)){
-        // lightPolygon.erase(lightPolygon.begin() + i);
-        i++;
-      }
-      j = i++;
-    } else {
-      j = (j+1)%lightPolygon.size();
-      i++;
-    }
-  }
-  lightPolygon = newPoly;
-  if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
+  // int i = 0, j = lightPolygon.size() - 1;
+  // std::vector<Intersection*> newPoly = std::vector<Intersection*>();
+  // while(i < (int)lightPolygon.size()){
+  //   newPoly.push_back(lightPolygon[j]);
+  //   if((int)lightPolygon[j]->y == (int)lightPolygon[i]->y){
+  //     while(i < (int)lightPolygon.size() &&
+  //      static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()]->y) ==
+  //      static_cast<int>(lightPolygon[i]->y)){
+  //       // lightPolygon.erase(lightPolygon.begin() + i);
+  //       // intersectionPool.push_back(lightPolygon[i]);
+  //
+  //       i++;
+  //     }
+  //     j = i++;
+  //   } else {
+  //     j = (j+1)%lightPolygon.size();
+  //     i++;
+  //   }
+  // }
+  // lightPolygon = newPoly;
+  // if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
 }
 
 /* updates the lightPolygon
 */
 void Light::update() {
   // reset our light polygon
+  for(Intersection* e : lightPolygon){
+    intersectionPool.push_back(e);
+  }
   lightPolygon.clear();
+  std::cout << "Pool Size: " << intersectionPool.size() << std::endl;
 
   int x = position[0];
   int y = position[1];
@@ -246,16 +272,22 @@ void Light::update() {
     // add to list of lightPolygon
     if(validIntersect(closestIntersect)){
       closestIntersect->angle = angle;
-      lightPolygon.push_back(*closestIntersect);
+      lightPolygon.push_back(closestIntersect);
+    } else {
+      intersectionPool.push_back(closestIntersect);
     }
-    delete closestIntersect;
 	}
 
   // sort lightPolygon by angle
-  std::sort(lightPolygon.begin(), lightPolygon.end());
+  std::sort(lightPolygon.begin(), lightPolygon.end(),
+    [](Intersection* a, Intersection* b){ return a->angle < b->angle;}
+  );
 
   // remove dupes
   cleanPolygon();
+  std::cout << "Pool Size: " << intersectionPool.size() << ", Polygon Size: " <<
+    lightPolygon.size() << std::endl;
+
 }
 
 /* Draws all of the cool light stuff!
@@ -269,11 +301,11 @@ void Light::draw() {
      NOTE: May be able to do this when calculating the lightPolygon. Consider
      doing this if lightPolygon has consderable number of vertices
   */
-  for(Intersection i: lightPolygon){
-    if(i.x < minx){ minx = i.x; }
-    if(i.y < miny){ miny = i.y; }
-    if(i.x > maxx){ maxx = i.x; }
-    if(i.y > maxy){ maxy = i.y; }
+  for(Intersection* i: lightPolygon){
+    if(i->x < minx){ minx = i->x; }
+    if(i->y < miny){ miny = i->y; }
+    if(i->x > maxx){ maxx = i->x; }
+    if(i->y > maxy){ maxy = i->y; }
   }
   if(minx < vx){ minx = vx;}
   if(miny < vy){ miny = vy;}
@@ -296,11 +328,11 @@ void Light::draw() {
       //  Build a list of nodes.
       nodes=0; j=polyCorners-1;
       for (i=0; i<polyCorners; i++) {
-        if ((lightPolygon[i].y<(double) pixelY && lightPolygon[j].y>=(double) pixelY)
-        ||  (lightPolygon[j].y<(double) pixelY && lightPolygon[i].y>=(double) pixelY)) {
-          nodeX[nodes++] = (int)(lightPolygon[i].x+(pixelY-lightPolygon[i].y) /
-          (lightPolygon[j].y-lightPolygon[i].y) *
-          (lightPolygon[j].x-lightPolygon[i].x));
+        if ((lightPolygon[i]->y<(double) pixelY && lightPolygon[j]->y>=(double) pixelY)
+        ||  (lightPolygon[j]->y<(double) pixelY && lightPolygon[i]->y>=(double) pixelY)) {
+          nodeX[nodes++] = (int)(lightPolygon[i]->x+(pixelY-lightPolygon[i]->y) /
+          (lightPolygon[j]->y-lightPolygon[i]->y) *
+          (lightPolygon[j]->x-lightPolygon[i]->x));
         }
         j=i;
       }
@@ -336,27 +368,28 @@ void Light::draw() {
 
   /* === Render debug lines & points === */
   if(debug){
+    // draw walls
     SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255/2 );
     for(auto w : LevelManager::getInstance().getWalls()){
       w.second->draw();
     }
     SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
-    Intersection lastIntersect = lightPolygon[0];
-    for(Intersection intersect: lightPolygon){
+    Intersection* lastIntersect = lightPolygon[0];
+    for(Intersection* intersect: lightPolygon){
       SDL_SetRenderDrawColor( renderer, 0, 255, 0, 255/2 );
 
       // Draw ray laser
       SDL_RenderDrawLine(renderer, position[0]-vx, position[1]-vy,
-                         intersect.x - vx, intersect.y - vy);
+                         intersect->x - vx, intersect->y - vy);
 
       // Draw Intersection dot
-      SDL_Rect r = {(int)intersect.x-2-vx, (int)intersect.y-2-vy, 4, 4};
+      SDL_Rect r = {(int)intersect->x-2-vx, (int)intersect->y-2-vy, 4, 4};
       SDL_RenderFillRect(renderer, &r);
 
       // Connect Polygon
       if(intersect == lightPolygon[0]) continue;
-      SDL_RenderDrawLine(renderer, lastIntersect.x - vx, lastIntersect.y-vy,
-                         intersect.x-vx, intersect.y-vy);
+      SDL_RenderDrawLine(renderer, lastIntersect->x - vx, lastIntersect->y-vy,
+                         intersect->x-vx, intersect->y-vy);
       lastIntersect = intersect;
     }
 
@@ -364,8 +397,8 @@ void Light::draw() {
     int j = lightPolygon.size()-1;
     for(int i = 0; i < (int)lightPolygon.size(); i++){
       SDL_SetRenderDrawColor( renderer, 0, i*10 % 256, 255, 255 );
-      SDL_RenderDrawLine(renderer, lightPolygon[i].x - vx,
-         lightPolygon[i].y-vy, lightPolygon[j].x-vx, lightPolygon[j].y-vy);
+      SDL_RenderDrawLine(renderer, lightPolygon[i]->x - vx,
+         lightPolygon[i]->y-vy, lightPolygon[j]->x-vx, lightPolygon[j]->y-vy);
       j=i;
     }
   }
