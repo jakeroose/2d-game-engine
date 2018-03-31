@@ -1,18 +1,24 @@
 valgrind --leak-check=full ./run
 
-Player:
+practice iterator while loops
 
-
-
-Level:
-collectable energy
-
-
+Collectable:
+Should give buff to player
+should have light source
 
 Lighting:
-optimize lighting with GPU or threads
-- probably add a lightRenderer class that draws all of the lights at the same time
-  instead of one at a time in engine
+lightRenderer class to render multiple lights at once
+
+Player:
+light intensity changes w/ energy left
+jumping scales correctly with unitSize
+
+LevelManager:
+load collectables from level file
+
+
+better XML
+
 
 X calculate lighting for line segments, or maybe add ability to have diagonal rects
   or triangles. not necessary atm.

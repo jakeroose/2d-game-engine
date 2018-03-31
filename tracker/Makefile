@@ -29,6 +29,7 @@ OBJS = \
 	light.o \
 	wall.o \
 	levelManager.o \
+	collectable.o \
 	main.o
 EXEC = run
 

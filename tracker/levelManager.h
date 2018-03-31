@@ -6,6 +6,7 @@
 #include <SDL.h>
 
 #include "wall.h"
+#include "collectable.h"
 
 class LevelManager {
 public:
@@ -28,9 +29,13 @@ public:
   }
   const Wall* getWall(const std::string& s){ return walls.find(s)->second; }
   void loadLevel(const std::string& s);
+  void addCollectable(int x, int y);
+  void addCollectables();
+  const std::vector<Collectable*>& getCollectables(){ return collectables; }
   static int UNIT_SIZE;
 private:
   std::map<std::string, Wall*> walls;
   std::map<std::string, std::vector<Vector2f> > wallVertices;
+  std::vector<Collectable*> collectables;
 };
 #endif

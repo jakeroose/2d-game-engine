@@ -5,20 +5,23 @@
 #include "light.h"
 #include "vector2f.h"
 #include "wall.h"
+// #include "collectable.h"
 
 /*
 LevelManager should let me easily add walls to a level using arbitrary in-game
 coordinates instead of specific pixel coordinates.
 It should keep track of all of the walls in the game so that classes such as
 Light and Player don't have to have their own copies.
-TODO: It should allow me to read in a level from a file so that I don't have to
-recompile the game to see if my level makes sense.
-
+Reads in level from /levels at runtime
+TODO: pooling for walls? only load walls that are in the viewport
 */
 
 int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize");
 
-LevelManager::LevelManager() : walls(), wallVertices() {
+LevelManager::LevelManager() :
+  walls(),
+  wallVertices(),
+  collectables() {
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
@@ -31,6 +34,7 @@ LevelManager::~LevelManager(){
   for(auto w: walls){
     delete w.second;
   }
+  for(Collectable* c: collectables) delete c;
 }
 
 void LevelManager::addWall(Wall* w){
@@ -49,6 +53,19 @@ void LevelManager::addWall(const std::string& s){
   addWall(new Wall(v[0], v[1], v[2], v[3]));
 }
 
+/* Adds a collectable to the tile at x, y */
+void LevelManager::addCollectable(int x, int y){
+  int scaledX =  UNIT_SIZE/2, scaledY = UNIT_SIZE/2;
+  Collectable* c = new Collectable("Collectable");
+  c->setPosition(Vector2f(scaledX + UNIT_SIZE*x, scaledY + UNIT_SIZE*y));
+  std::cout << "here" << std::endl;
+  collectables.push_back(c);
+}
+
+void LevelManager::addCollectables(){
+  addCollectable(2, 4);
+}
+
 void LevelManager::loadLevel(const std::string& name){
   std::ifstream levelData;
   std::string line;
@@ -59,6 +76,7 @@ void LevelManager::loadLevel(const std::string& name){
     }
     levelData.close();
   }
+
   // border of the screen
   SDL_Rect worldBorder[] = {
     { 0, 0, Gamedata::getInstance().getXmlInt("world/width"), // top
@@ -72,6 +90,7 @@ void LevelManager::loadLevel(const std::string& name){
   };
   for(SDL_Rect r: worldBorder){
     addWall(r);
-
   }
+
+  addCollectables();
 }

@@ -16,6 +16,7 @@
 #include "collisionStrategy.h"
 #include "viewport.h"
 #include "levelManager.h"
+#include "collectable.h"
 
 Engine::~Engine() {
   for(auto e: sprites) delete e;
@@ -92,6 +93,10 @@ void Engine::draw() const {
   for(auto e: sprites) e->draw();
   player->draw();
 
+  for(Collectable* c: LevelManager::getInstance().getCollectables()){
+    c->draw();
+  }
+
   if(hud.getDisplay()){
     std::stringstream strm;
     strm << sprites.size() << " Sprites Remaining";
@@ -152,6 +157,12 @@ void Engine::checkForCollisions() {
       it = sprites.erase(it);
     }
     else ++it;
+  }
+  
+  for(Collectable* c: LevelManager::getInstance().getCollectables()){
+    if ( strategies[currentStrategy]->execute(*(player->getPlayer()), *(c->getSprite())) ) {
+      c->collect(player);
+    }
   }
 }
 
@@ -247,7 +258,7 @@ void Engine::play() {
       if (keystate[SDL_SCANCODE_D]) {
         static_cast<Player*>(player)->right();
       }
-      if (keystate[SDL_SCANCODE_W]) {
+      if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_SPACE]) {
         static_cast<Player*>(player)->up();
       }
       if (keystate[SDL_SCANCODE_S]) {

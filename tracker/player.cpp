@@ -189,31 +189,7 @@ void Player::updatePlayerState(){
   }
 }
 
-void Player::refillEnergy(){
-  energy = LevelManager::UNIT_SIZE*4*totalEnergies;
-}
-
-void Player::update(Uint32 ticks) {
-  player.update(ticks);
-  std::list<SmartSprite*>::iterator ptr = observers.begin();
-  while ( ptr != observers.end() ) {
-    (*ptr)->setPlayerPos( getPosition() );
-    ++ptr;
-  }
-
-  updatePlayerState();
-
-  if(updateLighting){
-    for(Light* l: lights){
-      l->setPosition(Vector2f(
-        getPosition()[0] + getScaledWidth()/2,
-        getPosition()[1] + getScaledHeight()/2
-      ));
-      l->update();
-    }
-    updateLighting = false;
-  }
-
+void Player::handleGravity(){
   float gravity = 10;
 
   // TODO: Don't do check if player is on a floor. Currently makes them get
@@ -245,6 +221,35 @@ void Player::update(Uint32 ticks) {
     refillEnergy();
     stop();
   }
+}
+
+void Player::refillEnergy(){
+  energy = LevelManager::UNIT_SIZE*4*totalEnergies;
+}
+
+void Player::update(Uint32 ticks) {
+  player.update(ticks);
+  std::list<SmartSprite*>::iterator ptr = observers.begin();
+  while ( ptr != observers.end() ) {
+    (*ptr)->setPlayerPos( getPosition() );
+    ++ptr;
+  }
+
+  updatePlayerState();
+
+  if(updateLighting){
+    for(Light* l: lights){
+      l->setPosition(Vector2f(
+        getPosition()[0] + getScaledWidth()/2,
+        getPosition()[1] + getScaledHeight()/2
+      ));
+      l->update();
+    }
+    updateLighting = false;
+  }
+
+  handleGravity();
+
 
 }
 

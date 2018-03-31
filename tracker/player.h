@@ -32,18 +32,10 @@ public:
   const std::string& getName() const { return player.getName(); }
   int getX() const { return player.getX(); }
   int getY() const { return player.getY(); }
-  const Image* getImage() const {
-    return player.getImage();
-  }
-  int getScaledWidth()  const {
-    return player.getScaledWidth();
-  }
-  int getScaledHeight()  const {
-    return player.getScaledHeight();
-  }
-  const SDL_Surface* getSurface() const {
-    return player.getSurface();
-  }
+  const Image* getImage() const { return player.getImage(); }
+  int getScaledWidth()  const { return player.getScaledWidth(); }
+  int getScaledHeight()  const { return player.getScaledHeight(); }
+  const SDL_Surface* getSurface() const { return player.getSurface(); }
 
   void addLight(Light* l) { lights.push_back(l); }
   const std::vector<Light*>& getLights() { return lights; }
@@ -80,6 +72,7 @@ private:
   bool collisionTop(Wall* w);
   bool collisionBottom(Wall* w);
   void updatePlayerState();
+  void handleGravity();
   void refillEnergy();
 
   Player& operator=(const Player&) = delete;

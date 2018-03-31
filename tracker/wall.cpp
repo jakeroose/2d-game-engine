@@ -43,15 +43,8 @@ std::vector<Vector2f> Wall::getVertices(){
     Vector2f(rect.x + rect.w, rect.y + rect.h), // bottom right
     Vector2f(rect.x, rect.y + rect.h)  // bottom left
   };
-
   return v;
-
 }
-
-// const std::string Wall::getInfo() const {
-//   return std::string(id + ": " + std::to_string(rect.x) + ", " + std::to_string(rect.y) + ", " + std::to_string(rect.w) + ", " + std::to_string(rect.h));
-// }
-
 
 void Wall::draw() const {
   SDL_Renderer* renderer = RenderContext::getInstance()->getRenderer();

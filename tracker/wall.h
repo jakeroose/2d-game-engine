@@ -18,7 +18,6 @@ public:
     std::cout << rect.x << "," << rect.y << "," << rect.w << "," << rect.h << std::endl;
   }
   const std::string& getId() const { return id; }
-  // const std::string getInfo() const;
   std::vector<Vector2f> getVertices();
   WallType getType() { return type; }
 private:
