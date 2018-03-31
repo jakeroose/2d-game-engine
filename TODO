@@ -1,19 +1,18 @@
 valgrind --leak-check=full ./run
 
+Player:
+Multi-jumping
+
+
+Level:
+collectable energy
+
+
+
 Lighting:
 optimize lighting with GPU or threads
 - probably add a lightRenderer class that draws all of the lights at the same time
   instead of one at a time in engine
-
-Player:
-gravity
-jumping/floating
-object collisions
-
-Level:
-Simple game level
-Game level loader, probably from a text file/JSON file
-
 
 X calculate lighting for line segments, or maybe add ability to have diagonal rects
   or triangles. not necessary atm.

@@ -18,6 +18,10 @@ recompile the game to see if my level makes sense.
 
 int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize");
 
+LevelManager::LevelManager() : walls(), wallVertices() {
+  loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
+}
+
 LevelManager& LevelManager::getInstance(){
   static LevelManager levelManager;
   return levelManager;

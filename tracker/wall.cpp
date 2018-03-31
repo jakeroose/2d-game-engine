@@ -17,11 +17,15 @@ Wall::Wall(int x1, int y1, int x2, int y2) :
     y1*LevelManager::UNIT_SIZE,
     (x2 == x1 ? 1 : (x2-x1)*LevelManager::UNIT_SIZE),
     (y2 == y1 ? 1 : (y2-y1)*LevelManager::UNIT_SIZE) }),
-    id("wall_" + std::to_string(Wall::count)) {
+  id("wall_" + std::to_string(Wall::count)),
+  type(rect.w == 1 ? WallType::wall : WallType::floor) {
   count++;
 }
 
-Wall::Wall(const SDL_Rect& r) : rect(r), id("wall_"+std::to_string(Wall::count)){
+Wall::Wall(const SDL_Rect& r) :
+  rect(r),
+  id("wall_"+std::to_string(Wall::count)),
+  type(rect.w == 1 ? WallType::wall : WallType::floor) {
   count++;
 }
 

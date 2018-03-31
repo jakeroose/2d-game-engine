@@ -4,6 +4,8 @@
 #include <SDL.h>
 #include "vector2f.h"
 
+enum class WallType { wall, floor };
+
 // 1px wide rect representing a wall.
 // currenlty can only have vertical and horizontal walls, no diagonals.
 class Wall {
@@ -18,9 +20,11 @@ public:
   const std::string& getId() const { return id; }
   // const std::string getInfo() const;
   std::vector<Vector2f> getVertices();
+  WallType getType() { return type; }
 private:
   SDL_Rect rect;
   static int count;
   std::string id;
+  WallType type;
 };
 #endif

@@ -12,10 +12,12 @@ Player::Player( const std::string& name) :
   observers(std::list<SmartSprite*>()),
   lights(std::vector<Light*>()),
   collisions(),
+  state(PlayerState::falling),
   worldWidth(Gamedata::getInstance().getXmlInt("world/width")),
   worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
   updateLighting(true){
     addLight(new Light(getPosition()));
+    checkForCollisions();
 }
 
 Player::~Player(){
@@ -24,10 +26,14 @@ Player::~Player(){
 
 bool Player::checkWallCollision(Wall* w){
   float right2, left2, top2, bottom2;
+  int tolerance = 10;
+  bool wall = (w->getType() == WallType::wall);
   SDL_Rect r;
   r = w->getRect();
-  left2 = r.x; right2 = r.x + r.w;
-  top2 = r.y; bottom2 = r.y + r.h;
+  left2 = r.x +         (wall ? 0 : tolerance);
+  right2 = r.x + r.w +  (wall ? 0 : -tolerance);
+  top2 = r.y +          (wall ? tolerance : 0);
+  bottom2 = r.y + r.h + (wall ? -tolerance : 0);
   float left1 = player.getX();
 
   float right1 = left1+player.getScaledWidth();
@@ -42,7 +48,6 @@ bool Player::checkWallCollision(Wall* w){
 }
 
 bool Player::checkForCollisions(){
-  // std::vector<Wall*> colls = std::vector<Wall*>(4);
   collisions.clear();
   bool c = false;
   for(auto w : LevelManager::getInstance().getWalls()){
@@ -61,15 +66,51 @@ void Player::stop() {
   updateLighting = false;
 }
 
+bool Player::collisionRight(Wall* w){
+  SDL_Rect r = w->getRect();
+    // if wall is between player middle and player right
+  std::cout << "wall: " << r.x << ", player: " << player.getX() << std::endl;
+  if(w->getType() == WallType::wall &&
+    (r.x < player.getX() + player.getScaledWidth()) &&
+    (r.x > player.getX() + player.getScaledWidth()/2)) return true;
+  return false;
+}
+
+bool Player::collisionLeft(Wall* w){
+  SDL_Rect r = w->getRect();
+  // if wall is between player middle and player right
+  std::cout << "Left, wall: " << r.x << ", player: " << player.getX() << std::endl;
+  if(w->getType() == WallType::wall &&
+    (r.x > player.getX()) &&
+    (r.x < player.getX() + player.getScaledWidth()/2)) return true;
+  return false;
+}
+
+bool Player::collisionTop(Wall* w){
+  SDL_Rect r = w->getRect();
+  // if wall is between middle of player and top of player
+  std::cout << "Up, wall: " << r.y << ", player: " << player.getY() << std::endl;
+  if(w->getType() == WallType::floor &&
+     r.y > player.getY() &&
+     r.y < player.getY() + player.getScaledHeight()/2) return true;
+  return false;
+}
+
+bool Player::collisionBottom(Wall* w){
+  SDL_Rect r = w->getRect();
+  // if wall is between player bottom and player middle
+  std::cout << "Down, wall: " << (r.y + r.h) << ", player: " <<
+   (player.getY() + player.getScaledHeight()) << std::endl;
+  if(w->getType() == WallType::floor &&
+    ((r.y + r.h) < (player.getY() + player.getScaledHeight())) &&
+    ((r.y + r.h) > (player.getY() + player.getScaledHeight()/2))) return true;
+  return false;
+}
+
 void Player::right() {
   if(checkForCollisions()){
-    SDL_Rect r;
     for(Wall* w : collisions){
-      r = w->getRect();
-      // if wall is to the left of player
-      std::cout << "wall: " << r.x << ", player: " << player.getX() << std::endl;
-      if((r.x < player.getX() + player.getScaledWidth()) &&
-      (r.x > player.getX() + player.getScaledWidth()/2)) return;
+      if(collisionRight(w)) return;
     }
   }
   if ( player.getX() < worldWidth-getScaledWidth()) {
@@ -80,12 +121,8 @@ void Player::right() {
 
 void Player::left()  {
   if(checkForCollisions()){
-    SDL_Rect r;
     for(Wall* w : collisions){
-      r = w->getRect();
-      // if wall is to the right of player
-      std::cout << "Left, wall: " << r.x << ", player: " << player.getX() << std::endl;
-      if((r.x > player.getX()) && (r.x < player.getX() + player.getScaledWidth()/2)) return;
+      if(collisionLeft(w)) return;
     }
   }
   if ( player.getX() > 0) {
@@ -95,16 +132,10 @@ void Player::left()  {
 }
 
 void Player::up()    {
-  // std::vector<Wall*> colls = checkForCollisions();
+  // state = PlayerState::jumping;
   if(checkForCollisions()){
-    SDL_Rect r;
     for(Wall* w : collisions){
-      r = w->getRect();
-      // if wall is between middle of player and top of player
-      if(r.y > player.getY() && r.y < player.getY() + player.getScaledHeight()/2){
-        std::cout << "Up, wall: " << r.y << ", player: " << player.getY() << std::endl;
-        return;
-      }
+      if(collisionTop(w)) return;
     }
   }
   if ( player.getY() > 0) {
@@ -115,21 +146,30 @@ void Player::up()    {
 
 void Player::down()  {
   if(checkForCollisions()){
-    SDL_Rect r;
     for(Wall* w : collisions){
-      r = w->getRect();
-      // if wall is between player bottom and player middle
-      if(((r.y + r.h) < (player.getY() + player.getScaledHeight())) &&
-        ((r.y + r.h) > (player.getY() + player.getScaledHeight()/2))){
-        std::cout << "Down, wall: " << (r.y + r.h) << ", player: " << (player.getY() + player.getScaledHeight()) << std::endl;
-        return;
-      }
+      if(collisionBottom(w)) return;
     }
   }
   if ( player.getY() < worldHeight-getScaledHeight()) {
     player.setVelocityY( initialVelocity[1] );
   }
   updateLighting = true;
+}
+
+void Player::updatePlayerState(){
+  updateLighting = true;
+  if(player.getVelocityY() > 0 || collisions.size() == 0){
+    state = PlayerState::falling;
+  } else if(player.getVelocityY() < 0){
+    state = PlayerState::jumping;
+  } else if(player.getVelocityX() != 0){
+    state = PlayerState::walking;
+    player.setVelocityX(0);
+  } else {
+    state = PlayerState::idle;
+    updateLighting = false;
+    // stop();
+  }
 }
 
 void Player::update(Uint32 ticks) {
@@ -139,6 +179,9 @@ void Player::update(Uint32 ticks) {
     (*ptr)->setPlayerPos( getPosition() );
     ++ptr;
   }
+
+  updatePlayerState();
+
   if(updateLighting){
     for(Light* l: lights){
       l->setPosition(Vector2f(
@@ -147,11 +190,40 @@ void Player::update(Uint32 ticks) {
       ));
       l->update();
     }
-
-
     updateLighting = false;
   }
-  stop();
+
+  float gravity = 10;
+
+  // TODO: Don't do check if player is on a floor. Currently makes them get
+  // stuck on walls though bc of updatePlayerState().
+  // Here down should probably all be in update state.
+  // if(state != PlayerState::idle){
+  checkForCollisions();
+  // check if they should be falling
+  for(Wall* w : collisions){
+    if(collisionBottom(w)){
+      state = PlayerState::idle;
+      stop();
+      break;
+    } else {
+      state = PlayerState::falling;
+      std::cout << "falling" << std::endl;
+    }
+    if(collisionTop(w)){
+      player.setVelocityY(1);
+    }
+    if(collisionRight(w) || collisionLeft(w)){
+      player.setVelocityX(0);
+    }
+  }
+  // }
+  if(state != PlayerState::idle){
+    player.setVelocityY(player.getVelocityY() + gravity);
+  } else {
+    stop();
+  }
+
 }
 
 void Player::draw() const {

@@ -211,6 +211,9 @@ void Engine::play() {
           std::cout << "Terminating frame capture" << std::endl;
           makeVideo = false;
         }
+        if (keystate[SDL_SCANCODE_W]) {
+          static_cast<Player*>(player)->up();
+        }
       }
 
       // handle mouse interaction
@@ -241,9 +244,9 @@ void Engine::play() {
       if (keystate[SDL_SCANCODE_D]) {
         static_cast<Player*>(player)->right();
       }
-      if (keystate[SDL_SCANCODE_W]) {
-        static_cast<Player*>(player)->up();
-      }
+      // if (keystate[SDL_SCANCODE_W]) {
+      //   static_cast<Player*>(player)->up();
+      // }
       if (keystate[SDL_SCANCODE_S]) {
         static_cast<Player*>(player)->down();
       }

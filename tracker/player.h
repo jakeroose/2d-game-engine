@@ -9,6 +9,14 @@
 #include "smartSprite.h"
 #include "light.h"
 
+/* === Player States ===
+idle: they are standing on the floor. cannot enter another state w/out input
+falling: yVelocity > 0
+jumping: yVelocity < 0
+walking: yVelocity = 0 && xVelocity != 0
+*/
+enum class PlayerState { idle, falling, jumping, walking };
+
 class Player {
 public:
   Player(const std::string&);
@@ -43,16 +51,11 @@ public:
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
 
-  bool checkWallCollision(Wall* w);
-  bool checkForCollisions();
-
-
   void right();
   void left();
   void up();
   void down();
   void stop();
-
 
 private:
   MultiSprite player;
@@ -60,9 +63,18 @@ private:
   std::list<SmartSprite*> observers;
   std::vector<Light*> lights;
   std::list<Wall*> collisions;
+  PlayerState state;
   int worldWidth;
   int worldHeight;
   bool updateLighting;
+
+  bool checkWallCollision(Wall* w);
+  bool checkForCollisions();
+  bool collisionRight(Wall* w);
+  bool collisionLeft(Wall* w);
+  bool collisionTop(Wall* w);
+  bool collisionBottom(Wall* w);
+  void updatePlayerState();
 
   Player& operator=(const Player&) = delete;
 };

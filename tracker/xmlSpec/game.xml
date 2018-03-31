@@ -9,7 +9,7 @@
 <period>17</period>
 
 <maxFrames>300</maxFrames>
-<username>malloy</username>
+<username>jroose</username>
 
 <view>
   <width>800</width>
@@ -21,6 +21,10 @@
   <height>720</height>
   <unitSize>128</unitSize> <!-- length of 1 in game unit in pixels -->
 </world>
+
+<level>
+  <name>level1</name>
+</level>
 
 <test>
   <attr1>"att1 \n newline?"</attr1>
