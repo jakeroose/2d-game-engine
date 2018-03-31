@@ -203,6 +203,9 @@ void Engine::play() {
         if (keystate[SDL_SCANCODE_F1]) {
           hud.toggleDisplay();
         }
+        if (keystate[SDL_SCANCODE_F2]) {
+          player->toggleDebug();
+        }
         if (keystate[SDL_SCANCODE_F4] && !makeVideo) {
           std::cout << "Initiating frame capture" << std::endl;
           makeVideo = true;
@@ -211,9 +214,9 @@ void Engine::play() {
           std::cout << "Terminating frame capture" << std::endl;
           makeVideo = false;
         }
-        if (keystate[SDL_SCANCODE_W]) {
-          static_cast<Player*>(player)->up();
-        }
+        // if (keystate[SDL_SCANCODE_W]) {
+        //   static_cast<Player*>(player)->up();
+        // }
       }
 
       // handle mouse interaction
@@ -244,9 +247,9 @@ void Engine::play() {
       if (keystate[SDL_SCANCODE_D]) {
         static_cast<Player*>(player)->right();
       }
-      // if (keystate[SDL_SCANCODE_W]) {
-      //   static_cast<Player*>(player)->up();
-      // }
+      if (keystate[SDL_SCANCODE_W]) {
+        static_cast<Player*>(player)->up();
+      }
       if (keystate[SDL_SCANCODE_S]) {
         static_cast<Player*>(player)->down();
       }

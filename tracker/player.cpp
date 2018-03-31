@@ -6,6 +6,20 @@
 #include "levelManager.h"
 #include "wall.h"
 
+std::ostream& operator<<(std::ostream& out, PlayerState s){
+  std::string state = "idk";
+  if(s == PlayerState::idle){
+    state = "idle";
+  } else if(s == PlayerState::falling){
+    state = "falling";
+  } else if(s == PlayerState::jumping){
+    state = "jumping";
+  } else if(s == PlayerState::walking){
+    state = "walking";
+  }
+  return out << state;
+}
+
 Player::Player( const std::string& name) :
   player(name),
   initialVelocity(player.getVelocity()),
@@ -15,7 +29,12 @@ Player::Player( const std::string& name) :
   state(PlayerState::falling),
   worldWidth(Gamedata::getInstance().getXmlInt("world/width")),
   worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
-  updateLighting(true){
+  updateLighting(true),
+  hoverHeight(LevelManager::UNIT_SIZE/4),
+  energy(LevelManager::UNIT_SIZE*4),
+  flyPower(initialVelocity[1]),
+  totalEnergies(1)
+  {
     addLight(new Light(getPosition()));
     checkForCollisions();
 }
@@ -41,7 +60,7 @@ bool Player::checkWallCollision(Wall* w){
   if ( left1 > right2 ) return false;
   float top1 = player.getY();
 
-  float bottom1 = top1+player.getScaledHeight();
+  float bottom1 = top1+player.getScaledHeight() + hoverHeight;
   if ( bottom1 < top2 ) return false;
   if ( bottom2 < top1 ) return false;
   return true;
@@ -52,7 +71,7 @@ bool Player::checkForCollisions(){
   bool c = false;
   for(auto w : LevelManager::getInstance().getWalls()){
     if(checkWallCollision(w.second)){
-      std::cout << "collision: " << w.second->getId() << std::endl;
+      // std::cout << "collision: " << w.second->getId() << std::endl;
       collisions.push_back(w.second);
       c = true;
     }
@@ -69,7 +88,6 @@ void Player::stop() {
 bool Player::collisionRight(Wall* w){
   SDL_Rect r = w->getRect();
     // if wall is between player middle and player right
-  std::cout << "wall: " << r.x << ", player: " << player.getX() << std::endl;
   if(w->getType() == WallType::wall &&
     (r.x < player.getX() + player.getScaledWidth()) &&
     (r.x > player.getX() + player.getScaledWidth()/2)) return true;
@@ -79,7 +97,6 @@ bool Player::collisionRight(Wall* w){
 bool Player::collisionLeft(Wall* w){
   SDL_Rect r = w->getRect();
   // if wall is between player middle and player right
-  std::cout << "Left, wall: " << r.x << ", player: " << player.getX() << std::endl;
   if(w->getType() == WallType::wall &&
     (r.x > player.getX()) &&
     (r.x < player.getX() + player.getScaledWidth()/2)) return true;
@@ -89,7 +106,6 @@ bool Player::collisionLeft(Wall* w){
 bool Player::collisionTop(Wall* w){
   SDL_Rect r = w->getRect();
   // if wall is between middle of player and top of player
-  std::cout << "Up, wall: " << r.y << ", player: " << player.getY() << std::endl;
   if(w->getType() == WallType::floor &&
      r.y > player.getY() &&
      r.y < player.getY() + player.getScaledHeight()/2) return true;
@@ -99,11 +115,9 @@ bool Player::collisionTop(Wall* w){
 bool Player::collisionBottom(Wall* w){
   SDL_Rect r = w->getRect();
   // if wall is between player bottom and player middle
-  std::cout << "Down, wall: " << (r.y + r.h) << ", player: " <<
-   (player.getY() + player.getScaledHeight()) << std::endl;
   if(w->getType() == WallType::floor &&
-    ((r.y + r.h) < (player.getY() + player.getScaledHeight())) &&
-    ((r.y + r.h) > (player.getY() + player.getScaledHeight()/2))) return true;
+    ((r.y + r.h) < (player.getY() + player.getScaledHeight() + hoverHeight)) &&
+    ((r.y + r.h) > (player.getY() + player.getScaledHeight()/2 + hoverHeight))) return true;
   return false;
 }
 
@@ -138,8 +152,11 @@ void Player::up()    {
       if(collisionTop(w)) return;
     }
   }
-  if ( player.getY() > 0) {
-    player.setVelocityY( -initialVelocity[1] );
+  if ( player.getY() > 0 && energy > 0) {
+    // player.setVelocityY( -initialVelocity[1] );
+    if(player.getVelocityY() > 0) player.setVelocityY(0);
+    player.setVelocityY( player.getVelocityY() - flyPower );
+    energy -= flyPower;
   }
   updateLighting = true;
 }
@@ -170,6 +187,10 @@ void Player::updatePlayerState(){
     updateLighting = false;
     // stop();
   }
+}
+
+void Player::refillEnergy(){
+  energy = LevelManager::UNIT_SIZE*4*totalEnergies;
 }
 
 void Player::update(Uint32 ticks) {
@@ -208,10 +229,10 @@ void Player::update(Uint32 ticks) {
       break;
     } else {
       state = PlayerState::falling;
-      std::cout << "falling" << std::endl;
+      // std::cout << "falling" << std::endl;
     }
     if(collisionTop(w)){
-      player.setVelocityY(1);
+      player.setVelocityY(0);
     }
     if(collisionRight(w) || collisionLeft(w)){
       player.setVelocityX(0);
@@ -221,6 +242,7 @@ void Player::update(Uint32 ticks) {
   if(state != PlayerState::idle){
     player.setVelocityY(player.getVelocityY() + gravity);
   } else {
+    refillEnergy();
     stop();
   }
 

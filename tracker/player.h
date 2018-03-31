@@ -47,6 +47,7 @@ public:
 
   void addLight(Light* l) { lights.push_back(l); }
   const std::vector<Light*>& getLights() { return lights; }
+  void toggleDebug() { for(Light* l: lights) l->toggleDebug(); }
 
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
@@ -67,6 +68,10 @@ private:
   int worldWidth;
   int worldHeight;
   bool updateLighting;
+  int hoverHeight;
+  int energy;
+  int flyPower;
+  int totalEnergies;
 
   bool checkWallCollision(Wall* w);
   bool checkForCollisions();
@@ -75,6 +80,7 @@ private:
   bool collisionTop(Wall* w);
   bool collisionBottom(Wall* w);
   void updatePlayerState();
+  void refillEnergy();
 
   Player& operator=(const Player&) = delete;
 };

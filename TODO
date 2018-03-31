@@ -1,7 +1,7 @@
 valgrind --leak-check=full ./run
 
 Player:
-Multi-jumping
+
 
 
 Level:

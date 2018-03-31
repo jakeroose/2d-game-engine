@@ -78,7 +78,7 @@
   <frames>8</frames>
   <frameInterval>175</frameInterval>
   <speedX>300</speedX>
-  <speedY>300</speedY>
+  <speedY>25</speedY>
   <transparency>false</transparency>
 </UFO>
 
@@ -88,7 +88,7 @@
   <frames>8</frames>
   <frameInterval>100</frameInterval>
   <speedX>150</speedX>
-  <speedY>75</speedY>
+  <speedY>50</speedY>
   <transparency>false</transparency>
   <count>0</count>
   <safeDistance>300</safeDistance>
