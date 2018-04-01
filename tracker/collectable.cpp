@@ -26,23 +26,26 @@ void Collectable::update(){
     // the player
     light->setPosition(player->getPosition() + Vector2f(5, 5));
     light->update();
+    sprite->setPosition(light->getPosition());
   } else {
     light->setPosition(getPosition());
     // make sure light has been calculated
     if(light->getPolygonSize() == 0) light->update();
   }
-
 }
 
 void Collectable::draw() const {
   if(collected == false){
     sprite->draw();
   }
-  light->draw();
+  // light->draw();
 }
 
 
 void Collectable::collect(Player* p){
-  player = p;
-  collected = true;
+  if(collected == false){
+    player = p;
+    player->addCollectable();
+    collected = true;
+  }
 }

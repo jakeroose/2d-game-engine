@@ -107,30 +107,33 @@ void Engine::draw() const {
     strm.str(std::string()); // clear strm
     strm << Clock::getInstance().getFps();
     IoMod::getInstance().writeText("FPS: " + strm.str(), 15, 40);
+    IoMod::getInstance().writeText("PlayerState: "+player->getStateStr(), 15, 75);
+    IoMod::getInstance().writeText("PlayerEngergy: "+std::to_string(player->getEnergy()), 15, 100);
 
-    IoMod::getInstance().writeText("Controls:", 15, 75);
-    IoMod::getInstance().writeText("M   - Collision Strat.", 15, 100);
-    IoMod::getInstance().writeText("F1  - Toggle HUD", 15, 125);
-    IoMod::getInstance().writeText("P   - Pause", 15, 150);
-    IoMod::getInstance().writeText("ESC - Quit", 15, 175);
-    IoMod::getInstance().writeText("Click - Add Sprite", 15, 200);
 
-    // draw movement info to HUD
-    IoMod::getInstance().writeText("WASD to move", 15, 250);
-    const Uint8* keystate;
-    keystate = SDL_GetKeyboardState(NULL);
-    if (keystate[SDL_SCANCODE_A]) {
-      IoMod::getInstance().writeText("left", 15, 300);
-    }
-    if (keystate[SDL_SCANCODE_D]) {
-      IoMod::getInstance().writeText("right", 65, 300);
-    }
-    if (keystate[SDL_SCANCODE_W]) {
-      IoMod::getInstance().writeText("up", 40, 275);
-    }
-    if (keystate[SDL_SCANCODE_S]) {
-      IoMod::getInstance().writeText("down", 25, 325);
-    }
+    // IoMod::getInstance().writeText("Controls:", 15, 75);
+    // IoMod::getInstance().writeText("M   - Collision Strat.", 15, 100);
+    // IoMod::getInstance().writeText("F1  - Toggle HUD", 15, 125);
+    // IoMod::getInstance().writeText("P   - Pause", 15, 150);
+    // IoMod::getInstance().writeText("ESC - Quit", 15, 175);
+    // IoMod::getInstance().writeText("Click - Add Sprite", 15, 200);
+    //
+    // // draw movement info to HUD
+    // IoMod::getInstance().writeText("WASD to move", 15, 250);
+    // const Uint8* keystate;
+    // keystate = SDL_GetKeyboardState(NULL);
+    // if (keystate[SDL_SCANCODE_A]) {
+    //   IoMod::getInstance().writeText("left", 15, 300);
+    // }
+    // if (keystate[SDL_SCANCODE_D]) {
+    //   IoMod::getInstance().writeText("right", 65, 300);
+    // }
+    // if (keystate[SDL_SCANCODE_W]) {
+    //   IoMod::getInstance().writeText("up", 40, 275);
+    // }
+    // if (keystate[SDL_SCANCODE_S]) {
+    //   IoMod::getInstance().writeText("down", 25, 325);
+    // }
   }
 
   // draw our menus
@@ -170,7 +173,7 @@ void Engine::update(Uint32 ticks) {
   checkForCollisions();
   player->update(ticks);
   for(auto e: sprites) e->update(ticks);
-  
+
   for(Collectable* c: LevelManager::getInstance().getCollectables())
     c->update();
 

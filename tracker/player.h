@@ -51,6 +51,9 @@ public:
   void stop();
 
   PlayerState getState() const { return state; }
+  const std::string getStateStr();
+  int getEnergy() const { return energy; }
+  void addCollectable() { totalEnergies += 1; }
 
 private:
   MultiSprite player;

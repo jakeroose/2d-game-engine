@@ -68,7 +68,7 @@
 </pauseMenu>
 
 <lights>
-  <debug>true</debug>
+  <debug>false</debug>
   <renderLights>true</renderLights>
 </lights>
 

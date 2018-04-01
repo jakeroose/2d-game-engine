@@ -20,6 +20,7 @@ public:
   }
   void toggleDebug(){ debug = !debug; }
   void setPosition(const Vector2f& pos){ position = pos; }
+  const Vector2f& getPosition(){ return position; }
   void cleanPolygon();
   void cleanPolygonX();
   int  getPolygonSize() { return (int)lightPolygon.size();}

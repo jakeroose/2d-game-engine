@@ -20,6 +20,21 @@ std::ostream& operator<<(std::ostream& out, PlayerState s){
   return out << state;
 }
 
+const std::string Player::getStateStr(){
+  std::string s = "idk";
+  if(state == PlayerState::idle){
+    s = "idle";
+  } else if(state == PlayerState::falling){
+    s = "falling";
+  } else if(state == PlayerState::jumping){
+    s = "jumping";
+  } else if(state == PlayerState::walking){
+    s = "walking";
+  }
+  return s;
+}
+
+
 Player::Player( const std::string& name) :
   player(name),
   initialVelocity(player.getVelocity()),
