@@ -338,7 +338,7 @@ void Light::draw() const {
   std::vector<int> nodeX;
   nodeX.reserve(1024);
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-  SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255 );
+  SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
 
   if(renderLights){
     //  Loop through the rows of the image.

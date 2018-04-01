@@ -2,7 +2,7 @@
 <GameData>
 <!-- screenTitle is also used to identify you and your animation.
      So make sure to include your name as part of the screenTitle -->
-<title>Delve (Jake)</title>
+<title>Lit (Jake)</title>
 <maxStringSize>50</maxStringSize>
 
 <frameCapOn>true</frameCapOn>

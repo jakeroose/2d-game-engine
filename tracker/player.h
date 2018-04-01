@@ -50,6 +50,8 @@ public:
   void down();
   void stop();
 
+  PlayerState getState() const { return state; }
+
 private:
   MultiSprite player;
   Vector2f initialVelocity;

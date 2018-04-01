@@ -25,16 +25,23 @@ LevelManager::LevelManager() :
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
-LevelManager& LevelManager::getInstance(){
-  static LevelManager levelManager;
-  return levelManager;
-}
-
 LevelManager::~LevelManager(){
   for(auto w: walls){
     delete w.second;
   }
   for(Collectable* c: collectables) delete c;
+}
+
+LevelManager& LevelManager::getInstance(){
+  static LevelManager levelManager;
+  return levelManager;
+}
+
+// hopefully won't need an update call.
+void LevelManager::update(){
+  // for(Collectable* c : collectables){
+  //   c->update();
+  // }
 }
 
 void LevelManager::addWall(Wall* w){
@@ -60,6 +67,8 @@ void LevelManager::addCollectable(int x, int y){
   c->setPosition(Vector2f(scaledX + UNIT_SIZE*x, scaledY + UNIT_SIZE*y));
   std::cout << "here" << std::endl;
   collectables.push_back(c);
+  // initialize other things and stuff
+  // c->update();
 }
 
 void LevelManager::addCollectables(){
@@ -92,5 +101,6 @@ void LevelManager::loadLevel(const std::string& name){
     addWall(r);
   }
 
+  // add collectables after walls bc their lights depend on there being walls
   addCollectables();
 }

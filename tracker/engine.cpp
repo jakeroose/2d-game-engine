@@ -158,7 +158,7 @@ void Engine::checkForCollisions() {
     }
     else ++it;
   }
-  
+
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
     if ( strategies[currentStrategy]->execute(*(player->getPlayer()), *(c->getSprite())) ) {
       c->collect(player);
@@ -170,6 +170,9 @@ void Engine::update(Uint32 ticks) {
   checkForCollisions();
   player->update(ticks);
   for(auto e: sprites) e->update(ticks);
+  
+  for(Collectable* c: LevelManager::getInstance().getCollectables())
+    c->update();
 
   world.update();
   parallax.update();

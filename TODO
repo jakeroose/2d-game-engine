@@ -4,7 +4,7 @@ practice iterator while loops
 
 Collectable:
 Should give buff to player
-should have light source
+
 
 Lighting:
 lightRenderer class to render multiple lights at once
@@ -16,10 +16,10 @@ jumping scales correctly with unitSize
 LevelManager:
 load collectables from level file
 
+Enemies:
+probably move player-wall collision detection into generic class to reuse w/ enemies
+(once enemies are added game mechanics are complete I think)
 
+Low Prio:
 better XML
-
-
-X calculate lighting for line segments, or maybe add ability to have diagonal rects
-  or triangles. not necessary atm.
 Cool background. I think falling, rotating squares w/ parallax layers.

@@ -15,6 +15,8 @@ public:
   ~LevelManager();
   static LevelManager& getInstance();
 
+  void update();
+
   void addWall(Wall* w);
   void addWall(const std::string& s);
   void addWall(int x1, int y1, int x2, int y2){

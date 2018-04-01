@@ -122,6 +122,7 @@ bool Player::collisionBottom(Wall* w){
 }
 
 void Player::right() {
+  state = PlayerState::walking;
   if(checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionRight(w)) return;
@@ -134,6 +135,7 @@ void Player::right() {
 }
 
 void Player::left()  {
+  state = PlayerState::walking;
   if(checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionLeft(w)) return;
@@ -146,14 +148,13 @@ void Player::left()  {
 }
 
 void Player::up()    {
-  // state = PlayerState::jumping;
+  state = PlayerState::jumping;
   if(checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionTop(w)) return;
     }
   }
   if ( player.getY() > 0 && energy > 0) {
-    // player.setVelocityY( -initialVelocity[1] );
     if(player.getVelocityY() > 0) player.setVelocityY(0);
     player.setVelocityY( player.getVelocityY() - flyPower );
     energy -= flyPower;

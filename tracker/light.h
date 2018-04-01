@@ -22,6 +22,7 @@ public:
   void setPosition(const Vector2f& pos){ position = pos; }
   void cleanPolygon();
   void cleanPolygonX();
+  int  getPolygonSize() { return (int)lightPolygon.size();}
 private:
   Vector2f position;
   const RenderContext* rc;

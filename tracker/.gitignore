@@ -22,4 +22,5 @@ light.o
 wall.o
 main.o
 levelManager.o
+collectable.o
 run
