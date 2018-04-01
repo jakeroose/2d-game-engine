@@ -2,15 +2,10 @@ valgrind --leak-check=full ./run
 
 practice iterator while loops
 
-
-Lighting:
-lightRenderer class to render multiple lights at once
-
 Player:
 light intensity changes w/ energy left
 fix player state detection
 jumping scales correctly with unitSize
-
 
 LevelManager:
 load collectables from level file
@@ -22,7 +17,11 @@ probably move player-wall collision detection into generic class to reuse w/ ene
 Low Prio:
 better XML
 Cool background. I think falling, rotating squares w/ parallax layers.
-have lights follow player like lerp/slerp
 
 Collectable:
 circles around player
+
+Things to consider:
+object pooling for walls
+have lights follow player like lerp/slerp
+

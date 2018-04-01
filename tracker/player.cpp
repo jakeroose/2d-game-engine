@@ -265,14 +265,9 @@ void Player::update(Uint32 ticks) {
   }
 
   handleGravity();
-
-
 }
 
 void Player::draw() const {
-  for(Light* l: lights){
-    l->draw();
-  }
   player.draw();
 }
 

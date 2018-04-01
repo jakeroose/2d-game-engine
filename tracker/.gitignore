@@ -1,3 +1,4 @@
+run
 renderContext.o
 ioMod.o
 parseXML.o
@@ -23,4 +24,5 @@ wall.o
 main.o
 levelManager.o
 collectable.o
-run
+intersection.o
+lightRenderer.o

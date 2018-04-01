@@ -30,6 +30,8 @@ OBJS = \
 	wall.o \
 	levelManager.o \
 	collectable.o \
+	lightRenderer.o \
+	intersection.o \
 	main.o
 EXEC = run
 

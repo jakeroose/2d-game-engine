@@ -11,9 +11,7 @@
 #include "wall.h"
 #include "ioMod.h"
 #include "levelManager.h"
-
-// TODO:
-// - object pooling for lightPolygon
+#include "lightRenderer.h"
 
 // fill polygon implementation
 // http://alienryderflex.com/polygon/
@@ -22,35 +20,6 @@
 // inspiration for lighting
 // http://ncase.me/sight-and-light/
 
-class Intersection {
-public:
-  Intersection(float _x=0, float _y=0, float p=0, float a=0) : x(_x), y(_y), param(p), angle(a){}
-  float x;
-  float y;
-  float param;
-  float angle;
-
-  // sort based on angle!
-  bool operator< (const Intersection& i){
-    return (angle < i.angle);
-  }
-  bool operator==(const Intersection& i){
-    return (angle == i.angle && x == i.x && y == i.y );
-  }
-  const Intersection& operator=(const Intersection& rhs){
-    x = rhs.x; y = rhs.y; param = rhs.param; angle = rhs.angle;
-    return *this;
-  }
-};
-
-std::ostream& operator<<(std::ostream& out, const Intersection& i){
-  return out << i.x << ", " << i.y << ", " << i.angle;
-}
-
-
-/* =============================== */
-/* ==== START OF LIGHT CLASS  ==== */
-/* =============================== */
 Light::Light(const Vector2f& p) :
   position(p),
   rc(RenderContext::getInstance()),
@@ -58,8 +27,11 @@ Light::Light(const Vector2f& p) :
   lightPolygon(std::vector<Intersection*>()),
   intersectionPool(),
   debug(Gamedata::getInstance().getXmlBool("lights/debug")),
-  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")){
+  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")),
+  minx(0),miny(0),maxx(0),maxy(0)
+  {
     lightPolygon.reserve(256);
+    LightRenderer::getInstance().addLight(this);
 }
 
 Light::~Light(){
@@ -221,7 +193,9 @@ void Light::cleanPolygonX(){
   int i = 0, j = lightPolygon.size() - 1;
   std::vector<Intersection*> newPoly = std::vector<Intersection*>();
   while(i < (int)lightPolygon.size()){
-    newPoly.push_back(getFreeIntersection(lightPolygon[j]->x, lightPolygon[j]->y, lightPolygon[j]->param, lightPolygon[j]->angle));
+    newPoly.push_back(getFreeIntersection(lightPolygon[j]->x,
+       lightPolygon[j]->y, lightPolygon[j]->param, lightPolygon[j]->angle));
+    updateMinMaxCoords(lightPolygon[j]);
     if((int)lightPolygon[j]->y == (int)lightPolygon[i]->y){
       while(i < (int)lightPolygon.size() &&
        static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()]->y) ==
@@ -239,6 +213,13 @@ void Light::cleanPolygonX(){
   // if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
 }
 
+void Light::updateMinMaxCoords(Intersection* i){
+  if(i->x < minx){ minx = i->x; }
+  if(i->y < miny){ miny = i->y; }
+  if(i->x > maxx){ maxx = i->x; }
+  if(i->y > maxy){ maxy = i->y; }
+}
+
 /* updates the lightPolygon
 */
 void Light::update() {
@@ -247,6 +228,7 @@ void Light::update() {
     intersectionPool.push_back(e);
   }
   lightPolygon.clear();
+  minx = 999999; miny = 999999; maxx = -5; maxy = -5;
   // if(debug) std::cout << "Pool Size: " << intersectionPool.size() << std::endl;
 
   int x = position[0];
@@ -300,7 +282,9 @@ void Light::update() {
 
   // sort lightPolygon by angle
   std::sort(lightPolygon.begin(), lightPolygon.end(),
-    [](Intersection* a, Intersection* b){ return a->angle < b->angle;}
+    [](Intersection* a, Intersection* b){
+      return a->angle < b->angle;
+    }
   );
 
   // remove dupes
@@ -308,131 +292,4 @@ void Light::update() {
   // if(debug) std::cout << "Pool Size: " << intersectionPool.size() <<
   //   ", Polygon Size: " << lightPolygon.size() << std::endl;
 
-}
-
-/* Draws all of the cool light stuff!
-*/
-void Light::draw() const {
-  int minx = 999999, miny=999999, maxx = -1, maxy = -1,
-      vx = Viewport::getInstance().getX(),
-      vy = Viewport::getInstance().getY();
-
-  /* Optimization so that we only DRAW what is in the viewport and within a
-     rectangle surrounding the lightPolygon
-  */
-  for(Intersection* i: lightPolygon){
-    if(i->x < minx){ minx = i->x; }
-    if(i->y < miny){ miny = i->y; }
-    if(i->x > maxx){ maxx = i->x; }
-    if(i->y > maxy){ maxy = i->y; }
-  }
-  if(minx < vx){ minx = vx;}
-  if(miny < vy){ miny = vy;}
-  if(maxx > vx + Viewport::getInstance().getViewWidth()){ maxx = Viewport::getInstance().getViewWidth()+vx;}
-  if(maxy > Viewport::getInstance().getViewHeight()+vy) {maxy = Viewport::getInstance().getViewHeight()+vy;}
-
-  /* Render the Lighting Polygon */
-  // fill algorithm courtesy of http://alienryderflex.com/polygon_fill/
-  int polyCorners = lightPolygon.size();
-  int nodes, pixelX, pixelY, i, j, swap, IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
-  std::vector<int> nodeX;
-  nodeX.reserve(1024);
-  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-  SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
-
-  if(renderLights){
-    //  Loop through the rows of the image.
-    for (pixelY=miny; pixelY<maxy; pixelY++) {
-
-      //  Build a list of nodes.
-      nodes=0; j=polyCorners-1;
-      for (i=0; i<polyCorners; i++) {
-        if ((lightPolygon[i]->y<(double) pixelY && lightPolygon[j]->y>=(double) pixelY)
-        ||  (lightPolygon[j]->y<(double) pixelY && lightPolygon[i]->y>=(double) pixelY)) {
-          nodeX[nodes++] = (int)(lightPolygon[i]->x+(pixelY-lightPolygon[i]->y) /
-          (lightPolygon[j]->y-lightPolygon[i]->y) *
-          (lightPolygon[j]->x-lightPolygon[i]->x));
-        }
-        j=i;
-      }
-
-      //  Sort the nodes, via a simple “Bubble” sort.
-      i=0;
-      while (i<nodes-1) {
-        if (nodeX[i]>nodeX[i+1]) {
-          swap=nodeX[i];
-          nodeX[i]=nodeX[i+1];
-          nodeX[i+1]=swap;
-          if (i) i--;
-        }
-        else { i++; }
-      }
-
-      //  Fill the pixels between node pairs.
-      for (i=0; i<nodes; i+=2) {
-        if   (nodeX[i  ]>=IMAGE_RIGHT) break;
-        if   (nodeX[i+1]> IMAGE_LEFT ) {
-          if (nodeX[i  ]< IMAGE_LEFT ) nodeX[i  ]=IMAGE_LEFT ;
-          if (nodeX[i+1]> IMAGE_RIGHT) nodeX[i+1]=IMAGE_RIGHT;
-          for (pixelX=nodeX[i]; pixelX<nodeX[i+1]; pixelX++){
-            // have to render lighting to the viewport (vx & vy)
-            SDL_RenderDrawPoint(renderer, pixelX - vx, pixelY - vy);
-          }
-        }
-      }
-    }
-  }
-  // END fill polygon
-
-  /* === Render debug lines & points === */
-  if(debug){
-    // draw walls
-    SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255/2 );
-    for(auto w : LevelManager::getInstance().getWalls()){
-      w.second->draw();
-    }
-    SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
-    Intersection* lastIntersect = lightPolygon[0];
-    for(Intersection* intersect: lightPolygon){
-      SDL_SetRenderDrawColor( renderer, 0, 255, 0, 255/2 );
-
-      // Draw ray laser
-      SDL_RenderDrawLine(renderer, position[0]-vx, position[1]-vy,
-                         intersect->x - vx, intersect->y - vy);
-
-      // Draw Intersection dot
-      SDL_Rect r = {(int)intersect->x-2-vx, (int)intersect->y-2-vy, 4, 4};
-      SDL_RenderFillRect(renderer, &r);
-
-      // Connect Polygon
-      if(intersect == lightPolygon[0]) continue;
-      SDL_RenderDrawLine(renderer, lastIntersect->x - vx, lastIntersect->y-vy,
-                         intersect->x-vx, intersect->y-vy);
-      lastIntersect = intersect;
-    }
-
-    // draw outline of lightPolygon
-    int j = lightPolygon.size()-1;
-    for(int i = 0; i < (int)lightPolygon.size(); i++){
-      SDL_SetRenderDrawColor( renderer, 0, i*10 % 256, 255, 255 );
-      SDL_RenderDrawLine(renderer, lightPolygon[i]->x - vx,
-         lightPolygon[i]->y-vy, lightPolygon[j]->x-vx, lightPolygon[j]->y-vy);
-      j=i;
-    }
-  }
-
-
-
-  // OPTIONAL CODE
-  // float radius = 10000, distSq;
-  // int playerX = player->getPosition()[0], playerY = player->getPosition()[1];
-  // change intensity around circle around pointer
-  // distSq = pow((playerX - pixelX), 2)+pow((playerY - pixelY), 2);
-  // if( distSq < radius){
-  //   SDL_SetRenderDrawColor( renderer, 0, 0, 255, (float)(distSq/radius*255)/3);
-  // } else{
-  //   SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255/3);
-  // }
-
-  SDL_RenderPresent(renderer);
 }
