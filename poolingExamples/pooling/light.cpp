@@ -2,7 +2,6 @@
 #include <iostream>
 #include <algorithm>
 #include <list>
-
 #include "renderContext.h"
 #include "light.h"
 #include "engine.h"
@@ -11,9 +10,6 @@
 #include "wall.h"
 #include "ioMod.h"
 #include "levelManager.h"
-
-// TODO:
-// - object pooling for lightPolygon
 
 // fill polygon implementation
 // http://alienryderflex.com/polygon/
@@ -90,11 +86,6 @@ Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vect
 		return NULL;
 	}
 
-	// SOLVE FOR T1 & T2
-	// r_px+r_dx*T1 = s_px+s_dx*T2 && r_py+r_dy*T1 = s_py+s_dy*T2
-	// ==> T1 = (s_px+s_dx*T2-r_px)/r_dx = (s_py+s_dy*T2-r_py)/r_dy
-	// ==> s_px*r_dy + s_dx*T2*r_dy - r_px*r_dy = s_py*r_dx + s_dy*T2*r_dx - r_py*r_dx
-	// ==> T2 = (r_dx*(s_py-r_py) + r_dy*(r_px-s_px))/(s_dx*r_dy - s_dy*r_dx)
 	float T2 = (r_dx*(s_py-r_py) + r_dy*(r_px-s_px))/(s_dx*r_dy - s_dy*r_dx);
 	float T1 = (s_px+s_dx*T2-r_px)/r_dx;
 
@@ -102,7 +93,10 @@ Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vect
 	if(T1<0) return NULL;
 	if(T2<0 || T2>1) return NULL;
 
-	// Return the POINT OF INTERSECTION
+
+  // ===============================
+  // ===== OBJECT POOLING HERE =====
+  // ===============================
   if(intersectionPool.empty() == false){
     Intersection* i = intersectionPool.front();
     intersectionPool.pop_front();
@@ -112,6 +106,29 @@ Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vect
     return i;
   } else {
     return new Intersection(r_px+r_dx*T1, r_py+r_dy*T1, T1);
+  }
+}
+
+/* Checks the Intersection object pool for a free Intersection. If none
+   available it creates a new one.
+
+   ============================================
+   ===== OBJECT POOLING HELPER CLASS HERE =====
+   ============================================
+*/
+Intersection* Light::getFreeIntersection(float x, float y, float p, float a){
+  // if there is a free Intersection, use that
+  if(intersectionPool.empty() == false){
+    Intersection* i = intersectionPool.front();
+    intersectionPool.pop_front();
+    i->x = x;
+    i->y = y;
+    i->param = p;
+    i->angle = a;
+    return i;
+  } else {
+    // if not, make a new one
+    return new Intersection(x, y, p, a);
   }
 }
 
@@ -132,9 +149,17 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
       // segment (coordi, coordj) from our shape vector<coords_of_shape>
       Intersection* intersect = getIntersection(ray[0], ray[1], it->second[j], it->second[i]);
       if(intersect && (!closestIntersect || intersect->param < closestIntersect->param)){
+
+        // ===============================
+        // ===== OBJECT POOLING HERE =====
+        // ===============================
+        // Instead of deleting, add to object pool of Intersections
+
         // delete closestIntersect;
         if(closestIntersect) intersectionPool.push_back(closestIntersect);
   			closestIntersect = intersect;
+
+
       } else {
         // delete intersect;
         if(intersect) intersectionPool.push_back(intersect);
@@ -142,7 +167,6 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
       j = i;
     }
   }
-  // std::cout << "here" << std::endl;
   return closestIntersect;
 }
 
@@ -156,69 +180,10 @@ bool validIntersect(Intersection* i){
   return false;
 }
 
-bool sameLine(Intersection* i1, Intersection* i2){
-  // return !(static_cast<int>(i1.x) == static_cast<int>(i2.x)) !=
-    //  !(static_cast<int>(i1.y) == static_cast<int>(i2.y));
-  return static_cast<int>(i1->x) == static_cast<int>(i2->x);
-}
-
-/* cleanPolygon is used to remove duplicate points on the same line of
-   our lightPolygon to reduce its complexity
-   It works by checking for 3 points in a row with the same x/y and removing
-   the middle point.
-   FIXME!!!!
-*/
 void Light::cleanPolygon(){
-  // int i = 0, j = lightPolygon.size() - 1;
-  // std::vector<Intersection*> newPoly = std::vector<Intersection*>();
-  // newPoly.reserve(lightPolygon.size()/2);
-  // if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
-  // while(i < (int)lightPolygon.size()){
-  //   // always add j to the new list
-  //   newPoly.push_back(lightPolygon[j]);
-  //
-  //   if(sameLine(lightPolygon[j], lightPolygon[i])){
-  //     while(i < (int)lightPolygon.size() &&
-  //      sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
-  //      sameLine(lightPolygon[j], lightPolygon[i])
-  //   ){
-  //       // std::cout << lightPolygon[i] << std::endl;
-  //       // lightPolygon.erase(lightPolygon.begin() + i);
-  //       // intersectionPool.push_back(lightPolygon[i]);
-  //       i++;
-  //     }
-  //     j = i++;
-  //   } else {
-  //     j = (j+1)%lightPolygon.size();
-  //     i++;
-  //   }
-  // }
-  // lightPolygon = newPoly;
-  // cleanPolygonX();
 }
 
 void Light::cleanPolygonX(){
-  // int i = 0, j = lightPolygon.size() - 1;
-  // std::vector<Intersection*> newPoly = std::vector<Intersection*>();
-  // while(i < (int)lightPolygon.size()){
-  //   newPoly.push_back(lightPolygon[j]);
-  //   if((int)lightPolygon[j]->y == (int)lightPolygon[i]->y){
-  //     while(i < (int)lightPolygon.size() &&
-  //      static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()]->y) ==
-  //      static_cast<int>(lightPolygon[i]->y)){
-  //       // lightPolygon.erase(lightPolygon.begin() + i);
-  //       // intersectionPool.push_back(lightPolygon[i]);
-  //
-  //       i++;
-  //     }
-  //     j = i++;
-  //   } else {
-  //     j = (j+1)%lightPolygon.size();
-  //     i++;
-  //   }
-  // }
-  // lightPolygon = newPoly;
-  // if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
 }
 
 /* updates the lightPolygon
@@ -283,8 +248,6 @@ void Light::update() {
     [](Intersection* a, Intersection* b){ return a->angle < b->angle;}
   );
 
-  // remove dupes
-  cleanPolygon();
   // std::cout << "Pool Size: " << intersectionPool.size() << ", Polygon Size: " <<
   //   lightPolygon.size() << std::endl;
 
@@ -338,7 +301,6 @@ void Light::draw() {
       }
 
       //  Sort the nodes, via a simple “Bubble” sort.
-      // TODO: don't use bubble sort...
       i=0;
       while (i<nodes-1) {
         if (nodeX[i]>nodeX[i+1]) {
@@ -402,19 +364,6 @@ void Light::draw() {
       j=i;
     }
   }
-
-
-
-  // OPTIONAL CODE
-  // float radius = 10000, distSq;
-  // int playerX = player->getPosition()[0], playerY = player->getPosition()[1];
-  // change intensity around circle around pointer
-  // distSq = pow((playerX - pixelX), 2)+pow((playerY - pixelY), 2);
-  // if( distSq < radius){
-  //   SDL_SetRenderDrawColor( renderer, 0, 0, 255, (float)(distSq/radius*255)/3);
-  // } else{
-  //   SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255/3);
-  // }
 
   SDL_RenderPresent(renderer);
 }

@@ -180,7 +180,7 @@ void Player::up(Uint32 ticks)    {
   if(player.getY() > 0 && useEnergy((int)ticks)){
     player.setVelocityY( -(int)flyPower);
   } else {
-    player.setVelocityY(flyPower*2);
+    player.setVelocityY(flyPower);
   }
   updateLighting = true;
 }

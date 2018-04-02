@@ -38,7 +38,6 @@ void Collectable::draw() const {
   if(collected == false){
     sprite->draw();
   }
-  // light->draw();
 }
 
 
@@ -46,6 +45,7 @@ void Collectable::collect(Player* p){
   if(collected == false){
     player = p;
     player->addCollectable();
+    player->addLight(light);
     collected = true;
   }
 }

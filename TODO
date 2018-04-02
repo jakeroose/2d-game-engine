@@ -4,8 +4,7 @@ practice iterator while loops
 
 Player:
 fix player state detection
-jumping
-- scales correctly with unitSize
+jumping - in no way is it balanced
 
 LevelManager:
 load collectables from level file
@@ -13,15 +12,20 @@ load player starting position from file
 allow coords to be left<->right and top<->bottom
 
 Enemies:
+should walk back and forth on a floor
 probably move player-wall collision detection into generic class to reuse w/ enemies
 (once enemies are added game mechanics are complete I think)
 
 Low Prio:
 better XML
 Cool background. I think falling, rotating squares w/ parallax layers.
+make first player light a collectable?
+smooth changing directions
+slowly regain energy
 
 Collectable:
 circles around player
+
 
 Lighting:
 More autonomous
