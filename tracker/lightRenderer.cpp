@@ -49,7 +49,7 @@ void LightRenderer::draw() const {
 
   /* Render the Lighting Polygon */
   // fill algorithm courtesy of http://alienryderflex.com/polygon_fill/
-  int polyCorners; // = lightPolygon.size();
+  int polyCorners, intensity;
   int nodes, pixelX, pixelY, i, j, swap, IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
@@ -60,6 +60,9 @@ void LightRenderer::draw() const {
 
       for(Light* l : lights){
         polyCorners = l->getPolygonSize();
+        intensity = l->getIntensity();
+        SDL_SetRenderDrawColor( renderer, 200, 200, 200, intensity );
+
         std::vector<Intersection*> lightPolygon = l->getPolygon();
         std::vector<int> nodeX; nodeX.reserve(1024);
         //  Build a list of nodes.

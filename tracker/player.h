@@ -39,7 +39,6 @@ public:
 
   void addLight(Light* l) { lights.push_back(l); }
   const std::vector<Light*>& getLights() { return lights; }
-  void toggleDebug() { for(Light* l: lights) l->toggleDebug(); }
 
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
@@ -47,6 +46,7 @@ public:
   void right();
   void left();
   void up();
+  void up(Uint32 ticks);
   void down();
   void stop();
 
@@ -79,6 +79,8 @@ private:
   void updatePlayerState();
   void handleGravity();
   void refillEnergy();
+  int  useEnergy(int i);
+  int  maxEnergy();
 
   Player& operator=(const Player&) = delete;
 };

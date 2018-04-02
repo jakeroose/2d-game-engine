@@ -16,7 +16,6 @@ public:
   const Light& operator=(const Light& l) {
      rc = l.rc; return *this;
   }
-  void toggleDebug(){ debug = !debug; }
   void setPosition(const Vector2f& pos){ position = pos; }
   const Vector2f& getPosition(){ return position; }
   void cleanPolygon();
@@ -28,15 +27,18 @@ public:
   int getMiny(){ return miny;}
   int getMaxx(){ return maxx;}
   int getMaxy(){ return maxy;}
+  void setIntensity(int i) { intensity = i; }
+  int getIntensity() { return intensity; }
+  int getBaseIntensity() { return baseIntensity; }
+
 private:
   Vector2f position;
   const RenderContext* rc;
   SDL_Renderer* const renderer;
   std::vector<Intersection*> lightPolygon;
   std::list<Intersection*> intersectionPool;
-  bool debug;
-  bool renderLights;
   int minx, miny, maxx, maxy;
+  int intensity, baseIntensity;
 
   /* methods */
   Intersection* getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vector2f s2);

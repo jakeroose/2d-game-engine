@@ -112,7 +112,9 @@ void Engine::draw() const {
     IoMod::getInstance().writeText("FPS: " + strm.str(), 15, 40);
     IoMod::getInstance().writeText("PlayerState: "+player->getStateStr(), 15, 75);
     IoMod::getInstance().writeText("PlayerEngergy: "+std::to_string(player->getEnergy()), 15, 100);
-
+    // strm.str(std::string()); // clear strm
+    // strm << clock.getElapsedTicks();
+    // IoMod::getInstance().writeText("Ticks: " + strm.str(), 15, 125);
 
     // IoMod::getInstance().writeText("Controls:", 15, 75);
     // IoMod::getInstance().writeText("M   - Collision Strat.", 15, 100);
@@ -224,7 +226,7 @@ void Engine::play() {
           hud.toggleDisplay();
         }
         if (keystate[SDL_SCANCODE_F2]) {
-          player->toggleDebug();
+          LightRenderer::getInstance().toggleDebug();
         }
         if (keystate[SDL_SCANCODE_F4] && !makeVideo) {
           std::cout << "Initiating frame capture" << std::endl;
@@ -268,7 +270,7 @@ void Engine::play() {
         static_cast<Player*>(player)->right();
       }
       if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_SPACE]) {
-        static_cast<Player*>(player)->up();
+        static_cast<Player*>(player)->up(ticks);
       }
       if (keystate[SDL_SCANCODE_S]) {
         static_cast<Player*>(player)->down();

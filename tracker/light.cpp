@@ -26,9 +26,11 @@ Light::Light(const Vector2f& p) :
   renderer(rc->getRenderer()),
   lightPolygon(std::vector<Intersection*>()),
   intersectionPool(),
-  debug(Gamedata::getInstance().getXmlBool("lights/debug")),
-  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")),
-  minx(0),miny(0),maxx(0),maxy(0)
+  // debug(Gamedata::getInstance().getXmlBool("lights/debug")),
+  // renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")),
+  minx(0),miny(0),maxx(0),maxy(0),
+  intensity(Gamedata::getInstance().getXmlInt("lights/alpha")),
+  baseIntensity(intensity)
   {
     lightPolygon.reserve(256);
     LightRenderer::getInstance().addLight(this);

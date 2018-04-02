@@ -3,12 +3,14 @@ valgrind --leak-check=full ./run
 practice iterator while loops
 
 Player:
-light intensity changes w/ energy left
 fix player state detection
-jumping scales correctly with unitSize
+jumping
+- scales correctly with unitSize
 
 LevelManager:
 load collectables from level file
+load player starting position from file
+allow coords to be left<->right and top<->bottom
 
 Enemies:
 probably move player-wall collision detection into generic class to reuse w/ enemies
@@ -21,7 +23,20 @@ Cool background. I think falling, rotating squares w/ parallax layers.
 Collectable:
 circles around player
 
-Things to consider:
-object pooling for walls
-have lights follow player like lerp/slerp
+Lighting:
+More autonomous
+- if a light moves then it should automatically update itself. it shouldn't have to be told to update its position and also told to update its polygon. 
+- maybe some sort of update queue in light renderer that will notify lights to update themselves.
 
+
+Things to consider:
+object pooling for walls (when levels get larger)
+have lights follow player like lerp/slerp
+potentially a way to combine lightPolygons so that there is only one pass over 
+  the x coordinates of the viewport
+tiling background so that it doesn't glitch to hell for tall maps
+
+Bugs:
+crashed when hit the ceiling too hard
+jumping/flying depends on frame rate
+wall coords have to be from top right to bottom left for level loader

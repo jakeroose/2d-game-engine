@@ -46,8 +46,8 @@ Player::Player( const std::string& name) :
   worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
   updateLighting(true),
   hoverHeight(LevelManager::UNIT_SIZE/4),
-  energy(LevelManager::UNIT_SIZE*4),
-  flyPower(initialVelocity[1]),
+  energy(1),
+  flyPower(LevelManager::UNIT_SIZE),
   totalEnergies(1)
   {
     addLight(new Light(getPosition()));
@@ -163,16 +163,24 @@ void Player::left()  {
 }
 
 void Player::up()    {
+  up(1);
+}
+
+
+// tick based approach fails when frame rates drop :/
+void Player::up(Uint32 ticks)    {
   state = PlayerState::jumping;
   if(checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionTop(w)) return;
     }
   }
-  if ( player.getY() > 0 && energy > 0) {
-    if(player.getVelocityY() > 0) player.setVelocityY(0);
-    player.setVelocityY( player.getVelocityY() - flyPower );
-    energy -= flyPower;
+
+  // reduce energy by flyPower and set YVelocity
+  if(player.getY() > 0 && useEnergy((int)ticks)){
+    player.setVelocityY( -(int)flyPower);
+  } else {
+    player.setVelocityY(flyPower*2);
   }
   updateLighting = true;
 }
@@ -240,7 +248,22 @@ void Player::handleGravity(){
 }
 
 void Player::refillEnergy(){
-  energy = LevelManager::UNIT_SIZE*4*totalEnergies;
+  energy = maxEnergy();
+  for(Light* l: lights){
+    l->setIntensity(l->getBaseIntensity());
+  }
+}
+
+// reduces energy by i, returns energy remaining
+int Player::useEnergy(int i) {
+  energy -= i;
+  if(energy < 0) energy = 0;
+  return energy;
+}
+
+
+int Player::maxEnergy(){
+  return LevelManager::UNIT_SIZE*8*totalEnergies;
 }
 
 void Player::update(Uint32 ticks) {
@@ -260,6 +283,10 @@ void Player::update(Uint32 ticks) {
         getPosition()[1] + getScaledHeight()/2
       ));
       l->update();
+      // scale light based on energy left, keep a minimum of 1/5 intensity
+      l->setIntensity(l->getBaseIntensity()*
+                      (1+(4.0*energy/maxEnergy()))/5.0);
+
     }
     updateLighting = false;
   }

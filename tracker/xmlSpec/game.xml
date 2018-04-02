@@ -12,14 +12,14 @@
 <username>jroose</username>
 
 <view>
-  <width>800</width>
-  <height>450</height>
+  <width>1000</width>
+  <height>540</height>
 </view>
 
 <world>
-  <width>1280</width>
-  <height>720</height>
-  <unitSize>128</unitSize> <!-- length of 1 in game unit in pixels -->
+  <width>1240</width>
+  <height>900</height>
+  <unitSize>64</unitSize> <!-- length of 1 in game unit in pixels -->
 </world>
 
 <level>
@@ -70,6 +70,7 @@
 <lights>
   <debug>false</debug>
   <renderLights>true</renderLights>
+  <alpha>75</alpha>
 </lights>
 
 <UFO>
@@ -77,9 +78,10 @@
   <startLoc x="64" y="192"/>
   <frames>8</frames>
   <frameInterval>175</frameInterval>
-  <speedX>300</speedX>
+  <speedX>150</speedX>
   <speedY>25</speedY>
   <transparency>false</transparency>
+  <flyPower></flyPower>
 </UFO>
 
 <Bird>
