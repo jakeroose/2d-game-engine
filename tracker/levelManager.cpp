@@ -14,6 +14,7 @@ It should keep track of all of the walls in the game so that classes such as
 Light and Player don't have to have their own copies.
 Reads in level from /levels at runtime
 TODO: pooling for walls? only load walls that are in the viewport
+ActiveWalls and Walls. Only ActiveWalls are used for light rendering
 */
 
 int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize");
@@ -21,7 +22,8 @@ int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize"
 LevelManager::LevelManager() :
   walls(),
   wallVertices(),
-  collectables() {
+  collectables(),
+  spawnPoint() {
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
@@ -57,6 +59,24 @@ void LevelManager::addWall(const std::string& s){
     v.push_back(std::stoi(coord));
   }
 
+  // wall collision doesn't work properly if coords are big->small
+  // may be an issue with collision detection but fixing it here for now.
+  int tmp;
+  if(v[0] == v[2]){
+    if(v[1] > v[3]){
+      tmp = v[1];
+      v[1] = v[3];
+      v[3] = tmp;
+    }
+  }
+  else {
+    if(v[0] > v[2]){
+      tmp = v[0];
+      v[0] = v[2];
+      v[2] = tmp;
+    }
+  }
+
   addWall(new Wall(v[0], v[1], v[2], v[3]));
 }
 
@@ -65,14 +85,36 @@ void LevelManager::addCollectable(int x, int y){
   int scaledX =  UNIT_SIZE/2, scaledY = UNIT_SIZE/2;
   Collectable* c = new Collectable("Collectable");
   c->setPosition(Vector2f(scaledX + UNIT_SIZE*x, scaledY + UNIT_SIZE*y));
-  std::cout << "here" << std::endl;
   collectables.push_back(c);
   // initialize other things and stuff
   // c->update();
 }
 
 void LevelManager::addCollectables(){
-  addCollectable(2, 4);
+}
+
+std::vector<int> strToIntVec(std::string& s){
+  std::stringstream ss(s);
+  std::string coord;
+  std::vector<int> v;
+  while(std::getline(ss, coord, ' ')){
+    v.push_back(std::stoi(coord));
+  }
+  return v;
+}
+
+void LevelManager::setSpawnPoint(Vector2f v){
+  int scaledX =  UNIT_SIZE/2, scaledY = UNIT_SIZE/2;
+  spawnPoint = Vector2f(scaledX + UNIT_SIZE*v[0], scaledY + UNIT_SIZE*v[1]);
+}
+
+void LevelManager::parseLine(std::string& l){
+  std::vector<int> v = strToIntVec(l);
+  if(v.size() == 2){
+    addCollectable(v[0], v[1]);
+  } else {
+    addWall(l);
+  }
 }
 
 void LevelManager::loadLevel(const std::string& name){
@@ -80,8 +122,13 @@ void LevelManager::loadLevel(const std::string& name){
   std::string line;
   levelData.open(name);
   if(levelData.is_open()){
+    if(std::getline(levelData, line)){
+      std::vector<int> v = strToIntVec(line);
+      setSpawnPoint(Vector2f(v[0], v[1]));
+    }
     while(std::getline(levelData, line)){
-      addWall(line);
+      // addWall(line);
+      parseLine(line);
     }
     levelData.close();
   }
@@ -102,5 +149,5 @@ void LevelManager::loadLevel(const std::string& name){
   }
 
   // add collectables after walls bc their lights depend on there being walls
-  addCollectables();
+  // addCollectables();
 }

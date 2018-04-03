@@ -49,9 +49,9 @@ Engine::Engine() :
   collision(false),
   makeVideo( false )
 {
-
   hud.toggleDisplay();
 
+  player->setPosition(LevelManager::getInstance().getSpawnPoint());
   int spriteCount = Gamedata::getInstance().getXmlInt("Bird/count");
   sprites.reserve(spriteCount + 1);
 

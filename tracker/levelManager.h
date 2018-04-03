@@ -34,10 +34,15 @@ public:
   void addCollectable(int x, int y);
   void addCollectables();
   const std::vector<Collectable*>& getCollectables(){ return collectables; }
+  const Vector2f& getSpawnPoint(){ return spawnPoint; }
+  void setSpawnPoint(Vector2f v);
+  void parseLine(std::string& l);
+
   static int UNIT_SIZE;
 private:
   std::map<std::string, Wall*> walls;
   std::map<std::string, std::vector<Vector2f> > wallVertices;
   std::vector<Collectable*> collectables;
+  Vector2f spawnPoint;
 };
 #endif
