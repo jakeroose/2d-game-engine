@@ -86,7 +86,6 @@ bool Player::checkForCollisions(){
   bool c = false;
   for(auto w : LevelManager::getInstance().getWalls()){
     if(checkWallCollision(w.second)){
-      // std::cout << "collision: " << w.second->getId() << std::endl;
       collisions.push_back(w.second);
       c = true;
     }
@@ -176,6 +175,9 @@ void Player::up(Uint32 ticks)    {
     }
   }
 
+  // for smooth falling, if energy == 0 then subtract velocity and cap it at
+  // flyPower, instead of hard setting it.
+
   // reduce energy by flyPower and set YVelocity
   if(player.getY() > 0 && useEnergy((int)ticks)){
     player.setVelocityY( -(int)flyPower);
@@ -199,7 +201,7 @@ void Player::down()  {
 
 void Player::updatePlayerState(){
   updateLighting = true;
-  if(player.getVelocityY() > 0 || collisions.size() == 0){
+  if(player.getVelocityY() > 0){
     state = PlayerState::falling;
   } else if(player.getVelocityY() < 0){
     state = PlayerState::jumping;
@@ -209,27 +211,20 @@ void Player::updatePlayerState(){
   } else {
     state = PlayerState::idle;
     updateLighting = false;
-    // stop();
   }
 }
 
 void Player::handleGravity(){
-  float gravity = 10;
+  float gravity = 10; // cool constant you have there..
 
-  // TODO: Don't do check if player is on a floor. Currently makes them get
-  // stuck on walls though bc of updatePlayerState().
   // Here down should probably all be in update state.
-  // if(state != PlayerState::idle){
   checkForCollisions();
   // check if they should be falling
+  bool falling = true;
   for(Wall* w : collisions){
     if(collisionBottom(w)){
-      state = PlayerState::idle;
-      stop();
-      break;
-    } else {
-      state = PlayerState::falling;
-      // std::cout << "falling" << std::endl;
+      falling = false;
+      refillEnergy();
     }
     if(collisionTop(w)){
       player.setVelocityY(0);
@@ -238,12 +233,17 @@ void Player::handleGravity(){
       player.setVelocityX(0);
     }
   }
-  // }
-  if(state != PlayerState::idle){
+
+  // "That wasn't flying, that was falling with style."
+  // (could be flying or falling)
+  if(falling){
     player.setVelocityY(player.getVelocityY() + gravity);
+    // may get set to 0, in which case player may not realize they're falling
+    if(player.getVelocityY() == 0) player.setVelocityY(1);
+    // player shouldn't float from left to right when falling with style
+    player.setVelocityX(0);
   } else {
-    refillEnergy();
-    stop();
+    player.setVelocityY(0);
   }
 }
 
@@ -274,6 +274,7 @@ void Player::update(Uint32 ticks) {
     ++ptr;
   }
 
+  handleGravity();
   updatePlayerState();
 
   if(updateLighting){
@@ -286,12 +287,10 @@ void Player::update(Uint32 ticks) {
       // scale light based on energy left, keep a minimum of 1/5 intensity
       l->setIntensity(l->getBaseIntensity()*
                       (1+(4.0*energy/maxEnergy()))/5.0);
-
     }
     updateLighting = false;
   }
 
-  handleGravity();
 }
 
 void Player::draw() const {

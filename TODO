@@ -3,7 +3,6 @@ valgrind --leak-check=full ./run
 practice iterator while loops
 
 Player:
-fix player state detection
 jumping - in no way is it balanced
 
 LevelManager:
