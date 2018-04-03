@@ -20,13 +20,19 @@ Collectable& Collectable::operator=(const Collectable& rhs){
   return *this;
 }
 
+void Collectable::setPosition(const Vector2f& v){
+  sprite->setPosition(v);
+  light->setPosition(v);
+}
+
+
 void Collectable::update(){
-  if(collected && player->getState() != PlayerState::idle){
+  if(collected){
     // will probably need to be handled by player so that they circle around
     // the player
-    light->setPosition(player->getPosition() + Vector2f(5, 5));
+    // light->setPosition(player->getPosition() + Vector2f(5, 5));
     light->update();
-    sprite->setPosition(light->getPosition());
+    // sprite->setPosition(light->getPosition());
   } else {
     light->setPosition(getPosition());
     // make sure light has been calculated
@@ -36,15 +42,15 @@ void Collectable::update(){
 
 void Collectable::draw() const {
   if(collected == false){
-    sprite->draw();
   }
+  sprite->draw();
 }
 
 
 void Collectable::collect(Player* p){
   if(collected == false){
     player = p;
-    player->addCollectable();
+    player->addCollectable(this);
     player->addLight(light);
     collected = true;
   }

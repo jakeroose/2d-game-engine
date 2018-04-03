@@ -6,6 +6,8 @@
 #include "player.h"
 #include "light.h"
 
+class Player;
+
 class Collectable {
 public:
   Collectable(const std::string& name);
@@ -16,7 +18,7 @@ public:
   void draw() const;
   void collect(Player* p);
 
-  void setPosition(const Vector2f& v){ sprite->setPosition(v); }
+  void setPosition(const Vector2f& v);//{ sprite->setPosition(v); }
   const Vector2f& getPosition(){ return sprite->getPosition(); }
   MultiSprite* getSprite() { return sprite; }
   Light* getLight() { return light; }

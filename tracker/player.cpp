@@ -5,6 +5,9 @@
 #include "light.h"
 #include "levelManager.h"
 #include "wall.h"
+#include "collectable.h"
+#include "clock.h"
+#include "lightRenderer.h"
 
 std::ostream& operator<<(std::ostream& out, PlayerState s){
   std::string state = "idk";
@@ -41,6 +44,7 @@ Player::Player( const std::string& name) :
   observers(std::list<SmartSprite*>()),
   lights(std::vector<Light*>()),
   collisions(),
+  collectables(std::vector<Collectable*>()),
   state(PlayerState::falling),
   worldWidth(Gamedata::getInstance().getXmlInt("world/width")),
   worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
@@ -266,6 +270,11 @@ int Player::maxEnergy(){
   return LevelManager::UNIT_SIZE*8*totalEnergies;
 }
 
+void Player::addCollectable(Collectable* c) {
+  collectables.push_back(c);
+  totalEnergies += 1;
+}
+
 void Player::update(Uint32 ticks) {
   player.update(ticks);
   std::list<SmartSprite*>::iterator ptr = observers.begin();
@@ -289,6 +298,12 @@ void Player::update(Uint32 ticks) {
                       (1+(4.0*energy/maxEnergy()))/5.0);
     }
     updateLighting = false;
+  }
+
+  for(int i = 0; i < (int)collectables.size(); i++){
+    // double angle = Clock::getInstance().getTicks()*2*3.14*i;
+    float angle = Clock::getInstance().getTicks()*0.001 + i*10;
+    collectables[i]->setPosition(Vector2f(cos(angle), sin(angle))*25 + getPosition());
   }
 
 }

@@ -8,6 +8,9 @@
 #include "multisprite.h"
 #include "smartSprite.h"
 #include "light.h"
+#include "collectable.h"
+
+class Collectable;
 
 /* === Player States ===
 idle: they are standing on the floor. cannot enter another state w/out input
@@ -53,7 +56,7 @@ public:
   PlayerState getState() const { return state; }
   const std::string getStateStr();
   int getEnergy() const { return energy; }
-  void addCollectable() { totalEnergies += 1; }
+  void addCollectable(Collectable* c);
 
 private:
   MultiSprite player;
@@ -61,6 +64,7 @@ private:
   std::list<SmartSprite*> observers;
   std::vector<Light*> lights;
   std::list<Wall*> collisions;
+  std::vector<Collectable*> collectables;
   PlayerState state;
   int worldWidth;
   int worldHeight;
