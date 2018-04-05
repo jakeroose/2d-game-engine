@@ -69,7 +69,7 @@
 
 <lights>
   <debug>false</debug>
-  <renderLights>true</renderLights>
+  <renderLights>false</renderLights>
   <alpha>75</alpha>
 </lights>
 

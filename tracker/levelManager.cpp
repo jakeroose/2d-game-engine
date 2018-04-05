@@ -93,6 +93,25 @@ void LevelManager::addCollectable(int x, int y){
 void LevelManager::addCollectables(){
 }
 
+// TODO: update to use find & functor
+// https://stackoverflow.com/questions/35490173/stdfind-on-a-vector-of-pointers
+void LevelManager::removeCollectable(Collectable* c){
+  std::vector<Collectable*>::const_iterator it = collectables.begin();
+  while(it != collectables.end()){
+
+    if(**it == *c){
+      // delete *it;
+      // collectables.erase(it);
+      (*it)->softDelete();
+      // std::cout << "erased collectable" << std::endl;
+      return;
+    }
+    it++;
+  }
+  std::cout << "LevelManager::removeCollectable - couldn't find collectable." << std::endl;
+
+}
+
 std::vector<int> strToIntVec(std::string& s){
   std::stringstream ss(s);
   std::string coord;

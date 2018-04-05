@@ -33,6 +33,7 @@ public:
   void loadLevel(const std::string& s);
   void addCollectable(int x, int y);
   void addCollectables();
+  void removeCollectable(Collectable* c);
   const std::vector<Collectable*>& getCollectables(){ return collectables; }
   const Vector2f& getSpawnPoint(){ return spawnPoint; }
   void setSpawnPoint(Vector2f v);

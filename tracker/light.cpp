@@ -30,7 +30,8 @@ Light::Light(const Vector2f& p) :
   // renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")),
   minx(0),miny(0),maxx(0),maxy(0),
   intensity(Gamedata::getInstance().getXmlInt("lights/alpha")),
-  baseIntensity(intensity)
+  baseIntensity(intensity),
+  renderStatus(true)
   {
     lightPolygon.reserve(256);
     LightRenderer::getInstance().addLight(this);

@@ -59,6 +59,8 @@ void LightRenderer::draw() const {
     for (pixelY=miny; pixelY<maxy; pixelY++) {
 
       for(Light* l : lights){
+        if(l->shouldDraw() == false) continue;
+
         polyCorners = l->getPolygonSize();
         intensity = l->getIntensity();
         SDL_SetRenderDrawColor( renderer, 200, 200, 200, intensity );
@@ -111,6 +113,7 @@ void LightRenderer::draw() const {
   /* === Render debug lines & points === */
   if(debug){
     for(Light* l :lights){
+      if(l->shouldDraw() == false) continue;
       std::vector<Intersection*> lightPolygon = l->getPolygon();
       Vector2f position = l->getPosition();
       // draw walls

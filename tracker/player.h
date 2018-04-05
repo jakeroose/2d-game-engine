@@ -57,6 +57,7 @@ public:
   const std::string getStateStr();
   int getEnergy() const { return energy; }
   void addCollectable(Collectable* c);
+  void removeCollectable();
 
 private:
   MultiSprite player;

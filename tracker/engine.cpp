@@ -166,6 +166,7 @@ void Engine::checkForCollisions() {
       player->detach(doa);
       delete doa;
       it = sprites.erase(it);
+      player->removeCollectable();
     }
     else ++it;
   }

@@ -41,3 +41,4 @@ Bugs:
 crashed when hit the ceiling too hard
 player can fall through floors at a certain velocity
 jumping/flying depends on frame rate
+memory leak with collectables in levelManager

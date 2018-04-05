@@ -28,8 +28,10 @@ public:
   int getMaxx(){ return maxx;}
   int getMaxy(){ return maxy;}
   void setIntensity(int i) { intensity = i; }
-  int getIntensity() { return intensity; }
-  int getBaseIntensity() { return baseIntensity; }
+  int getIntensity() const { return intensity; }
+  int getBaseIntensity() const { return baseIntensity; }
+  bool shouldDraw() const { return renderStatus; }
+  void setRenderStatus(bool s) { renderStatus = s; }
 
 private:
   Vector2f position;
@@ -39,6 +41,7 @@ private:
   std::list<Intersection*> intersectionPool;
   int minx, miny, maxx, maxy;
   int intensity, baseIntensity;
+  bool renderStatus;
 
   /* methods */
   Intersection* getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vector2f s2);

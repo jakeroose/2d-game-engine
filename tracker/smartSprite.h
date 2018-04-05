@@ -14,6 +14,13 @@ public:
   virtual void update(Uint32 ticks);
   void setPlayerPos(const Vector2f& p) { playerPos = p; }
   float getDistance();
+
+  SmartSprite& operator=(const SmartSprite& rhs){
+    strategy = rhs.strategy;
+    floor = rhs.floor;
+    playerPos = rhs.playerPos;
+    return *this;
+  }
 private:
   enum MODE {NORMAL, EVADE, ATTACK};
   enum DIRECTION {LEFT, RIGHT};

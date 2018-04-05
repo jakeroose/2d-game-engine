@@ -17,15 +17,18 @@ public:
   void update();
   void draw() const;
   void collect(Player* p);
+  void softDelete();
 
   void setPosition(const Vector2f& v);
-  const Vector2f& getPosition(){ return sprite->getPosition(); }
+  const Vector2f& getPosition() const { return sprite->getPosition(); }
   MultiSprite* getSprite() { return sprite; }
   Light* getLight() { return light; }
   Collectable& operator=(const Collectable& rhs);
+  bool operator==(const Collectable& rhs);
 private:
   MultiSprite* sprite;
   bool collected;
+  bool deleted;
   Player* player;
   Light* light;
 };

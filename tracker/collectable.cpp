@@ -3,6 +3,7 @@
 Collectable::Collectable(const std::string& name) :
   sprite(new MultiSprite(name)),
   collected(false),
+  deleted(false),
   player(NULL),
   light(new Light(getPosition()))
   {
@@ -10,6 +11,7 @@ Collectable::Collectable(const std::string& name) :
 Collectable::Collectable(const Collectable& c) :
   sprite(c.sprite),
   collected(c.collected),
+  deleted(c.deleted),
   player(c.player),
   light(c.light)
   {}
@@ -17,7 +19,12 @@ Collectable::Collectable(const Collectable& c) :
 Collectable& Collectable::operator=(const Collectable& rhs){
   collected = rhs.collected;
   player = rhs.player;
+  deleted = rhs.deleted;
   return *this;
+}
+
+bool Collectable::operator==(const Collectable& rhs){
+  return getPosition() == rhs.getPosition();// && collected == rhs.collected;
 }
 
 void Collectable::setPosition(const Vector2f& v){
@@ -27,6 +34,9 @@ void Collectable::setPosition(const Vector2f& v){
 
 
 void Collectable::update(){
+  if(deleted){
+    return;
+  }
   if(collected){
     light->update();
   } else {
@@ -37,9 +47,9 @@ void Collectable::update(){
 }
 
 void Collectable::draw() const {
-  if(collected == false){
+  if(deleted == false){
+    sprite->draw();
   }
-  sprite->draw();
 }
 
 
@@ -50,4 +60,9 @@ void Collectable::collect(Player* p){
     player->addLight(light);
     collected = true;
   }
+}
+
+void Collectable::softDelete(){
+  deleted = true;
+  light->setRenderStatus(false);
 }
