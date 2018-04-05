@@ -31,7 +31,7 @@ LevelManager::~LevelManager(){
   for(auto w: walls){
     delete w.second;
   }
-  for(Collectable* c: collectables) delete c;
+  // for(Collectable* c: collectables) delete c;
 }
 
 LevelManager& LevelManager::getInstance(){

@@ -7,7 +7,6 @@
 #include "wall.h"
 #include "collectable.h"
 #include "clock.h"
-#include "lightRenderer.h"
 
 std::ostream& operator<<(std::ostream& out, PlayerState s){
   std::string state = "idk";
@@ -301,7 +300,6 @@ void Player::update(Uint32 ticks) {
   }
 
   for(int i = 0; i < (int)collectables.size(); i++){
-    // double angle = Clock::getInstance().getTicks()*2*3.14*i;
     float angle = Clock::getInstance().getTicks()*0.001 + i*10;
     collectables[i]->setPosition(Vector2f(cos(angle), sin(angle))*25 + getPosition());
   }

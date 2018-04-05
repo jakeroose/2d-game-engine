@@ -20,6 +20,10 @@ public:
   const std::string& getId() const { return id; }
   std::vector<Vector2f> getVertices();
   WallType getType() { return type; }
+  int getMaxx(){ return rect.x + rect.w; }
+  int getMaxy(){ return rect.y + rect.h; }
+  int getMinx(){ return rect.x; }
+  int getMiny(){ return rect.y; }
 private:
   SDL_Rect rect;
   static int count;

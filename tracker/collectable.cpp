@@ -28,11 +28,7 @@ void Collectable::setPosition(const Vector2f& v){
 
 void Collectable::update(){
   if(collected){
-    // will probably need to be handled by player so that they circle around
-    // the player
-    // light->setPosition(player->getPosition() + Vector2f(5, 5));
     light->update();
-    // sprite->setPosition(light->getPosition());
   } else {
     light->setPosition(getPosition());
     // make sure light has been calculated

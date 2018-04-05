@@ -97,9 +97,9 @@
 </Bird>
 
 <Collectable>
-  <file>assets/arrow.png</file>
+  <file>assets/yellowstar32.png</file>
   <startLoc x="50" y="400"/>
-  <frames>8</frames>
+  <frames>1</frames>
   <frameInterval>1000</frameInterval>
   <speedX>0</speedX>
   <speedY>0</speedY>

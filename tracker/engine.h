@@ -5,6 +5,7 @@
 #include "world.h"
 #include "viewport.h"
 #include "hud.h"
+#include "collisionStrategy.h"
 
 class Player;
 class CollisionStrategy;
@@ -30,7 +31,8 @@ private:
 
   std::vector<SmartSprite*> sprites;
   Player* player;
-  std::vector<CollisionStrategy*> strategies;
+  // std::vector<CollisionStrategy*> strategies;
+  RectangularCollisionStrategy* strategy;
 
   int currentStrategy;
   int currentSprite;

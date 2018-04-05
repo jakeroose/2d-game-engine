@@ -4,6 +4,7 @@
 #include "collisionStrategy.h"
 #include "viewport.h"
 #include "renderContext.h"
+#include "levelManager.h"
 
 void RectangularCollisionStrategy::draw() const {
   IoMod::
@@ -26,6 +27,79 @@ bool RectangularCollisionStrategy::execute(
   if ( bottom1 < top2 ) return false;
   if ( bottom2 < top1 ) return false;
   return true;
+}
+
+bool RectangularCollisionStrategy::checkWallCollision(Drawable* d, Wall* w){
+  float right2, left2, top2, bottom2;
+  int tolerance = 10;
+  bool wall = (w->getType() == WallType::wall);
+  SDL_Rect r;
+  r = w->getRect();
+  left2 = r.x +         (wall ? 0 : tolerance);
+  right2 = r.x + r.w +  (wall ? 0 : -tolerance);
+  top2 = r.y +          (wall ? tolerance : 0);
+  bottom2 = r.y + r.h + (wall ? -tolerance : 0);
+  float left1 = d->getX();
+
+  float right1 = left1+d->getScaledWidth();
+  if ( right1 < left2 ) return false;
+  if ( left1 > right2 ) return false;
+  float top1 = d->getY();
+
+  float bottom1 = top1+d->getScaledHeight();
+  if ( bottom1 < top2 ) return false;
+  if ( bottom2 < top1 ) return false;
+  return true;
+}
+
+bool RectangularCollisionStrategy::checkWallCollisions(Drawable* d){
+  bool c = false;
+  for(auto w : LevelManager::getInstance().getWalls()){
+    if(checkWallCollision(d, w.second)){
+      c = true;
+    }
+  }
+  return c;
+}
+
+bool RectangularCollisionStrategy::collisionRight(Drawable* d, Wall* w){
+  SDL_Rect r = w->getRect();
+    // if wall is between d middle and d right
+  if(w->getType() == WallType::wall &&
+    checkWallCollision(d, w) &&
+    (r.x < d->getX() + d->getScaledWidth()) &&
+    (r.x > d->getX() + d->getScaledWidth()/2)) return true;
+  return false;
+}
+
+bool RectangularCollisionStrategy::collisionLeft(Drawable* d, Wall* w){
+  SDL_Rect r = w->getRect();
+  // if wall is between d middle and d right
+  if(w->getType() == WallType::wall &&
+    checkWallCollision(d, w) &&
+    (r.x > d->getX()) &&
+    (r.x < d->getX() + d->getScaledWidth()/2)) return true;
+  return false;
+}
+
+bool RectangularCollisionStrategy::collisionTop(Drawable* d, Wall* w){
+  SDL_Rect r = w->getRect();
+  // if wall is between middle of d and top of d
+  if(w->getType() == WallType::floor &&
+    checkWallCollision(d, w) &&
+     r.y > d->getY() &&
+     r.y < d->getY() + d->getScaledHeight()/2) return true;
+  return false;
+}
+
+bool RectangularCollisionStrategy::collisionBottom(Drawable* d, Wall* w){
+  SDL_Rect r = w->getRect();
+  // if wall is between d bottom and d middle
+  if(w->getType() == WallType::floor &&
+    checkWallCollision(d, w) &&
+    ((r.y + r.h) < (d->getY() + d->getScaledHeight())) &&
+    ((r.y + r.h) > (d->getY() + d->getScaledHeight()/2))) return true;
+  return false;
 }
 
 

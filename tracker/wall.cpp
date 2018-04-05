@@ -32,9 +32,6 @@ Wall::Wall(const SDL_Rect& r) :
 std::ostream& operator<<(std::ostream out, const Wall& w){
   return out << w.getId();
 }
-std::ostream& operator<<(std::ostream out, const Wall* w){
-  return out << w->getId();
-}
 
 std::vector<Vector2f> Wall::getVertices(){
   std::vector<Vector2f> v = {

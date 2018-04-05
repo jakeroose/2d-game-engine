@@ -22,9 +22,11 @@
 Engine::~Engine() {
   for(auto e: sprites) delete e;
   delete player;
-  for ( CollisionStrategy* strategy : strategies ) {
-    delete strategy;
-  }
+  // for ( CollisionStrategy* strategy : strategies ) {
+  //   delete strategy;
+  // }
+  delete strategy;
+
   std::cout << "Terminating program" << std::endl;
 }
 
@@ -43,7 +45,8 @@ Engine::Engine() :
     Gamedata::getInstance().getXmlInt("view/height")/2)),
   sprites(std::vector<SmartSprite*>()),
   player(new Player("UFO")),
-  strategies(),
+  // strategies(),
+  strategy(),
   currentStrategy(0),
   currentSprite(0),
   collision(false),
@@ -59,9 +62,9 @@ Engine::Engine() :
     addSprite();
   }
 
-  strategies.push_back( new RectangularCollisionStrategy );
-  strategies.push_back( new PerPixelCollisionStrategy );
-  strategies.push_back( new MidPointCollisionStrategy );
+  strategy = new RectangularCollisionStrategy ;
+  // strategies.push_back( new PerPixelCollisionStrategy );
+  // strategies.push_back( new MidPointCollisionStrategy );
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
   std::cout << "Loading complete" << std::endl;
@@ -104,7 +107,7 @@ void Engine::draw() const {
     std::stringstream strm;
     strm << sprites.size() << " Sprites Remaining";
     IoMod::getInstance().writeText(strm.str(), 15, 15);
-    strategies[currentStrategy]->draw();
+    strategy->draw();
 
     // write FPS to screen
     strm.str(std::string()); // clear strm
@@ -158,7 +161,7 @@ void Engine::draw() const {
 void Engine::checkForCollisions() {
   auto it = sprites.begin();
   while ( it != sprites.end() ) {
-    if ( strategies[currentStrategy]->execute(*(player->getPlayer()), **it) ) {
+    if ( strategy->execute(*(player->getPlayer()), **it) ) {
       SmartSprite* doa = *it;
       player->detach(doa);
       delete doa;
@@ -168,7 +171,7 @@ void Engine::checkForCollisions() {
   }
 
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
-    if ( strategies[currentStrategy]->execute(*(player->getPlayer()), *(c->getSprite())) ) {
+    if ( strategy->execute(*(player->getPlayer()), *(c->getSprite())) ) {
       c->collect(player);
     }
   }
@@ -216,9 +219,9 @@ void Engine::play() {
           pauseMenu.toggleDisplay();
           pauseMenu.drawCentered();
         }
-        if ( keystate[SDL_SCANCODE_M] ) {
-          currentStrategy = (1 + currentStrategy) % strategies.size();
-        }
+        // if ( keystate[SDL_SCANCODE_M] ) {
+        //   currentStrategy = (1 + currentStrategy) % strategies.size();
+        // }
         if ( keystate[SDL_SCANCODE_T] ) {
           switchSprite();
         }

@@ -62,7 +62,7 @@ private:
   MultiSprite player;
   Vector2f initialVelocity;
   std::list<SmartSprite*> observers;
-  std::vector<Light*> lights;
+  std::vector<Light*> lights; // can remove this and only have one light pointer
   std::list<Wall*> collisions;
   std::vector<Collectable*> collectables;
   PlayerState state;

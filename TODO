@@ -3,15 +3,17 @@ valgrind --leak-check=full ./run
 practice iterator while loops
 
 Collectable:
-circles around player
 
 Enemies:
-should walk back and forth on a floor
+composition?
 probably move player-wall collision detection into generic class to reuse w/ enemies
 (once enemies are added game mechanics are complete I think)
 
 Player:
 if player damaged, lose light
+
+LevelManager:
+More robust so we can differentiate player, collectable and enemy spawn coords
 
 Low Prio:
 jumping - in no way is it balanced
@@ -37,4 +39,5 @@ More autonomous
 
 Bugs:
 crashed when hit the ceiling too hard
+player can fall through floors at a certain velocity
 jumping/flying depends on frame rate

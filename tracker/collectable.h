@@ -12,13 +12,13 @@ class Collectable {
 public:
   Collectable(const std::string& name);
   Collectable(const Collectable& c);
-  ~Collectable(){ delete sprite;}
+  ~Collectable(){ delete sprite; delete light; }
 
   void update();
   void draw() const;
   void collect(Player* p);
 
-  void setPosition(const Vector2f& v);//{ sprite->setPosition(v); }
+  void setPosition(const Vector2f& v);
   const Vector2f& getPosition(){ return sprite->getPosition(); }
   MultiSprite* getSprite() { return sprite; }
   Light* getLight() { return light; }
