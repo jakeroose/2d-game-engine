@@ -3,6 +3,7 @@
 #include "renderContext.h"
 #include "vector2f.h"
 #include "gamedata.h"
+#include "viewport.h"
 #include <SDL.h>
 
 float scaler = 0.1f;
@@ -16,23 +17,26 @@ public:
 private:
   Image* image;
   Vector2f offset;
+  float scrollFactor;
 };
 
 BackgroundSprite::BackgroundSprite() :
   image(),
-  offset(Vector2f(Gamedata::getInstance().getRandFloat(0, 500),
-                  Gamedata::getInstance().getRandFloat(0, 500)))
+  offset(Vector2f(Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldWidth()),
+                  Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldHeight()))),
+  scrollFactor(1)
   {}
 
 BackgroundSprite::BackgroundSprite(Image* s) :
   image(s),
-  offset(Vector2f(Gamedata::getInstance().getRandFloat(0, 500),
-                  Gamedata::getInstance().getRandFloat(0, 500)))
+  offset(Vector2f(Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldWidth()),
+                  Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldHeight()))),
+  scrollFactor(1)
   {}
 
 void BackgroundSprite::update(Uint32 t) {
   offset[1] += t*scaler;
-  offset[1] = (int)offset[1] % 500;
+  offset[1] = (int)offset[1] % Viewport::getInstance().getWorldHeight();
 }
 
 void BackgroundSprite::draw() const {
@@ -41,8 +45,8 @@ void BackgroundSprite::draw() const {
 
   SDL_Point cent = {i->getWidth()/2, i->getHeight()/2 };
   SDL_Rect pos = i->getSurface()->clip_rect;
-  pos.y = offset[1];
-  pos.x = offset[0];
+  pos.y = offset[1] - Viewport::getInstance().getY();
+  pos.x = offset[0] - Viewport::getInstance().getX()/scrollFactor;
   SDL_RenderCopyEx(
     renderer,
     i->getTexture(),
@@ -57,18 +61,20 @@ void BackgroundSprite::draw() const {
 
 Background::Background() :
   image(),
-  images(),
-  offset()
+  images()
   {}
 
 Background::Background(const std::string& name) :
   image(ImageFactory::getInstance().getImage(name)),
-  images(),
-  offset()
+  images()
   {}
 
+Background::~Background(){
+  delete image;
+  for(auto e : images) delete e;
+}
 void Background::initialize(){
-  for(int i = 0; i < 10; i ++){
+  for(int i = 0; i < 20000; i ++){
     images.push_back(new BackgroundSprite(image));
   }
 }
@@ -81,9 +87,7 @@ void Background::update(Uint32 t){
 }
 
 void Background::draw() const {
-
   for(auto i : images){
     i->draw();
   }
-
 }

@@ -89,6 +89,9 @@ void Engine::draw() const {
   world.draw();
   parallax.draw();
 
+  background->draw();
+  player->draw();
+
   if(hud.getDisplay()){
     std::stringstream strm;
     strm << sprites.size() << " Sprites Remaining";
@@ -113,7 +116,6 @@ void Engine::draw() const {
   IoMod::getInstance().writeText("Jake Roose", 10 + (rndm/255.0)*20, Viewport::getInstance().getViewHeight() - 30, custColor);
 
 
-  background->draw();
   // std::vector<Image*> rotImages = std::vector<Image*>();
   // rotImages.push_back(ImageFactory::getInstance().getImage("Collectable"));
   //

@@ -1,6 +1,15 @@
 valgrind --leak-check=full ./run
 
 practice iterator while loops
+look into blitting light polygon shape onto an image to render on GPU
+- same with UI elements, seems like sdl primitive draw funcs are super slow
+https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
+
+Background:
+different square sprites
+multiple layers
+xml support
+draw black behind everything, probs just render black image to viewport
 
 Collectable:
 
@@ -15,7 +24,6 @@ More robust so we can differentiate player, collectable and enemy spawn coords
 Low Prio:
 jumping - in no way is it balanced
 better XML
-Cool background. I think falling, rotating squares w/ parallax layers.
 Scoring / Ending
 
 Polish:
@@ -33,14 +41,14 @@ have lights follow player via some slerp function
 
 Things to consider:
 object pooling for walls (when levels get larger)
-potentially a way to combine lightPolygons so that there is only one pass over 
+potentially a way to combine lightPolygons so that there is only one pass over
   the x coordinates of the viewport
 tiling background so that it doesn't glitch to hell for tall maps
 slowly regain energy
 
 Lighting:
 More autonomous
-- if a light moves then it should automatically update itself. it shouldn't have to be told to update its position and also told to update its polygon. 
+- if a light moves then it should automatically update itself. it shouldn't have to be told to update its position and also told to update its polygon.
 - maybe some sort of update queue in light renderer that will notify lights to update themselves.
 
 Bugs:

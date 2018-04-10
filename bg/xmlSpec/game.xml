@@ -81,6 +81,7 @@
   <speedX>150</speedX>
   <speedY>25</speedY>
   <transparency>false</transparency>
+  <noClip>true</noClip>
   <flyPower></flyPower>
 </UFO>
 

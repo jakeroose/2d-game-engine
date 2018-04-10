@@ -9,12 +9,13 @@ class Background {
 public:
   Background();
   Background(const std::string& name);
+  ~Background();
   void initialize();
   void draw() const;
   void update(Uint32 t);
 private:
   Image* image;
   std::vector<BackgroundSprite*> images;
-  int offset, ticks;
+  int ticks;
 };
 #endif
