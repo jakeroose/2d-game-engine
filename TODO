@@ -5,28 +5,34 @@ practice iterator while loops
 Collectable:
 
 Enemies:
-composition?
-probably move player-wall collision detection into generic class to reuse w/ enemies
-(once enemies are added game mechanics are complete I think)
 
 Player:
-if player damaged, lose light
 
 LevelManager:
+Reset level
 More robust so we can differentiate player, collectable and enemy spawn coords
 
 Low Prio:
 jumping - in no way is it balanced
 better XML
 Cool background. I think falling, rotating squares w/ parallax layers.
-make first player light a collectable?
+Scoring / Ending
+
+Polish:
+lights don't clip through walls
+Walls have width?
+Music
+Sound
+Player sprite
+enemy sprite
+collectable sprite
+have lights follow player via some slerp function
 
 
 === End of "Need to Do" ===
 
 Things to consider:
 object pooling for walls (when levels get larger)
-have lights follow player like lerp/slerp
 potentially a way to combine lightPolygons so that there is only one pass over 
   the x coordinates of the viewport
 tiling background so that it doesn't glitch to hell for tall maps

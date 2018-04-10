@@ -5,7 +5,6 @@
 #include "light.h"
 #include "vector2f.h"
 #include "wall.h"
-// #include "collectable.h"
 
 /*
 LevelManager should let me easily add walls to a level using arbitrary in-game
@@ -41,9 +40,6 @@ LevelManager& LevelManager::getInstance(){
 
 // hopefully won't need an update call.
 void LevelManager::update(){
-  // for(Collectable* c : collectables){
-  //   c->update();
-  // }
 }
 
 void LevelManager::addWall(Wall* w){
@@ -166,7 +162,4 @@ void LevelManager::loadLevel(const std::string& name){
   for(SDL_Rect r: worldBorder){
     addWall(r);
   }
-
-  // add collectables after walls bc their lights depend on there being walls
-  // addCollectables();
 }
