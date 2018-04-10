@@ -18,6 +18,7 @@
 #include "levelManager.h"
 #include "collectable.h"
 #include "lightRenderer.h"
+#include "background.h"
 
 Engine::~Engine() {
   for(auto e: sprites) delete e;
@@ -44,6 +45,7 @@ Engine::Engine() :
   player(new Player("UFO")),
   // strategies(),
   strategy(),
+  background(new Background("Collectable")),
   currentStrategy(0),
   currentSprite(0),
   collision(false),
@@ -54,6 +56,8 @@ Engine::Engine() :
   player->setPosition(LevelManager::getInstance().getSpawnPoint());
 
   strategy = new RectangularCollisionStrategy ;
+
+  background->initialize();
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
   std::cout << "Loading complete" << std::endl;
@@ -85,10 +89,6 @@ void Engine::draw() const {
   world.draw();
   parallax.draw();
 
-
-
-
-
   if(hud.getDisplay()){
     std::stringstream strm;
     strm << sprites.size() << " Sprites Remaining";
@@ -113,23 +113,27 @@ void Engine::draw() const {
   IoMod::getInstance().writeText("Jake Roose", 10 + (rndm/255.0)*20, Viewport::getInstance().getViewHeight() - 30, custColor);
 
 
+  background->draw();
+  // std::vector<Image*> rotImages = std::vector<Image*>();
+  // rotImages.push_back(ImageFactory::getInstance().getImage("Collectable"));
+  //
+  // Image* i = rotImages[0];
+  // for(int j = 0; j < 10; j ++){
+  //   SDL_Point cent = {i->getWidth()/2, i->getHeight()/2 };
+  //   SDL_Rect pos = i->getSurface()->clip_rect;
+  //   pos.y += rndm;
+  //   pos.x += j * 50;
+  //   SDL_RenderCopyEx(
+  //     renderer,
+  //     i->getTexture(),
+  //     NULL,
+  //     &pos,
+  //     (double) rndm,
+  //     &cent,
+  //     SDL_FLIP_NONE
+  //   );
+  // }
 
-  std::vector<Image*> rotImages = std::vector<Image*>();
-  rotImages.push_back(ImageFactory::getInstance().getImage("Collectable"));
-
-  Image* i = rotImages[0];
-  SDL_Point cent = {i->getWidth()/2, i->getHeight()/2 };
-  SDL_Rect pos = i->getSurface()->clip_rect;
-  pos.y += rndm;
-  SDL_RenderCopyEx(
-    renderer,
-    i->getTexture(),
-    NULL,
-    &pos,
-    (double) rndm,
-    &cent,
-    SDL_FLIP_NONE
-  );
 
 
   // we don't do anything in Viewport::draw() anymore
@@ -160,6 +164,7 @@ void Engine::checkForCollisions() {
 void Engine::update(Uint32 ticks) {
   checkForCollisions();
   player->update(ticks);
+  background->update(ticks);
   // for(auto e: sprites) e->update(ticks);
 
   // for(Collectable* c: LevelManager::getInstance().getCollectables())

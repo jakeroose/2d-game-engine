@@ -6,6 +6,7 @@
 #include "viewport.h"
 #include "hud.h"
 #include "collisionStrategy.h"
+#include "background.h"
 
 class Player;
 class CollisionStrategy;
@@ -33,6 +34,7 @@ private:
   Player* player;
   // std::vector<CollisionStrategy*> strategies;
   RectangularCollisionStrategy* strategy;
+  Background* background;
 
   int currentStrategy;
   int currentSprite;

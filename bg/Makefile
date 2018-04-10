@@ -32,6 +32,7 @@ OBJS = \
 	collectable.o \
 	lightRenderer.o \
 	intersection.o \
+	background.o \
 	main.o
 EXEC = run
 

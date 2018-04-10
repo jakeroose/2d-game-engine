@@ -26,3 +26,4 @@ levelManager.o
 collectable.o
 intersection.o
 lightRenderer.o
+background.o
