@@ -94,7 +94,7 @@ void Engine::draw() const {
   world.draw();
   parallax.draw();
 
-  LightRenderer::getInstance().draw();
+  // LightRenderer::getInstance().draw();
 
   for(auto e: sprites) e->draw();
   player->draw();
