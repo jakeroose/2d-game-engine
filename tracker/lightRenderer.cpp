@@ -23,6 +23,14 @@ LightRenderer& LightRenderer::getInstance(){
   static LightRenderer lr;
   return lr;
 }
+// https://gamedev.stackexchange.com/questions/115341/sdl-convert-pixel-format
+// https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
+// void set_pixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+// {
+//   Uint32 *target_pixel = (Uint8 *) surface->pixels + y * surface->pitch +
+//                                                      x * sizeof *target_pixel;
+//   *target_pixel = pixel;
+// }
 
 void LightRenderer::draw() const {
   int minx = 999999, miny=999999, maxx = -1, maxy = -1,
@@ -53,6 +61,14 @@ void LightRenderer::draw() const {
   int nodes, pixelX, pixelY, i, j, swap, IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
+
+  SDL_Surface* surface = SDL_CreateRGBSurface(0,
+                          Viewport::getInstance().getViewWidth(),
+                          Viewport::getInstance().getViewHeight(),
+                          32,
+                          0, 0, 0, 0
+                        );
+  Uint32 mask = 0x0000FFFF;;
 
   if(renderLights){
     //  Loop through the rows of the image.
@@ -101,6 +117,7 @@ void LightRenderer::draw() const {
             if (nodeX[i+1]> IMAGE_RIGHT) nodeX[i+1]=IMAGE_RIGHT;
             for (pixelX=nodeX[i]; pixelX<nodeX[i+1]; pixelX++){
               // have to render lighting to the viewport (vx & vy)
+              // set_pixel(surface, pixelX - vx, pixelY - vy, mask);
               SDL_RenderDrawPoint(renderer, pixelX - vx, pixelY - vy);
             }
           }
