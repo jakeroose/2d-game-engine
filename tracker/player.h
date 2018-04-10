@@ -70,6 +70,7 @@ private:
   int worldWidth;
   int worldHeight;
   bool updateLighting;
+  bool noClip;
   int hoverHeight;
   int energy;
   int flyPower;

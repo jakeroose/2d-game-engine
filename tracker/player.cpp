@@ -53,6 +53,7 @@ Player::Player( const std::string& name) :
   worldWidth(Gamedata::getInstance().getXmlInt("world/width")),
   worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
   updateLighting(true),
+  noClip(Gamedata::getInstance().getXmlBool(name+"/noClip")),
   hoverHeight(LevelManager::UNIT_SIZE/4),
   energy(1),
   flyPower(LevelManager::UNIT_SIZE),
@@ -145,7 +146,7 @@ bool Player::collisionBottom(Wall* w){
 
 void Player::right() {
   state = PlayerState::walking;
-  if(checkForCollisions()){
+  if(noClip == false && checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionRight(w)) return;
     }
@@ -158,7 +159,7 @@ void Player::right() {
 
 void Player::left()  {
   state = PlayerState::walking;
-  if(checkForCollisions()){
+  if(noClip == false && checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionLeft(w)) return;
     }
@@ -177,7 +178,7 @@ void Player::up()    {
 // tick based approach fails when frame rates drop :/
 void Player::up(Uint32 ticks)    {
   state = PlayerState::jumping;
-  if(checkForCollisions()){
+  if(noClip == false && checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionTop(w)) return;
     }
@@ -196,19 +197,22 @@ void Player::up(Uint32 ticks)    {
 }
 
 void Player::down()  {
-  if(checkForCollisions()){
+  if(noClip == false && checkForCollisions()){
     for(Wall* w : collisions){
       if(collisionBottom(w)) return;
     }
   }
   if ( player.getY() < worldHeight-getScaledHeight()) {
-    player.setVelocityY( initialVelocity[1] );
+    player.setVelocityY( flyPower );
   }
   updateLighting = true;
 }
 
 void Player::updatePlayerState(){
   updateLighting = true;
+  if(noClip == true) {
+    stop();
+  }
   if(player.getVelocityY() > 0){
     state = PlayerState::falling;
   } else if(player.getVelocityY() < 0){
@@ -223,6 +227,10 @@ void Player::updatePlayerState(){
 }
 
 void Player::handleGravity(){
+  if(noClip == true) {
+    energy = maxEnergy();
+    return;
+  }
   float gravity = 10; // cool constant you have there..
 
   // Here down should probably all be in update state.
@@ -300,6 +308,7 @@ void Player::update(Uint32 ticks) {
 
   if(updateLighting){
     for(Light* l: lights){
+      if(l->shouldDraw() == false) continue;
       l->setPosition(Vector2f(
         getPosition()[0] + getScaledWidth()/2,
         getPosition()[1] + getScaledHeight()/2

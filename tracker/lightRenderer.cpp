@@ -25,6 +25,8 @@ LightRenderer& LightRenderer::getInstance(){
 }
 
 void LightRenderer::draw() const {
+  return; // DELETE ME WHEN RUNNING ON A REAL MACHINE
+  
   int minx = 999999, miny=999999, maxx = -1, maxy = -1,
       vx = Viewport::getInstance().getX(),
       vy = Viewport::getInstance().getY();
