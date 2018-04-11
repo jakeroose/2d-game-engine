@@ -6,9 +6,6 @@ look into blitting light polygon shape onto an image to render on GPU
 https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
 
 Background:
-different square sprites
-multiple layers
-xml support
 draw black behind everything, probs just render black image to viewport
 
 Collectable:
@@ -28,12 +25,10 @@ Scoring / Ending
 
 Polish:
 lights don't clip through walls
+don't stop camera from following along edges
 Walls have width?
 Music
 Sound
-Player sprite
-enemy sprite
-collectable sprite
 have lights follow player via some slerp function
 
 

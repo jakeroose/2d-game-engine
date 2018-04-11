@@ -74,9 +74,9 @@
 </lights>
 
 <UFO>
-  <file>assets/arrow.png</file>
+  <file>assets/ballbig.png</file>
   <startLoc x="64" y="192"/>
-  <frames>8</frames>
+  <frames>4</frames>
   <frameInterval>175</frameInterval>
   <speedX>150</speedX>
   <speedY>25</speedY>
@@ -108,5 +108,17 @@
   <count>0</count>
   <safeDistance>300</safeDistance>
 </Collectable>
+
+<Square>
+  <file>assets/blacksquare32.png</file>
+  <transparency>false</transparency>
+  <scroll>1</scroll>
+</Square>
+
+<Square1>
+  <file>assets/greysquare32.png</file>
+  <transparency>false</transparency>
+  <scroll>2</scroll>
+</Square1>
 
 </GameData>

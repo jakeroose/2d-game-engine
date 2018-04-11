@@ -24,6 +24,7 @@ Engine::~Engine() {
   for(auto e: sprites) delete e;
   delete player;
   delete strategy;
+  for(auto e: backgrounds) delete e;
 
   std::cout << "Terminating program" << std::endl;
 }
@@ -45,7 +46,7 @@ Engine::Engine() :
   player(new Player("UFO")),
   // strategies(),
   strategy(),
-  background(new Background("Collectable")),
+  backgrounds(),
   currentStrategy(0),
   currentSprite(0),
   collision(false),
@@ -55,9 +56,15 @@ Engine::Engine() :
 
   player->setPosition(LevelManager::getInstance().getSpawnPoint());
 
-  strategy = new RectangularCollisionStrategy ;
+  strategy = new RectangularCollisionStrategy;
 
-  background->initialize();
+  backgrounds.push_back(new Background("Square1"));
+  backgrounds.push_back(new Background("Square"));
+
+  for(Background* b : backgrounds){
+    b->initialize();
+  }
+
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
   std::cout << "Loading complete" << std::endl;
@@ -89,7 +96,9 @@ void Engine::draw() const {
   world.draw();
   parallax.draw();
 
-  background->draw();
+  for(Background* b : backgrounds){
+    b->draw();
+  }
   player->draw();
 
   if(hud.getDisplay()){
@@ -166,7 +175,9 @@ void Engine::checkForCollisions() {
 void Engine::update(Uint32 ticks) {
   checkForCollisions();
   player->update(ticks);
-  background->update(ticks);
+  for(Background* b : backgrounds){
+    b->update(ticks);
+  }
   // for(auto e: sprites) e->update(ticks);
 
   // for(Collectable* c: LevelManager::getInstance().getCollectables())

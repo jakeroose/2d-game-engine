@@ -18,13 +18,11 @@
 #include "levelManager.h"
 #include "collectable.h"
 #include "lightRenderer.h"
+#include "background.h"
 
 Engine::~Engine() {
   for(auto e: sprites) delete e;
   delete player;
-  // for ( CollisionStrategy* strategy : strategies ) {
-  //   delete strategy;
-  // }
   delete strategy;
 
   std::cout << "Terminating program" << std::endl;
@@ -35,7 +33,6 @@ Engine::Engine() :
   clock( Clock::getInstance() ),
   renderer( rc->getRenderer() ),
   world("back", Gamedata::getInstance().getXmlInt("back/factor") ),
-  parallax("parallax", Gamedata::getInstance().getXmlInt("parallax/factor") ),
   viewport( Viewport::getInstance() ),
   hud(HUD("hud")),
   pauseMenu(HUD( "pauseMenu",
@@ -44,9 +41,10 @@ Engine::Engine() :
     Gamedata::getInstance().getXmlInt("view/width")/2,
     Gamedata::getInstance().getXmlInt("view/height")/2)),
   sprites(std::vector<SmartSprite*>()),
-  player(new Player("UFO")),
+  player(new Player("Player")),
   // strategies(),
   strategy(),
+  backgrounds(),
   currentStrategy(0),
   currentSprite(0),
   collision(false),
@@ -55,16 +53,21 @@ Engine::Engine() :
   hud.toggleDisplay();
 
   player->setPosition(LevelManager::getInstance().getSpawnPoint());
-  int spriteCount = Gamedata::getInstance().getXmlInt("Bird/count");
+  int spriteCount = Gamedata::getInstance().getXmlInt("Enemy/count");
   sprites.reserve(spriteCount + 1);
 
   for(int i = 0; i < spriteCount; i++){
     addSprite();
   }
 
-  strategy = new RectangularCollisionStrategy ;
-  // strategies.push_back( new PerPixelCollisionStrategy );
-  // strategies.push_back( new MidPointCollisionStrategy );
+  strategy = new RectangularCollisionStrategy;
+
+  // initialize background
+  backgrounds.push_back(new Background("Square1"));
+  backgrounds.push_back(new Background("Square"));
+  for(Background* b : backgrounds){
+    b->initialize();
+  }
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
   std::cout << "Loading complete" << std::endl;
@@ -75,7 +78,7 @@ void Engine::addSprite(){
   Vector2f pos = player->getPosition();
   int w = player->getScaledWidth();
   int h = player->getScaledHeight();
-  SmartSprite* s = new SmartSprite("Bird", pos, w, h);
+  SmartSprite* s = new SmartSprite("Enemy", pos, w, h);
   sprites.push_back(s);
   player->attach(s);
 }
@@ -85,23 +88,26 @@ void Engine::addSprite(int x, int y){
   Vector2f pos = player->getPosition();
   int w = player->getScaledWidth();
   int h = player->getScaledHeight();
-  SmartSprite* s = new SmartSprite("Bird", pos, w, h, x + Viewport::getInstance().getX(), y+Viewport::getInstance().getY());
+  SmartSprite* s = new SmartSprite("Enemy", pos, w, h, x + Viewport::getInstance().getX(), y+Viewport::getInstance().getY());
   sprites.push_back(s);
   player->attach(s);
 }
 
 void Engine::draw() const {
   world.draw();
-  parallax.draw();
 
-  // LightRenderer::getInstance().draw();
+  for(Background* b : backgrounds){
+    b->draw();
+  }
 
-  for(auto e: sprites) e->draw();
+  LightRenderer::getInstance().draw();
+
+
   player->draw();
-
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
     c->draw();
   }
+  for(auto e: sprites) e->draw();
 
   if(hud.getDisplay()){
     std::stringstream strm;
@@ -183,11 +189,14 @@ void Engine::update(Uint32 ticks) {
   player->update(ticks);
   for(auto e: sprites) e->update(ticks);
 
-  for(Collectable* c: LevelManager::getInstance().getCollectables())
+  for(Collectable* c: LevelManager::getInstance().getCollectables()){
     c->update();
+  }
 
+  for(Background* b : backgrounds){
+    b->update(ticks);
+  }
   world.update();
-  parallax.update();
   viewport.update(); // always update viewport last
 }
 

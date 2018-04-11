@@ -36,12 +36,6 @@
   <transparency>false</transparency>
 </back>
 
-<parallax>
-  <file>assets/mountain_bg.png</file>
-  <factor>1</factor>
-  <transparency>false</transparency>
-</parallax>
-
 <font name="font">
   <file>fonts/arial.ttf</file>
   <size>24</size>
@@ -69,44 +63,56 @@
 
 <lights>
   <debug>false</debug>
-  <renderLights>false</renderLights>
+  <renderLights>true</renderLights>
   <alpha>75</alpha>
 </lights>
 
-<UFO>
-  <file>assets/arrow.png</file>
+<Player>
+  <file>assets/expandingSphere.png</file>
   <startLoc x="64" y="192"/>
-  <frames>8</frames>
-  <frameInterval>175</frameInterval>
+  <frames>6</frames>
+  <frameInterval>250</frameInterval>
   <speedX>150</speedX>
   <speedY>25</speedY>
   <transparency>false</transparency>
-  <flyPower></flyPower>
   <noClip>false</noClip>
-</UFO>
+  <flyPower></flyPower>
+</Player>
 
-<Bird>
-  <file>assets/arrow.png</file>
+<Enemy>
+  <file>assets/enemy.png</file>
   <startLoc x="50" y="400"/>
-  <frames>8</frames>
-  <frameInterval>100</frameInterval>
+  <frames>6</frames>
+  <frameInterval>150</frameInterval>
   <speedX>150</speedX>
   <speedY>50</speedY>
   <transparency>false</transparency>
   <count>0</count>
   <safeDistance>300</safeDistance>
-</Bird>
+</Enemy>
 
 <Collectable>
-  <file>assets/yellowstar32.png</file>
+  <file>assets/smallSphere.png</file>
   <startLoc x="50" y="400"/>
-  <frames>1</frames>
-  <frameInterval>1000</frameInterval>
+  <frames>6</frames>
+  <frameInterval>200</frameInterval>
   <speedX>0</speedX>
   <speedY>0</speedY>
   <transparency>false</transparency>
   <count>0</count>
   <safeDistance>300</safeDistance>
 </Collectable>
+
+<Square>
+  <file>assets/blacksquare32.png</file>
+  <transparency>false</transparency>
+  <scroll>1</scroll>
+</Square>
+
+<Square1>
+  <file>assets/greysquare32.png</file>
+  <transparency>false</transparency>
+  <scroll>2</scroll>
+</Square1>
 
 </GameData>

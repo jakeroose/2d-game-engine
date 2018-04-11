@@ -6,6 +6,7 @@
 #include "viewport.h"
 #include "hud.h"
 #include "collisionStrategy.h"
+#include "background.h"
 
 class Player;
 class CollisionStrategy;
@@ -24,7 +25,6 @@ private:
 
   SDL_Renderer * const renderer;
   World world;
-  World parallax;
   Viewport& viewport;
   HUD hud;
   HUD pauseMenu;
@@ -33,6 +33,7 @@ private:
   Player* player;
   // std::vector<CollisionStrategy*> strategies;
   RectangularCollisionStrategy* strategy;
+  std::vector<Background*> backgrounds;
 
   int currentStrategy;
   int currentSprite;

@@ -34,7 +34,7 @@ private:
   Player* player;
   // std::vector<CollisionStrategy*> strategies;
   RectangularCollisionStrategy* strategy;
-  Background* background;
+  std::vector<Background*> backgrounds;
 
   int currentStrategy;
   int currentSprite;

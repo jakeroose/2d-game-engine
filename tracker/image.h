@@ -20,6 +20,7 @@ public:
   inline int getWidth()  const { return surface->w; }
   inline int getHeight() const { return surface->h; }
   SDL_Surface* getSurface() const { return surface; }
+  SDL_Texture* getTexture() const { return texture; }
   Image* crop(SDL_Rect)const;
 private:
   SDL_Renderer * renderer;
