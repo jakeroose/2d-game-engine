@@ -40,8 +40,9 @@ public:
   int getScaledHeight()  const { return player.getScaledHeight(); }
   const SDL_Surface* getSurface() const { return player.getSurface(); }
 
-  void addLight(Light* l) { lights.push_back(l); }
-  const std::vector<Light*>& getLights() { return lights; }
+  // void addLight(Light* l) { lights.push_back(l); }
+  // const std::vector<Light*>& getLights() { return lights; }
+  const Light* getLight() { return light; }
 
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
@@ -63,7 +64,7 @@ private:
   MultiSprite player;
   Vector2f initialVelocity;
   std::list<SmartSprite*> observers;
-  std::vector<Light*> lights; // can remove this and only have one light pointer
+  Light* light;
   std::list<Wall*> collisions;
   std::vector<Collectable*> collectables;
   PlayerState state;

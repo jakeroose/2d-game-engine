@@ -38,13 +38,12 @@ void Collectable::update(Uint8 ticks){
   }
 
   sprite->update(ticks);
-  if(collected){
+  // make sure light polygon has been calculated
+  if(collected || light->getPolygonSize() == 0){
     light->update();
-  } else {
-    light->setPosition(getPosition());
-    // make sure light has been calculated
-    if(light->getPolygonSize() == 0) light->update();
   }
+  light->setPosition(getPosition() + Vector2f(sprite->getScaledWidth()/2,
+                                              sprite->getScaledHeight()/2));
 }
 
 void Collectable::draw() const {
@@ -57,7 +56,6 @@ void Collectable::collect(Player* p){
   if(collected == false){
     player = p;
     player->addCollectable(this);
-    player->addLight(light);
     collected = true;
   }
 }

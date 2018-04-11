@@ -9,14 +9,12 @@ Background:
 do something with background image
 
 Collectable:
-don't crash if it goes outside the map
 
 Enemies:
-should fall
+should fall if able, or don't go off an edge
 on death should... implode? O.o
 
 Player:
-max fall rate
 
 LevelManager:
 Reset level
@@ -24,14 +22,14 @@ More robust so we can differentiate player, collectable and enemy spawn coords
 
 Polish:
 plug all of the leaks
-jumping - in no way is it balanced
+more ballanced jumping 
 Scoring / Ending
 lights don't clip through walls
 don't stop camera from following along edges of the map
 Walls have width?
 Music
 Sound
-have lights follow player via some slerp function
+have lights follow player via some slerp function (flocking?)
 slowly regain energy
 
 === End of "Need to Do" ===

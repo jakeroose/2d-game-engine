@@ -41,12 +41,11 @@ const std::string Player::getStateStr(){
   return s;
 }
 
-
 Player::Player( const std::string& name) :
   player(name),
   initialVelocity(player.getVelocity()),
   observers(std::list<SmartSprite*>()),
-  lights(std::vector<Light*>()),
+  light(new Light(getPosition())),
   collisions(),
   collectables(std::vector<Collectable*>()),
   state(PlayerState::falling),
@@ -59,12 +58,11 @@ Player::Player( const std::string& name) :
   flyPower(LevelManager::UNIT_SIZE),
   totalEnergies(1)
   {
-    addLight(new Light(getPosition()));
     checkForCollisions();
 }
 
 Player::~Player(){
-  for(Light* l : lights) delete l;
+  delete light;
 }
 
 bool Player::checkWallCollision(Wall* w){
@@ -232,6 +230,7 @@ void Player::handleGravity(){
     return;
   }
   float gravity = 10; // cool constant you have there..
+  float terminalVelocity = 400;
 
   // Here down should probably all be in update state.
   checkForCollisions();
@@ -256,6 +255,8 @@ void Player::handleGravity(){
     player.setVelocityY(player.getVelocityY() + gravity);
     // may get set to 0, in which case player may not realize they're falling
     if(player.getVelocityY() == 0) player.setVelocityY(1);
+    else if (player.getVelocityY() > terminalVelocity)
+      player.setVelocityY(terminalVelocity); // prevent falling at mach 10
     // player shouldn't float from left to right when falling with style
     player.setVelocityX(0);
   } else {
@@ -265,9 +266,7 @@ void Player::handleGravity(){
 
 void Player::refillEnergy(){
   energy = maxEnergy();
-  for(Light* l: lights){
-    l->setIntensity(l->getBaseIntensity());
-  }
+  light->setIntensity(light->getBaseIntensity());
 }
 
 // reduces energy by i, returns energy remaining
@@ -307,25 +306,33 @@ void Player::update(Uint32 ticks) {
   updatePlayerState();
 
   if(updateLighting){
-    for(Light* l: lights){
-      if(l->shouldDraw() == false) continue;
-      l->setPosition(Vector2f(
+    if(light->shouldDraw()){
+      light->setPosition(Vector2f(
         getPosition()[0] + getScaledWidth()/2,
         getPosition()[1] + getScaledHeight()/2
       ));
-      l->update();
+      light->update();
       // scale light based on energy left, keep a minimum of 1/5 intensity
-      l->setIntensity(l->getBaseIntensity()*
-                      (1+(4.0*energy/maxEnergy()))/5.0);
+      light->setIntensity(light->getBaseIntensity()*
+      (1+(4.0*energy/maxEnergy()))/5.0);
     }
     updateLighting = false;
   }
 
   for(int i = 0; i < (int)collectables.size(); i++){
     float angle = Clock::getInstance().getTicks()*0.001 + i*10;
-    collectables[i]->setPosition(Vector2f(cos(angle), sin(angle))*25 + getPosition());
-  }
+    Collectable* c = collectables[i];
+    collectables[i]->setPosition(Vector2f(cos(angle), sin(angle)) * 25 +
+      // offset according to player center and collectable center
+      (getPosition() + Vector2f(
+        getScaledWidth()/2 - c->getSprite()->getScaledWidth()/2,
+        getScaledHeight()/2 - c->getSprite()->getScaledHeight()/2)));
 
+    // make sure collectable doesn't go outside of the game
+    if(c->getPosition()[0] < 0) c->setPosition(Vector2f(0,c->getPosition()[1]));
+    if(c->getPosition()[1] < 0) c->setPosition(Vector2f(c->getPosition()[0],0));
+    // check for rightside and bottom of map too, eventually walls
+  }
 }
 
 void Player::draw() const {
