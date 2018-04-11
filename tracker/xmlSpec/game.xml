@@ -106,6 +106,10 @@
   <transparency>false</transparency>
   <count>0</count>
   <safeDistance>300</safeDistance>
+  <chunk>
+    <size>15</size>
+    <distance>50</distance>
+  </chunk>
 </Collectable>
 
 <Square>

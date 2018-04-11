@@ -42,7 +42,6 @@ Engine::Engine() :
     Gamedata::getInstance().getXmlInt("view/height")/2)),
   sprites(std::vector<SmartSprite*>()),
   player(new Player("Player")),
-  // strategies(),
   strategy(),
   background(
     new Background(Gamedata::getInstance().getXmlInt("background/count"))
@@ -72,6 +71,7 @@ Engine::Engine() :
 }
 
 // add sprite to default location
+// TODO: should add this ability as an XML debug setting
 void Engine::addSprite(){
   Vector2f pos = player->getPosition();
   int w = player->getScaledWidth();
@@ -186,7 +186,7 @@ void Engine::update(Uint32 ticks) {
   for(auto e: sprites) e->update(ticks);
 
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
-    c->update();
+    c->update(ticks);
   }
 
   background->update(ticks);

@@ -14,7 +14,7 @@ public:
   Collectable(const Collectable& c);
   ~Collectable(){ delete sprite; delete light; }
 
-  void update();
+  void update(Uint8 t);
   void draw() const;
   void collect(Player* p);
   void softDelete();

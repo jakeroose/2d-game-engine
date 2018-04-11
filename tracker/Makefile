@@ -33,6 +33,8 @@ OBJS = \
 	lightRenderer.o \
 	intersection.o \
 	background.o \
+	explodingSprite.o \
+	chunk.o \
 	main.o
 EXEC = run
 

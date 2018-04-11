@@ -10,10 +10,10 @@ do something with background image
 
 Collectable:
 don't crash if it goes outside the map
-explode particle effect when player gets hit
 
 Enemies:
 should fall
+on death should... implode? O.o
 
 Player:
 max fall rate

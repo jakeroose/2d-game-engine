@@ -32,11 +32,12 @@ void Collectable::setPosition(const Vector2f& v){
   light->setPosition(v);
 }
 
-
-void Collectable::update(){
-  if(deleted){
+void Collectable::update(Uint8 ticks){
+  if(deleted && !(sprite->isExploding())){
     return;
   }
+
+  sprite->update(ticks);
   if(collected){
     light->update();
   } else {
@@ -47,11 +48,10 @@ void Collectable::update(){
 }
 
 void Collectable::draw() const {
-  if(deleted == false){
+  if(deleted == false || (deleted && sprite->isExploding())){
     sprite->draw();
   }
 }
-
 
 void Collectable::collect(Player* p){
   if(collected == false){
@@ -65,4 +65,5 @@ void Collectable::collect(Player* p){
 void Collectable::softDelete(){
   deleted = true;
   light->setRenderStatus(false);
+  sprite->explode();
 }

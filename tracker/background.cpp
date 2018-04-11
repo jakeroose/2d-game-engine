@@ -20,11 +20,14 @@ private:
   float gravityScale, distanceScale, imageScale;
 };
 
-
 BackgroundSprite::BackgroundSprite(Image* s) :
   image(s),
-  offset(Vector2f(Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldWidth()),
-                  Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldHeight()))),
+  offset(Vector2f(
+    Gamedata::getInstance().getRandFloat(0,
+      Viewport::getInstance().getWorldWidth()),
+    Gamedata::getInstance().getRandFloat(0,
+      Viewport::getInstance().getWorldHeight()))
+  ),
   gravityScale(Gamedata::getInstance().getXmlFloat("background/gravity")),
   distanceScale(Gamedata::getInstance().getRandFloat(0.5f, 3.0f)),
   imageScale(1/distanceScale)
@@ -78,10 +81,9 @@ Background::~Background(){
 }
 
 void Background::initialize(){
-  // NOTE: these squares never get deleted D:
   Image* square1 = ImageFactory::getInstance().getImage("Square");
   Image* square2 = ImageFactory::getInstance().getImage("Square1");
-  
+
   for(int i = 0; i < objectCount; i ++){
     if(i%2){
       images.push_back(new BackgroundSprite(square1));
