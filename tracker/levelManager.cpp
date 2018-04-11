@@ -159,7 +159,7 @@ void LevelManager::loadLevel(const std::string& name){
     }
   }
   // I don't like that we have to call this directly vvv
-  for(Collectable* c : freeCollectables) c->getLight()->update();
+  // for(Collectable* c : freeCollectables) c->getLight()->update();
 
   std::ifstream levelData;
   std::string line;

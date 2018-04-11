@@ -61,6 +61,8 @@ public:
   int getEnergy() const { return energy; }
   void addCollectable(Collectable* c);
   void removeCollectable();
+  void removeCollectable(Collectable* c);
+  int getTotalEnergies() const { return totalEnergies; }
 
 private:
   MultiSprite player;
@@ -88,8 +90,10 @@ private:
   void updatePlayerState();
   void handleGravity();
   void refillEnergy();
+  void updateCollectables();
   int  useEnergy(int i);
   int  maxEnergy();
+  int calculateLightIntensity(Light* l);
 
   Player& operator=(const Player&) = delete;
 };

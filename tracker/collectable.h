@@ -24,6 +24,7 @@ public:
   const Vector2f& getPosition() const { return sprite->getPosition(); }
   MultiSprite* getSprite() { return sprite; }
   Light* getLight() { return light; }
+  void setLightIntensity(int i) { light->setIntensity(i); }
   Collectable& operator=(const Collectable& rhs);
   bool operator==(const Collectable& rhs);
 private:

@@ -46,11 +46,6 @@ tiling background so that it doesn't glitch to hell for tall maps
 if adding slerp functionality to movement then that will help prevent falling through
   walls durring heavy lag (i.e. valgrind)
 
-Lighting:
-More autonomous
-- if a light moves then it should automatically update itself. it shouldn't have to be told to update its position and also told to update its polygon.
-- maybe some sort of update queue in light renderer that will notify lights to update themselves.
-
 Bugs:
 crashed when hit the ceiling too hard
 player can fall through floors at a certain velocity

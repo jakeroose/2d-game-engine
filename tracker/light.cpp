@@ -46,6 +46,13 @@ Light::~Light(){
   for(Intersection* i: intersectionPool) delete i;
 }
 
+void Light::setPosition(const Vector2f& pos){
+  bool shouldUpdate = (renderStatus && pos != position);
+  position = pos;
+  if(shouldUpdate) update();
+}
+
+
 /* Returns the point of intersection between ray(r1, r2) and the line(s1, s2)
 */
 Intersection* Light::getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vector2f s2){

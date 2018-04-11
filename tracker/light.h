@@ -18,7 +18,7 @@ public:
   }
   // TODO: add call to update()
   // need to refactor all calls to light so that it doesn't get updated twice
-  void setPosition(const Vector2f& pos){ position = pos; }
+  void setPosition(const Vector2f& pos);
   const Vector2f& getPosition(){ return position; }
   void cleanPolygon();
   void cleanPolygonX();
@@ -34,6 +34,7 @@ public:
   int getBaseIntensity() const { return baseIntensity; }
   bool shouldDraw() const { return renderStatus; }
   void setRenderStatus(bool s) { renderStatus = s; }
+  bool getRenderStatus() const { return renderStatus; }
 
 private:
   Vector2f position;

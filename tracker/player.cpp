@@ -100,7 +100,6 @@ bool Player::checkForCollisions(){
   return c;
 }
 
-
 void Player::stop() {
   player.setVelocity( Vector2f(0, 0) );
   updateLighting = false;
@@ -276,9 +275,29 @@ int Player::useEnergy(int i) {
   return energy;
 }
 
-
 int Player::maxEnergy(){
   return LevelManager::UNIT_SIZE*8*totalEnergies;
+}
+
+void Player::respawn(const Vector2f& v){
+  player.setPosition(v + Vector2f(0, -hoverHeight));
+  updateLight();
+}
+
+void Player::updateLight(){
+  if(light->shouldDraw()){
+    light->setPosition(Vector2f(
+      getPosition()[0] + getScaledWidth()/2,
+      getPosition()[1] + getScaledHeight()/2
+    ));
+    light->setIntensity(calculateLightIntensity(light));
+  }
+  updateLighting = false;
+}
+
+// scale light based on energy left, keep a minimum of 1/5 intensity
+int Player::calculateLightIntensity(Light* l){
+  return l->getBaseIntensity()*(1+(4.0*energy/maxEnergy()))/5.0;
 }
 
 void Player::addCollectable(Collectable* c) {
@@ -294,23 +313,24 @@ void Player::removeCollectable(){
   }
 }
 
-void Player::respawn(const Vector2f& v){
-  player.setPosition(v + Vector2f(0, -hoverHeight));
-  updateLight();
-}
+void Player::updateCollectables(){
+  for(int i = 0; i < (int)collectables.size(); i++){
+    float angle = Clock::getInstance().getTicks()*0.001 + i*10;
+    Collectable* c = collectables[i];
+    collectables[i]->setPosition(Vector2f(cos(angle), sin(angle)) * 25 +
+      // offset according to player center and collectable center
+      (getPosition() + Vector2f(
+        getScaledWidth()/2 - c->getSprite()->getScaledWidth()/2,
+        getScaledHeight()/2 - c->getSprite()->getScaledHeight()/2)));
 
-void Player::updateLight(){
-  if(light->shouldDraw()){
-    light->setPosition(Vector2f(
-      getPosition()[0] + getScaledWidth()/2,
-      getPosition()[1] + getScaledHeight()/2
-    ));
-    light->update();
-    // scale light based on energy left, keep a minimum of 1/5 intensity
-    light->setIntensity(light->getBaseIntensity()*
-    (1+(4.0*energy/maxEnergy()))/5.0);
+    // make sure collectable doesn't go outside of the game
+    if(c->getPosition()[0] < 0) c->setPosition(Vector2f(0,c->getPosition()[1]));
+    if(c->getPosition()[1] < 0) c->setPosition(Vector2f(c->getPosition()[0],0));
+    // check for rightside and bottom of map too, eventually walls
+
+    // update lights on collectable
+    c->setLightIntensity(calculateLightIntensity(c->getLight()));
   }
-  updateLighting = false;
 }
 
 void Player::update(Uint32 ticks) {
@@ -328,20 +348,7 @@ void Player::update(Uint32 ticks) {
     updateLight();
   }
 
-  for(int i = 0; i < (int)collectables.size(); i++){
-    float angle = Clock::getInstance().getTicks()*0.001 + i*10;
-    Collectable* c = collectables[i];
-    collectables[i]->setPosition(Vector2f(cos(angle), sin(angle)) * 25 +
-      // offset according to player center and collectable center
-      (getPosition() + Vector2f(
-        getScaledWidth()/2 - c->getSprite()->getScaledWidth()/2,
-        getScaledHeight()/2 - c->getSprite()->getScaledHeight()/2)));
-
-    // make sure collectable doesn't go outside of the game
-    if(c->getPosition()[0] < 0) c->setPosition(Vector2f(0,c->getPosition()[1]));
-    if(c->getPosition()[1] < 0) c->setPosition(Vector2f(c->getPosition()[0],0));
-    // check for rightside and bottom of map too, eventually walls
-  }
+  updateCollectables();
 }
 
 void Player::draw() const {

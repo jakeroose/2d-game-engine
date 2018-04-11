@@ -116,7 +116,11 @@ void Engine::draw() const {
     strm << Clock::getInstance().getFps();
     IoMod::getInstance().writeText("FPS: " + strm.str(), 15, 40);
     IoMod::getInstance().writeText("PlayerState: "+player->getStateStr(), 15, 75);
-    IoMod::getInstance().writeText("PlayerEngergy: "+std::to_string(player->getEnergy()), 15, 100);
+    IoMod::getInstance().writeText("PlayerEngergy: " +
+      std::to_string(player->getEnergy()), 15, 100);
+    IoMod::getInstance().writeText("PlayerEngergy: " +
+      std::to_string(player->getTotalEnergies()), 15, 125);
+
     // strm.str(std::string()); // clear strm
     // strm << clock.getElapsedTicks();
     // IoMod::getInstance().writeText("Ticks: " + strm.str(), 15, 125);

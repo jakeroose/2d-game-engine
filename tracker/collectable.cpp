@@ -29,7 +29,7 @@ bool Collectable::operator==(const Collectable& rhs){
 
 void Collectable::setPosition(const Vector2f& v){
   sprite->setPosition(v);
-  light->setPosition(v);
+  // light position will get set in update, since it's based on the sprite
 }
 
 void Collectable::update(Uint8 ticks){
@@ -39,7 +39,7 @@ void Collectable::update(Uint8 ticks){
 
   sprite->update(ticks);
   // make sure light polygon has been calculated
-  if(collected || light->getPolygonSize() == 0){
+  if(light->getPolygonSize() == 0){
     light->update();
   }
   light->setPosition(getPosition() + Vector2f(sprite->getScaledWidth()/2,
