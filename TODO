@@ -6,31 +6,33 @@ look into blitting light polygon shape onto an image to render on GPU
 https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
 
 Background:
-draw black behind everything, probs just render black image to viewport
+do something with background image
 
 Collectable:
+don't crash if it goes outside the map
+explode particle effect when player gets hit
 
 Enemies:
+should fall
 
 Player:
+max fall rate
 
 LevelManager:
 Reset level
 More robust so we can differentiate player, collectable and enemy spawn coords
 
-Low Prio:
-jumping - in no way is it balanced
-better XML
-Scoring / Ending
-
 Polish:
+plug all of the leaks
+jumping - in no way is it balanced
+Scoring / Ending
 lights don't clip through walls
-don't stop camera from following along edges
+don't stop camera from following along edges of the map
 Walls have width?
 Music
 Sound
 have lights follow player via some slerp function
-
+slowly regain energy
 
 === End of "Need to Do" ===
 
@@ -39,7 +41,8 @@ object pooling for walls (when levels get larger)
 potentially a way to combine lightPolygons so that there is only one pass over
   the x coordinates of the viewport
 tiling background so that it doesn't glitch to hell for tall maps
-slowly regain energy
+if adding slerp functionality to movement then that will help prevent falling through
+  walls durring heavy lag (i.e. valgrind)
 
 Lighting:
 More autonomous

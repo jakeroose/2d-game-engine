@@ -36,6 +36,11 @@
   <transparency>false</transparency>
 </back>
 
+<background>
+  <count>100</count>
+  <gravity>0.1</gravity>
+</background>
+
 <font name="font">
   <file>fonts/arial.ttf</file>
   <size>24</size>
@@ -62,9 +67,9 @@
 </pauseMenu>
 
 <lights>
-  <debug>false</debug>
   <renderLights>true</renderLights>
-  <alpha>75</alpha>
+  <debug>false</debug>
+  <alpha>50</alpha>
 </lights>
 
 <Player>
@@ -75,8 +80,8 @@
   <speedX>150</speedX>
   <speedY>25</speedY>
   <transparency>false</transparency>
-  <noClip>false</noClip>
   <flyPower></flyPower>
+  <noClip>false</noClip>
 </Player>
 
 <Enemy>

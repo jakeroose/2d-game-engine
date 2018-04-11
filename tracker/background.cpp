@@ -5,30 +5,36 @@
 #include "gamedata.h"
 #include "viewport.h"
 #include <SDL.h>
+#include <algorithm>
 
 class BackgroundSprite {
 public:
   BackgroundSprite() = delete;
-  BackgroundSprite(Image* s, int i);
+  BackgroundSprite(Image* s);
   void update(Uint32 t);
   void draw() const;
+  float getDistanceScale(){ return distanceScale; }
 private:
   Image* image;
   Vector2f offset;
-  float scrollFactor, gravityScale, imageScale;
+  float gravityScale, distanceScale, imageScale;
 };
 
-BackgroundSprite::BackgroundSprite(Image* s, int i) :
+
+BackgroundSprite::BackgroundSprite(Image* s) :
   image(s),
   offset(Vector2f(Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldWidth()),
                   Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldHeight()))),
-  scrollFactor(i),
-  gravityScale(Gamedata::getInstance().getRandFloat(0.1f, 0.2f)),
-  imageScale(Gamedata::getInstance().getRandFloat(0.8f, 1.5f))
+  gravityScale(Gamedata::getInstance().getXmlFloat("background/gravity")),
+  distanceScale(Gamedata::getInstance().getRandFloat(0.5f, 3.0f)),
+  imageScale(1/distanceScale)
   {}
 
 void BackgroundSprite::update(Uint32 t) {
-  offset[1] += t*gravityScale/scrollFactor;
+  // update it's y coord per tick
+  offset[1] += t*gravityScale/distanceScale; // close -> fall faster
+
+  // reset y and give new x once it reaches the bottom
   if(offset[1] > Viewport::getInstance().getWorldHeight()){
     offset[1] = (int)offset[1] % Viewport::getInstance().getWorldHeight();
     offset[0] = Gamedata::getInstance().getRandFloat(0, Viewport::getInstance().getWorldWidth());
@@ -46,7 +52,7 @@ void BackgroundSprite::draw() const {
   };
   SDL_Rect pos = i->getSurface()->clip_rect;
   pos.y = offset[1] - Viewport::getInstance().getY();
-  pos.x = offset[0] - Viewport::getInstance().getX()/scrollFactor;
+  pos.x = offset[0] - Viewport::getInstance().getX()/distanceScale;
   pos.w *= imageScale;
   pos.h *= imageScale;
   SDL_RenderCopyEx(
@@ -58,32 +64,36 @@ void BackgroundSprite::draw() const {
     &center,
     SDL_FLIP_NONE
   );
-
 }
 
-Background::Background() :
-  image(),
+/* Initialized to number of objects in the background */
+Background::Background(int c) :
   images(),
   ticks(),
-  name()
-  {}
-
-Background::Background(const std::string& n) :
-  image(ImageFactory::getInstance().getImage(n)),
-  images(),
-  ticks(),
-  name(n)
+  objectCount(c)
   {}
 
 Background::~Background(){
-  delete image;
   for(auto e : images) delete e;
 }
+
 void Background::initialize(){
-  for(int i = 0; i < 20; i ++){
-    images.push_back(new BackgroundSprite(image,
-       Gamedata::getInstance().getXmlInt(name+"/scroll")));
+  // NOTE: these squares never get deleted D:
+  Image* square1 = ImageFactory::getInstance().getImage("Square");
+  Image* square2 = ImageFactory::getInstance().getImage("Square1");
+  
+  for(int i = 0; i < objectCount; i ++){
+    if(i%2){
+      images.push_back(new BackgroundSprite(square1));
+    } else {
+      images.push_back(new BackgroundSprite(square2));
+    }
   }
+
+  std::sort(images.begin(), images.end(), [](
+    BackgroundSprite* s1, BackgroundSprite* s2){
+      return s1->getDistanceScale() > s2->getDistanceScale();
+  });
 }
 
 void Background::update(Uint32 t){

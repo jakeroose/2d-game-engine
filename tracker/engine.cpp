@@ -44,7 +44,9 @@ Engine::Engine() :
   player(new Player("Player")),
   // strategies(),
   strategy(),
-  backgrounds(),
+  background(
+    new Background(Gamedata::getInstance().getXmlInt("background/count"))
+  ),
   currentStrategy(0),
   currentSprite(0),
   collision(false),
@@ -63,11 +65,7 @@ Engine::Engine() :
   strategy = new RectangularCollisionStrategy;
 
   // initialize background
-  backgrounds.push_back(new Background("Square1"));
-  backgrounds.push_back(new Background("Square"));
-  for(Background* b : backgrounds){
-    b->initialize();
-  }
+  background->initialize();
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
   std::cout << "Loading complete" << std::endl;
@@ -96,9 +94,7 @@ void Engine::addSprite(int x, int y){
 void Engine::draw() const {
   world.draw();
 
-  for(Background* b : backgrounds){
-    b->draw();
-  }
+  background->draw();
 
   LightRenderer::getInstance().draw();
 
@@ -193,9 +189,7 @@ void Engine::update(Uint32 ticks) {
     c->update();
   }
 
-  for(Background* b : backgrounds){
-    b->update(ticks);
-  }
+  background->update(ticks);
   world.update();
   viewport.update(); // always update viewport last
 }

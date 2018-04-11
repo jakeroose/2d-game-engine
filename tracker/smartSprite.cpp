@@ -128,9 +128,9 @@ float SmartSprite::getDistance() {
 void SmartSprite::update(Uint32 ticks) {
   TwoWayMultiSprite::update(ticks);
   float x= getX()+getImage()->getWidth()/2;
-  float y= getY()+getImage()->getHeight()/2;
   float ex= playerPos[0]+playerWidth/2;
-  float ey= playerPos[1]+playerHeight/2;
+  // float y= getY()+getImage()->getHeight()/2;
+  // float ey= playerPos[1]+playerHeight/2;
   float distanceToEnemy = getDistance();
   setVelocity(Vector2f(0,0));
 

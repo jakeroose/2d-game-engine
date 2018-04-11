@@ -31,9 +31,8 @@ private:
 
   std::vector<SmartSprite*> sprites;
   Player* player;
-  // std::vector<CollisionStrategy*> strategies;
   RectangularCollisionStrategy* strategy;
-  std::vector<Background*> backgrounds;
+  Background* background;
 
   int currentStrategy;
   int currentSprite;
