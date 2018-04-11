@@ -18,6 +18,7 @@ public:
   void draw() const;
   void collect(Player* p);
   void softDelete();
+  void setTo(bool c, bool d, Player* p);
 
   void setPosition(const Vector2f& v);
   const Vector2f& getPosition() const { return sprite->getPosition(); }

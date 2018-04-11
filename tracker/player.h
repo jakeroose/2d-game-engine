@@ -46,6 +46,8 @@ public:
 
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
+  void respawn(const Vector2f& v);
+  void updateLight();
 
   void right();
   void left();

@@ -294,6 +294,25 @@ void Player::removeCollectable(){
   }
 }
 
+void Player::respawn(const Vector2f& v){
+  player.setPosition(v + Vector2f(0, -hoverHeight));
+  updateLight();
+}
+
+void Player::updateLight(){
+  if(light->shouldDraw()){
+    light->setPosition(Vector2f(
+      getPosition()[0] + getScaledWidth()/2,
+      getPosition()[1] + getScaledHeight()/2
+    ));
+    light->update();
+    // scale light based on energy left, keep a minimum of 1/5 intensity
+    light->setIntensity(light->getBaseIntensity()*
+    (1+(4.0*energy/maxEnergy()))/5.0);
+  }
+  updateLighting = false;
+}
+
 void Player::update(Uint32 ticks) {
   player.update(ticks);
   std::list<SmartSprite*>::iterator ptr = observers.begin();
@@ -306,17 +325,7 @@ void Player::update(Uint32 ticks) {
   updatePlayerState();
 
   if(updateLighting){
-    if(light->shouldDraw()){
-      light->setPosition(Vector2f(
-        getPosition()[0] + getScaledWidth()/2,
-        getPosition()[1] + getScaledHeight()/2
-      ));
-      light->update();
-      // scale light based on energy left, keep a minimum of 1/5 intensity
-      light->setIntensity(light->getBaseIntensity()*
-      (1+(4.0*energy/maxEnergy()))/5.0);
-    }
-    updateLighting = false;
+    updateLight();
   }
 
   for(int i = 0; i < (int)collectables.size(); i++){

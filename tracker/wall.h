@@ -24,6 +24,7 @@ public:
   int getMaxy(){ return rect.y + rect.h; }
   int getMinx(){ return rect.x; }
   int getMiny(){ return rect.y; }
+  void setTo(int x1, int y1, int x2, int y2);
 private:
   SDL_Rect rect;
   static int count;

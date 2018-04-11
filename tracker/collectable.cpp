@@ -65,3 +65,10 @@ void Collectable::softDelete(){
   light->setRenderStatus(false);
   sprite->explode();
 }
+
+// it will always have sprite and light so we don't need to set those.
+void Collectable::setTo(bool c, bool d, Player* p){
+  collected = c;
+  deleted = d;
+  player = p;
+}

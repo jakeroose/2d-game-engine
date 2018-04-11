@@ -229,6 +229,12 @@ void Engine::play() {
         if ( keystate[SDL_SCANCODE_T] ) {
           switchSprite();
         }
+        if ( keystate[SDL_SCANCODE_R] ) {
+          LevelManager::getInstance().loadLevel("levels/" +
+                          Gamedata::getInstance().getXmlStr("level/name"));
+          // LevelManager::getInstance().loadLevel("levels/empty");
+          player->respawn(LevelManager::getInstance().getSpawnPoint());
+        }
         if (keystate[SDL_SCANCODE_F1]) {
           hud.toggleDisplay();
         }

@@ -43,6 +43,16 @@ std::vector<Vector2f> Wall::getVertices(){
   return v;
 }
 
+void Wall::setTo(int x1, int y1, int x2, int y2){
+  rect = {
+    x1*LevelManager::UNIT_SIZE,
+    y1*LevelManager::UNIT_SIZE,
+    (x2 == x1 ? 1 : (x2-x1)*LevelManager::UNIT_SIZE),
+    (y2 == y1 ? 1 : (y2-y1)*LevelManager::UNIT_SIZE)
+  };
+  type = rect.w == 1 ? WallType::wall : WallType::floor;
+}
+
 void Wall::draw() const {
   SDL_Renderer* renderer = RenderContext::getInstance()->getRenderer();
   SDL_Rect r = {

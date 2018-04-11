@@ -16,6 +16,8 @@ public:
   const Light& operator=(const Light& l) {
      rc = l.rc; return *this;
   }
+  // TODO: add call to update()
+  // need to refactor all calls to light so that it doesn't get updated twice
   void setPosition(const Vector2f& pos){ position = pos; }
   const Vector2f& getPosition(){ return position; }
   void cleanPolygon();

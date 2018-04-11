@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include "levelManager.h"
 #include "light.h"
 #include "vector2f.h"
@@ -20,17 +21,19 @@ int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize"
 
 LevelManager::LevelManager() :
   walls(),
+  freeWalls(),
   wallVertices(),
   collectables(),
+  freeCollectables(),
   spawnPoint() {
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
 LevelManager::~LevelManager(){
-  for(auto w: walls){
-    delete w.second;
-  }
-  // for(Collectable* c: collectables) delete c;
+  for(auto w: walls) delete w.second;
+  for(auto w: freeWalls) delete w;
+  for(Collectable* c: collectables) delete c;
+  for(Collectable* c: freeCollectables) delete c;
 }
 
 LevelManager& LevelManager::getInstance(){
@@ -72,40 +75,46 @@ void LevelManager::addWall(const std::string& s){
       v[2] = tmp;
     }
   }
+  // std::cout << "addWall" << std::endl;
+  if(freeWalls.size() > 0){
+    Wall* w = freeWalls.back();
+    freeWalls.pop_back();
+    w->setTo(v[0], v[1], v[2], v[3]);
+    addWall(w);
+  } else {
+    addWall(new Wall(v[0], v[1], v[2], v[3]));
+  }
 
-  addWall(new Wall(v[0], v[1], v[2], v[3]));
 }
 
 /* Adds a collectable to the tile at x, y */
 void LevelManager::addCollectable(int x, int y){
   int scaledX =  UNIT_SIZE/2, scaledY = UNIT_SIZE/2;
-  Collectable* c = new Collectable("Collectable");
+
+  Collectable* c;
+  if(freeCollectables.size() > 0){
+    c = freeCollectables.back();
+    freeCollectables.pop_back();
+    c->setTo(false, false, NULL);
+  } else {
+    c = new Collectable("Collectable");
+  }
+
   c->setPosition(Vector2f(scaledX + UNIT_SIZE*x, scaledY + UNIT_SIZE*y));
   collectables.push_back(c);
-  // initialize other things and stuff
-  // c->update();
 }
 
 void LevelManager::addCollectables(){
 }
 
-// TODO: update to use find & functor
-// https://stackoverflow.com/questions/35490173/stdfind-on-a-vector-of-pointers
+// TODO: this should put collectable into freeCollectables, but that currently
+// will cause the explosion to not be drawn. Need to find fix for this because
+// currently just wasting memory
 void LevelManager::removeCollectable(Collectable* c){
-  std::vector<Collectable*>::const_iterator it = collectables.begin();
-  while(it != collectables.end()){
-
-    if(**it == *c){
-      // delete *it;
-      // collectables.erase(it);
-      (*it)->softDelete();
-      // std::cout << "erased collectable" << std::endl;
-      return;
-    }
-    it++;
-  }
-  std::cout << "LevelManager::removeCollectable - couldn't find collectable." << std::endl;
-
+  std::vector<Collectable*>::const_iterator it;
+  it = std::find_if(collectables.begin(), collectables.end(),
+    [&c](Collectable* c1){return c1 == c; });
+  if(it != collectables.end()) (*it)->softDelete();
 }
 
 std::vector<int> strToIntVec(std::string& s){
@@ -133,6 +142,25 @@ void LevelManager::parseLine(std::string& l){
 }
 
 void LevelManager::loadLevel(const std::string& name){
+  // std::cout << walls.size() << std::endl;
+  wallVertices.erase(wallVertices.begin(), wallVertices.end());
+  if(walls.size() > 0){
+    auto it = walls.begin();
+    while(it != walls.end()){
+      freeWalls.push_back((*it).second);
+      it = walls.erase(it);
+    }
+  }
+  if(collectables.size() > 0){
+    auto it = collectables.begin();
+    while(it != collectables.end()){
+      freeCollectables.push_back(*it);
+      it = collectables.erase(it);
+    }
+  }
+  // I don't like that we have to call this directly vvv
+  for(Collectable* c : freeCollectables) c->getLight()->update();
+
   std::ifstream levelData;
   std::string line;
   levelData.open(name);
@@ -146,6 +174,8 @@ void LevelManager::loadLevel(const std::string& name){
       parseLine(line);
     }
     levelData.close();
+    std::cout << walls.size() << std::endl;
+
   }
 
   // border of the screen

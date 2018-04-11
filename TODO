@@ -1,5 +1,9 @@
 valgrind --leak-check=full ./run
 
+Project 5 completion:
+player should explode and reappear (explode on death and reset level)
+should display use of object pooling in HUD
+
 practice iterator while loops
 look into blitting light polygon shape onto an image to render on GPU
 - same with UI elements, seems like sdl primitive draw funcs are super slow
@@ -9,6 +13,7 @@ Background:
 do something with background image
 
 Collectable:
+time limit to explosion?
 
 Enemies:
 should fall if able, or don't go off an edge
@@ -17,7 +22,6 @@ on death should... implode? O.o
 Player:
 
 LevelManager:
-Reset level
 More robust so we can differentiate player, collectable and enemy spawn coords
 
 Polish:

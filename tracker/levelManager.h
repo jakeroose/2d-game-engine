@@ -42,8 +42,10 @@ public:
   static int UNIT_SIZE;
 private:
   std::map<std::string, Wall*> walls;
+  std::vector<Wall*> freeWalls;
   std::map<std::string, std::vector<Vector2f> > wallVertices;
   std::vector<Collectable*> collectables;
+  std::vector<Collectable*> freeCollectables;
   Vector2f spawnPoint;
 };
 #endif
