@@ -42,7 +42,7 @@ void HUD::drawCentered() const {
 void HUD::draw() const {
   if(display == false) return;
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255/2);
+  SDL_SetRenderDrawColor(renderer, 50, 50, 50, 100);
   SDL_Rect r;
   r.x = x;
   r.y = y;

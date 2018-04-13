@@ -198,3 +198,18 @@ void LevelManager::loadLevel(const std::string& name){
   std::cout << "Walls: " << walls.size() << std::endl;
   std::cout << "freeWalls: " << freeWalls.size() << std::endl;
 }
+
+
+int LevelManager::getTotalLightIntersections() const {
+  int count = 0;
+  for(Collectable* c: collectables) count +=
+    c->getLight()->getPolygonSize();
+  return count;
+}
+
+int LevelManager::getTotalFreeIntersections() const {
+  int count = 0;
+  for(Collectable* c: collectables) count +=
+    c->getLight()->getIntersectionPoolSize();
+  return count;
+}

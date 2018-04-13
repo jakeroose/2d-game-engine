@@ -16,13 +16,11 @@ public:
   const Light& operator=(const Light& l) {
      rc = l.rc; return *this;
   }
-  // TODO: add call to update()
-  // need to refactor all calls to light so that it doesn't get updated twice
   void setPosition(const Vector2f& pos);
   const Vector2f& getPosition(){ return position; }
   void cleanPolygon();
   void cleanPolygonX();
-  int  getPolygonSize() { return (int)lightPolygon.size();}
+  int  getPolygonSize() const { return (int)lightPolygon.size();}
   std::vector<Intersection*>& getPolygon() { return lightPolygon; }
   void updateMinMaxCoords(Intersection* i);
   int getMinx(){ return minx;}
@@ -35,6 +33,8 @@ public:
   bool shouldDraw() const { return renderStatus; }
   void setRenderStatus(bool s) { renderStatus = s; }
   bool getRenderStatus() const { return renderStatus; }
+
+  int getIntersectionPoolSize() const { return (int)intersectionPool.size(); }
 
 private:
   Vector2f position;

@@ -124,8 +124,17 @@ void Engine::draw() const {
     IoMod::getInstance().writeText("PlayerState: "+player->getStateStr(), 15, 75);
     IoMod::getInstance().writeText("PlayerEngergy: " +
       std::to_string(player->getEnergy()), 15, 100);
-    IoMod::getInstance().writeText("PlayerEngergy: " +
-      std::to_string(player->getTotalEnergies()), 15, 125);
+    IoMod::getInstance().writeText("Walls:             " +      std::to_string(LevelManager::getInstance().getWallCount()), 15, 125);
+    IoMod::getInstance().writeText("Free Walls:        " +      std::to_string(LevelManager::getInstance().getFreeWallCount()), 15, 150);
+    IoMod::getInstance().writeText("Collectables:      " +      std::to_string(LevelManager::getInstance().getCollectableCount()), 15, 175);
+    IoMod::getInstance().writeText("Free Collectables: " +      std::to_string(LevelManager::getInstance().getFreeCollectableCount()), 15, 200);
+    int totalIntersections = LevelManager::getInstance().getTotalLightIntersections() + player->getLight()->getPolygonSize();
+    int freeIntersections = LevelManager::getInstance().getTotalFreeIntersections() + player->getLight()->getIntersectionPoolSize();
+    IoMod::getInstance().writeText("Light Intersections: " +      std::to_string(totalIntersections), 15, 225);
+    IoMod::getInstance().writeText("Free Intersections : " +      std::to_string(freeIntersections), 15, 250);
+
+    // IoMod::getInstance().writeText("PlayerEngergy: " +
+    //   std::to_string(player->getTotalEnergies()), 15, 125);
 
     // strm.str(std::string()); // clear strm
     // strm << clock.getElapsedTicks();

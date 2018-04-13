@@ -41,6 +41,13 @@ public:
   void setSpawnPoint(Vector2f v);
   void parseLine(std::string& l);
 
+  int getWallCount() const { return (int)walls.size();}
+  int getFreeWallCount() const { return (int)freeWalls.size();}
+  int getCollectableCount() const { return (int)collectables.size();}
+  int getFreeCollectableCount() const { return (int)freeCollectables.size();}
+  int getTotalLightIntersections() const;
+  int getTotalFreeIntersections() const;
+
   static int UNIT_SIZE;
 private:
   std::map<std::string, Wall*> walls;
