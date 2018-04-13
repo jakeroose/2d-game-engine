@@ -44,12 +44,14 @@ void Image::draw(int x, int y, float scale) const {
   int tempHeight = scale*view.h;
   int tempWidth =  scale*view.w;
   SDL_Rect dest =  {x, y, tempWidth, tempHeight};
+  // SDL_SetTextureAlphaMod(texture, 255/2);
   SDL_RenderCopy(renderer, texture, &view, &dest);
 }
 
 void Image::draw(int sx, int sy, int dx, int dy) const {
   SDL_Rect src = { sx, sy, view.w, view.h };
   SDL_Rect dst = { dx, dy, getWidth(), getHeight() };
+  // SDL_SetTextureAlphaMod(texture, 255/2);
   SDL_RenderCopy(renderer, texture, &src, &dst);
 }
 

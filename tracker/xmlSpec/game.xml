@@ -82,6 +82,12 @@
   <transparency>false</transparency>
   <flyPower></flyPower>
   <noClip>false</noClip>
+  <chunk>
+    <size>20</size>
+    <distance>200</distance>
+    <lifespan>3000</lifespan>
+    <percentVariation>50</percentVariation>
+  </chunk>
 </Player>
 
 <Enemy>

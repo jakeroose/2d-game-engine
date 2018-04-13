@@ -105,6 +105,12 @@ void Engine::draw() const {
   }
   for(auto e: sprites) e->draw();
 
+  if(player->isDead()){
+    SDL_Color white = {255, 255, 255, 255};
+    IoMod::getInstance().writeText(" You Died!", Viewport::getInstance().getViewWidth()/2 - 50, Viewport::getInstance().getViewHeight()/2 - 30, white);
+    IoMod::getInstance().writeText("R to restart", Viewport::getInstance().getViewWidth()/2 - 50, Viewport::getInstance().getViewHeight()/2 + 20, white);
+  }
+
   if(hud.getDisplay()){
     std::stringstream strm;
     strm << sprites.size() << " Sprites Remaining";
@@ -292,9 +298,9 @@ void Engine::play() {
       if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_SPACE]) {
         static_cast<Player*>(player)->up(ticks);
       }
-      if (keystate[SDL_SCANCODE_S]) {
-        static_cast<Player*>(player)->down();
-      }
+      // if (keystate[SDL_SCANCODE_S]) {
+      //   static_cast<Player*>(player)->down();
+      // }
       update(ticks);
       draw();
       if ( makeVideo ) {

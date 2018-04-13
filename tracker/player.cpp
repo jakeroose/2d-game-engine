@@ -57,7 +57,8 @@ Player::Player( const std::string& name) :
   hoverHeight(LevelManager::UNIT_SIZE/4),
   energy(1),
   flyPower(LevelManager::UNIT_SIZE),
-  totalEnergies(1)
+  totalEnergies(1),
+  alive(true)
   {
     checkForCollisions();
 }
@@ -283,6 +284,7 @@ int Player::maxEnergy(){
 void Player::respawn(const Vector2f& v){
   player.setPosition(v + Vector2f(0, -hoverHeight));
   updateLight();
+  alive = true;
 }
 
 void Player::reset(){
@@ -312,34 +314,20 @@ void Player::addCollectable(Collectable* c) {
   // totalEnergies += 1;
 }
 
-// void Player::removeCollectable(){
-//   if((int)collectables.size() > 0){
-//     LevelManager::getInstance().removeCollectable(collectables.back());
-//     collectables.pop_back();
-//     --totalEnergies;
-//   }
-// }
-
 void Player::damagePlayer(){
   if((int)collectables.size() > 0){
     collectables.back()->explode();
     collectables.pop_back();
   } else {
-    // TODO: PLAYER IS DEAD!!!
+    // PLAYER IS DEAD!!!
+    killPlayer();
   }
 }
 
-
-
-// void Player::removeCollectable(Collectable* c){
-//   auto it = std::find_if(collectables.begin(), collectables.end(),
-//               [&c](Collectable* e){return e == c;});
-//   if(it != collectables.end()){
-//     collectables.erase(it);
-//     // --totalEnergies;
-//     std::cout << "removed energy" << std::endl;
-//   }
-// }
+void Player::killPlayer(){
+  player.explode();
+  alive = false;
+}
 
 void Player::updateCollectables(){
   for(int i = 0; i < (int)collectables.size(); i++){
@@ -362,6 +350,7 @@ void Player::updateCollectables(){
 }
 
 void Player::update(Uint32 ticks) {
+  if(isDead() && player.isExploding() == false ) return;
   player.update(ticks);
   std::list<SmartSprite*>::iterator ptr = observers.begin();
   while ( ptr != observers.end() ) {
@@ -381,6 +370,8 @@ void Player::update(Uint32 ticks) {
 }
 
 void Player::draw() const {
+  if(isDead() && player.isExploding() == false ) return;
+
   player.draw();
 }
 

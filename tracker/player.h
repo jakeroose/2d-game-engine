@@ -39,9 +39,6 @@ public:
   int getScaledWidth()  const { return player.getScaledWidth(); }
   int getScaledHeight()  const { return player.getScaledHeight(); }
   const SDL_Surface* getSurface() const { return player.getSurface(); }
-
-  // void addLight(Light* l) { lights.push_back(l); }
-  // const std::vector<Light*>& getLights() { return lights; }
   const Light* getLight() { return light; }
 
   const Vector2f& getPosition() const { return player.getPosition(); }
@@ -65,6 +62,8 @@ public:
   void removeCollectable(Collectable* c);
   int getTotalEnergies() const { return totalEnergies; }
   void damagePlayer();
+  void killPlayer();
+  bool isDead() const { return !alive; }
 
 private:
   MultiSprite player;
@@ -82,6 +81,7 @@ private:
   int energy;
   int flyPower;
   int totalEnergies;
+  bool alive;
 
   bool checkWallCollision(Wall* w);
   bool checkForCollisions();
