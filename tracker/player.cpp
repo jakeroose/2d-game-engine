@@ -13,7 +13,6 @@
   Use collision detection in RectangularCollisionStrategy instead of here.
 */
 
-
 std::ostream& operator<<(std::ostream& out, PlayerState s){
   std::string state = "idk";
   if(s == PlayerState::idle){
@@ -312,7 +311,6 @@ int Player::calculateLightIntensity(Light* l){
 
 void Player::addCollectable(Collectable* c) {
   collectables.push_back(c);
-  // totalEnergies += 1;
 }
 
 void Player::damagePlayer(){

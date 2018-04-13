@@ -41,6 +41,7 @@ public:
 
   static int UNIT_SIZE;
 private:
+  enum LOADING_TYPE { NONE, ENEMY, PLAYER, WALL, COLLECTABLE};
   std::map<std::string, Wall*> walls;
   std::vector<Wall*> freeWalls;
   std::map<std::string, std::vector<Vector2f> > wallVertices;
@@ -49,6 +50,7 @@ private:
   std::vector<SmartSprite*> enemies;
   std::vector<SmartSprite*> freeEnemies;
   Vector2f spawnPoint;
+  LOADING_TYPE loadingType;
 
   void setSpawnPoint(Vector2f v);
   void parseLine(std::string& l);

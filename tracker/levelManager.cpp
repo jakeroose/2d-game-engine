@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <regex>
 #include "levelManager.h"
 #include "light.h"
 #include "vector2f.h"
@@ -36,7 +37,8 @@ LevelManager::LevelManager() :
   freeCollectables(),
   enemies(),
   freeEnemies(),
-  spawnPoint() {
+  spawnPoint(),
+  loadingType() {
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
@@ -159,11 +161,43 @@ void LevelManager::setSpawnPoint(Vector2f v){
 }
 
 void LevelManager::parseLine(std::string& l){
-  std::vector<int> v = strToIntVec(l);
-  if(v.size() == 2){
-    addEnemy(v[0], v[1]);
-  } else {
-    addWall(l);
+  std::regex r("([a-zA-z]+)(\\:)");
+  std::regex n("[(\\d+)(\\s)*)]+");
+  if(regex_match(l, r)){
+    std::regex p("(player\\:)");
+    std::regex e("(enemies\\:)");
+    std::regex c("(collectables\\:)");
+    std::regex w("(walls\\:)");
+
+    if(regex_match(l, p)){
+      std::cout << "Loading Player" << std::endl;
+      loadingType = PLAYER;
+    } else if(regex_match(l, e)){
+      std::cout << "Loading Enemies" << std::endl;
+      loadingType = ENEMY;
+    } else if(regex_match(l, c)){
+      std::cout << "Loading Collectables" << std::endl;
+      loadingType = COLLECTABLE;
+    } else if(regex_match(l, w)){
+      std::cout << "Loading Walls" << std::endl;
+      loadingType = WALL;
+    } else {
+      std::cout << "Cannot load type \""<< l << "\"" << std::endl;
+    }
+  } else if(regex_match(l, n)){
+    if(loadingType == NONE){
+      std::cout << "uhh something's wrong with the level file.." << std::endl;
+    }
+    std::vector<int> v = strToIntVec(l);
+    if(loadingType == PLAYER){
+      setSpawnPoint(Vector2f(v[0], v[1]));
+    } else if(loadingType == ENEMY){
+      addEnemy(v[0], v[1]);
+    } else if(loadingType == COLLECTABLE){
+      addCollectable(v[0], v[1]);
+    } else if(loadingType == WALL){
+      addWall(l);
+    }
   }
 }
 
@@ -199,15 +233,13 @@ void LevelManager::loadLevel(const std::string& name){
   std::string line;
   levelData.open(name);
   if(levelData.is_open()){
-    if(std::getline(levelData, line)){
-      std::vector<int> v = strToIntVec(line);
-      setSpawnPoint(Vector2f(v[0], v[1]));
-    }
     while(std::getline(levelData, line)){
-      // addWall(line);
       parseLine(line);
     }
     levelData.close();
+  } else {
+    std::cout << "Couldn't find level" << std::endl;
+    throw 0;
   }
 
   // border of the world

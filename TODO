@@ -1,13 +1,9 @@
 valgrind --leak-check=full ./run
 
-practice iterator while loops
 look into blitting light polygon shape onto an image to render on GPU
 - same with UI elements, seems like sdl primitive draw funcs are super slow
 - CUDA example from class
 https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
-
-LevelManager:
-More robust so we can differentiate player, collectable and enemy spawn coords
 
 Polish:
 plug all of the leaks
@@ -35,6 +31,4 @@ if adding slerp functionality to movement then that will help prevent falling th
 player inherit from SmartSprite or other way around
 
 Bugs:
-crashed when hit the ceiling too hard
-player can fall through floors at a certain velocity
 jumping/flying depends on frame rate

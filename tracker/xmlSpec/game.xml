@@ -19,7 +19,7 @@
 <world>
   <width>1240</width>
   <height>900</height>
-  <unitSize>64</unitSize> <!-- length of 1 in game unit in pixels -->
+  <unitSize>100</unitSize> <!-- length of 1 in game unit in pixels -->
 </world>
 
 <level>
