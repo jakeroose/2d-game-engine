@@ -6,6 +6,7 @@
 #include "light.h"
 #include "vector2f.h"
 #include "wall.h"
+#include "smartSprite.h"
 
 /*
 LevelManager should let me easily add walls to a level using arbitrary in-game
@@ -17,12 +18,24 @@ Reads in level from /levels at runtime
 
 int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize");
 
+std::vector<int> strToIntVec(std::string& s){
+  std::stringstream ss(s);
+  std::string coord;
+  std::vector<int> v;
+  while(std::getline(ss, coord, ' ')){
+    v.push_back(std::stoi(coord));
+  }
+  return v;
+}
+
 LevelManager::LevelManager() :
   walls(),
   freeWalls(),
   wallVertices(),
   collectables(),
   freeCollectables(),
+  enemies(),
+  freeEnemies(),
   spawnPoint() {
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
@@ -32,15 +45,13 @@ LevelManager::~LevelManager(){
   for(auto w: freeWalls) delete w;
   for(Collectable* c: collectables) delete c;
   for(Collectable* c: freeCollectables) delete c;
+  for(SmartSprite* e: enemies) delete e;
+  for(SmartSprite* e: freeEnemies) delete e;
 }
 
 LevelManager& LevelManager::getInstance(){
   static LevelManager levelManager;
   return levelManager;
-}
-
-// hopefully won't need an update call.
-void LevelManager::update(){
 }
 
 void LevelManager::addWall(Wall* w){
@@ -102,6 +113,8 @@ void LevelManager::addCollectable(int x, int y){
   collectables.push_back(c);
 }
 
+
+
 // Remove collectable and place it in freeCollectables object pool
 void LevelManager::removeCollectable(Collectable* c){
   std::vector<Collectable*>::const_iterator it;
@@ -114,14 +127,30 @@ void LevelManager::removeCollectable(Collectable* c){
   }
 }
 
-std::vector<int> strToIntVec(std::string& s){
-  std::stringstream ss(s);
-  std::string coord;
-  std::vector<int> v;
-  while(std::getline(ss, coord, ' ')){
-    v.push_back(std::stoi(coord));
+void LevelManager::addEnemy(int x, int y){
+  int scaledX =  UNIT_SIZE/2, scaledY = UNIT_SIZE/2;
+
+  SmartSprite* e;
+  if(freeEnemies.size() > 0){
+    e = freeEnemies.back();
+    freeEnemies.pop_back();
+    e->reset();
+  } else {
+    e = new SmartSprite("Enemy");
   }
-  return v;
+
+  e->setPosition(Vector2f(scaledX + UNIT_SIZE*x - e->getScaledWidth()/2,
+    scaledY + UNIT_SIZE*y - e->getScaledHeight()/2));
+  enemies.push_back(e);
+}
+
+void LevelManager::removeEnemy(SmartSprite* s){
+  auto it = std::find_if(enemies.begin(), enemies.end(),
+    [&s](SmartSprite* e){return e == s;});
+  if(it != enemies.end()){
+    freeEnemies.push_back(*it);
+    enemies.erase(it);
+  }
 }
 
 void LevelManager::setSpawnPoint(Vector2f v){
@@ -132,7 +161,7 @@ void LevelManager::setSpawnPoint(Vector2f v){
 void LevelManager::parseLine(std::string& l){
   std::vector<int> v = strToIntVec(l);
   if(v.size() == 2){
-    addCollectable(v[0], v[1]);
+    addEnemy(v[0], v[1]);
   } else {
     addWall(l);
   }
@@ -140,11 +169,11 @@ void LevelManager::parseLine(std::string& l){
 
 void LevelManager::loadLevel(const std::string& name){
   std::cout << "Loading Level: " << name << std::endl;
-  std::cout << "=== Before Load ===" << std::endl;
-  std::cout << "Collectables: " << collectables.size() << std::endl;
-  std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
-  std::cout << "Walls: " << walls.size() << std::endl;
-  std::cout << "freeWalls: " << freeWalls.size() << std::endl;
+  // std::cout << "=== Before Load ===" << std::endl;
+  // std::cout << "Collectables: " << collectables.size() << std::endl;
+  // std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
+  // std::cout << "Walls: " << walls.size() << std::endl;
+  // std::cout << "freeWalls: " << freeWalls.size() << std::endl;
   wallVertices.erase(wallVertices.begin(), wallVertices.end());
   if(walls.size() > 0){
     auto it = walls.begin();
@@ -160,6 +189,11 @@ void LevelManager::loadLevel(const std::string& name){
       it = collectables.erase(it);
     }
   }
+  auto ite = enemies.begin();
+  while(ite != enemies.end()){
+    freeEnemies.push_back(*ite);
+    ite = enemies.erase(ite);
+  }
 
   std::ifstream levelData;
   std::string line;
@@ -174,7 +208,6 @@ void LevelManager::loadLevel(const std::string& name){
       parseLine(line);
     }
     levelData.close();
-    std::cout << walls.size() << std::endl;
   }
 
   // border of the world
@@ -192,11 +225,11 @@ void LevelManager::loadLevel(const std::string& name){
   for(SDL_Rect r: worldBorder){
     addWall(r);
   }
-  std::cout << "=== After Load ===" << std::endl;
-  std::cout << "Collectables: " << collectables.size() << std::endl;
-  std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
-  std::cout << "Walls: " << walls.size() << std::endl;
-  std::cout << "freeWalls: " << freeWalls.size() << std::endl;
+  // std::cout << "=== After Load ===" << std::endl;
+  // std::cout << "Collectables: " << collectables.size() << std::endl;
+  // std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
+  // std::cout << "Walls: " << walls.size() << std::endl;
+  // std::cout << "freeWalls: " << freeWalls.size() << std::endl;
 }
 
 

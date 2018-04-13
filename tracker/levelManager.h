@@ -7,6 +7,7 @@
 
 #include "wall.h"
 #include "collectable.h"
+#include "smartSprite.h"
 
 class LevelManager {
 public:
@@ -17,29 +18,19 @@ public:
 
   void update();
 
-  void addWall(Wall* w);
-  void addWall(const std::string& s);
-  // vvv should use object pooling vvv
-  void addWall(int x1, int y1, int x2, int y2){
-    addWall(new Wall(x1, y1, x2, y2));
-  }
-  void addWall(const SDL_Rect& r){
-    addWall(new Wall(r));
-  }
-
   const std::map<std::string, Wall*>& getWalls(){ return walls; }
   const std::map<std::string, std::vector<Vector2f> >& getWallVertices(){
     return wallVertices;
   }
   const Wall* getWall(const std::string& s){ return walls.find(s)->second; }
   void loadLevel(const std::string& s);
-  void addCollectable(int x, int y);
-  void addCollectables();
+
   void removeCollectable(Collectable* c);
   const std::vector<Collectable*>& getCollectables(){ return collectables; }
+  void addEnemy(int x, int y);
+  void removeEnemy(SmartSprite* s);
+  const std::vector<SmartSprite*>& getEnemies(){ return enemies; }
   const Vector2f& getSpawnPoint(){ return spawnPoint; }
-  void setSpawnPoint(Vector2f v);
-  void parseLine(std::string& l);
 
   int getWallCount() const { return (int)walls.size();}
   int getFreeWallCount() const { return (int)freeWalls.size();}
@@ -55,6 +46,17 @@ private:
   std::map<std::string, std::vector<Vector2f> > wallVertices;
   std::vector<Collectable*> collectables;
   std::vector<Collectable*> freeCollectables;
+  std::vector<SmartSprite*> enemies;
+  std::vector<SmartSprite*> freeEnemies;
   Vector2f spawnPoint;
+
+  void setSpawnPoint(Vector2f v);
+  void parseLine(std::string& l);
+  void addWall(Wall* w);
+  void addWall(const std::string& s);
+  // vvv should use object pooling vvv
+  void addWall(int x1, int y1, int x2, int y2){addWall(new Wall(x1, y1, x2, y2));}
+  void addWall(const SDL_Rect& r){ addWall(new Wall(r)); }
+  void addCollectable(int x, int y);
 };
 #endif

@@ -29,8 +29,6 @@ public:
   void draw() const;
   void update(Uint32 ticks);
   const MultiSprite* getPlayer() const { return &player; }
-  void attach(SmartSprite* o) { observers.push_back(o); }
-  void detach(SmartSprite* o);
 
   const std::string& getName() const { return player.getName(); }
   int getX() const { return player.getX(); }
@@ -68,7 +66,6 @@ public:
 private:
   MultiSprite player;
   Vector2f initialVelocity;
-  std::list<SmartSprite*> observers;
   Light* light;
   std::list<Wall*> collisions;
   std::vector<Collectable*> collectables;

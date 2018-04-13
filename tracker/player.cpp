@@ -45,7 +45,6 @@ const std::string Player::getStateStr(){
 Player::Player( const std::string& name) :
   player(name),
   initialVelocity(player.getVelocity()),
-  observers(std::list<SmartSprite*>()),
   light(new Light(getPosition())),
   collisions(),
   collectables(std::vector<Collectable*>()),
@@ -104,7 +103,7 @@ bool Player::checkForCollisions(){
 
 void Player::stop() {
   player.setVelocity( Vector2f(0, 0) );
-  updateLighting = false;
+  // updateLighting = false;
 }
 
 bool Player::collisionRight(Wall* w){
@@ -196,11 +195,12 @@ void Player::up(Uint32 ticks)    {
 }
 
 void Player::down()  {
-  if(noClip == false && checkForCollisions()){
-    for(Wall* w : collisions){
-      if(collisionBottom(w)) return;
-    }
-  }
+  if(noClip == false) return;
+  // if(noClip == false && checkForCollisions()){
+  //   for(Wall* w : collisions){
+  //     if(collisionBottom(w)) return;
+  //   }
+  // }
   if ( player.getY() < worldHeight-getScaledHeight()) {
     player.setVelocityY( flyPower );
   }
@@ -211,6 +211,7 @@ void Player::updatePlayerState(){
   updateLighting = true;
   if(noClip == true) {
     stop();
+    return;
   }
   if(player.getVelocityY() > 0){
     state = PlayerState::falling;
@@ -282,7 +283,7 @@ int Player::maxEnergy(){
 }
 
 void Player::respawn(const Vector2f& v){
-  player.setPosition(v + Vector2f(0, -hoverHeight));
+  player.setPosition(v + Vector2f(-getScaledWidth()/2, -(hoverHeight + getScaledHeight()/2)));
   updateLight();
   alive = true;
 }
@@ -352,11 +353,6 @@ void Player::updateCollectables(){
 void Player::update(Uint32 ticks) {
   if(isDead() && player.isExploding() == false ) return;
   player.update(ticks);
-  std::list<SmartSprite*>::iterator ptr = observers.begin();
-  while ( ptr != observers.end() ) {
-    (*ptr)->setPlayerPos( getPosition() );
-    ++ptr;
-  }
   totalEnergies = (int)collectables.size() + 1;
 
   handleGravity();
@@ -373,15 +369,4 @@ void Player::draw() const {
   if(isDead() && player.isExploding() == false ) return;
 
   player.draw();
-}
-
-void Player::detach( SmartSprite *o){
-  std::list<SmartSprite*>::iterator ptr = observers.begin();
-  while ( ptr != observers.end() ) {
-    if ( *ptr == o ) {
-      ptr = observers.erase(ptr);
-      return;
-    }
-    ++ptr;
-  }
 }

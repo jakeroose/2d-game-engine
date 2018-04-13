@@ -29,7 +29,6 @@ private:
   HUD hud;
   HUD pauseMenu;
 
-  std::vector<SmartSprite*> sprites;
   Player* player;
   RectangularCollisionStrategy* strategy;
   Background* background;

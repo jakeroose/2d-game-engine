@@ -1,6 +1,7 @@
 #include "twowaymultisprite.h"
 #include "gamedata.h"
 #include "renderContext.h"
+#include "chunk.h"
 
 TwoWayMultiSprite::TwoWayMultiSprite( const std::string& name) :
   Drawable(name,
@@ -10,6 +11,7 @@ TwoWayMultiSprite::TwoWayMultiSprite( const std::string& name) :
                     (Gamedata::getInstance().getXmlInt(name+"/speedY") + rand() % 100) * (rand() % 2 == 1 ? -1 : 1))
            ),
   images( RenderContext::getInstance()->getImages(name) ),
+  explosion(nullptr),
   currentFrame(0),
   frameOffset(0),
   numberOfFrames( Gamedata::getInstance().getXmlInt(name+"/frames") ),
@@ -27,6 +29,7 @@ TwoWayMultiSprite::TwoWayMultiSprite( const std::string& name, int x, int y) :
                     (Gamedata::getInstance().getXmlInt(name+"/speedY") + rand() % 100) * (rand() % 2 == 1 ? -1 : 1))
            ),
   images( RenderContext::getInstance()->getImages(name) ),
+  explosion(nullptr),
   currentFrame(0),
   frameOffset(0),
   numberOfFrames( Gamedata::getInstance().getXmlInt(name+"/frames") ),
@@ -39,6 +42,7 @@ TwoWayMultiSprite::TwoWayMultiSprite( const std::string& name, int x, int y) :
 TwoWayMultiSprite::TwoWayMultiSprite(const TwoWayMultiSprite& s) :
   Drawable(s),
   images(s.images),
+  explosion(s.explosion),
   currentFrame(s.currentFrame),
   frameOffset(s.frameOffset),
   numberOfFrames( s.numberOfFrames ),
@@ -69,11 +73,28 @@ TwoWayMultiSprite& TwoWayMultiSprite::operator=(const TwoWayMultiSprite& s) {
   return *this;
 }
 
+void TwoWayMultiSprite::explode() {
+	if( !explosion ) {
+		Sprite sprite(getName(), getPosition(), getVelocity(), images[currentFrame]);
+		explosion = new ExplodingSprite(sprite);
+	}
+}
+
 void TwoWayMultiSprite::draw() const {
-  images[currentFrame]->draw(getX(), getY(), getScale());
+  if(explosion) explosion->draw();
+  else images[currentFrame]->draw(getX(), getY(), getScale());
 }
 
 void TwoWayMultiSprite::update(Uint32 ticks) {
+  if(explosion){
+    explosion->update(ticks);
+    if(explosion->chunkCount() == 0){
+      delete explosion;
+      explosion = NULL;
+    }
+    return;
+  }
+
   advanceFrame(ticks);
 
   Vector2f incr = getVelocity() * static_cast<float>(ticks) * 0.001;

@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include "drawable.h"
+#include "explodingSprite.h"
 
 class TwoWayMultiSprite : public Drawable {
 public:
@@ -27,8 +28,12 @@ public:
     return images[currentFrame]->getSurface();
   }
 
+  virtual void explode();
+  virtual bool isExploding() const { return !!(explosion);}
+
 protected:
   std::vector<Image *> images;
+  ExplodingSprite* explosion;
 
   unsigned currentFrame;
   unsigned frameOffset;

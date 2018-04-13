@@ -10,9 +10,8 @@
 
 /*
 TODO:
-Optimization can be made to set max wander distance based on floor and then
-collision with left and right walls, also to make sure enemies don't fall.
-
+Move strategy to LevelManager so it can be used by other classes w/out having
+to reinstantiate
 */
 
 SmartSprite::SmartSprite(const std::string& name, const Vector2f& pos,
@@ -25,7 +24,10 @@ SmartSprite::SmartSprite(const std::string& name, const Vector2f& pos,
   playerHeight(h),
   currentMode(NORMAL),
   direction(RIGHT),
-  safeDistance(Gamedata::getInstance().getXmlFloat(name+"/safeDistance"))
+  safeDistance(Gamedata::getInstance().getXmlFloat(name+"/safeDistance")),
+  minx(-1),
+  maxx(-1),
+  alive(true)
 {}
 
 SmartSprite::SmartSprite(const std::string& name, const Vector2f& pos,
@@ -38,7 +40,10 @@ SmartSprite::SmartSprite(const std::string& name, const Vector2f& pos,
   playerHeight(h),
   currentMode(NORMAL),
   direction(RIGHT),
-  safeDistance(Gamedata::getInstance().getXmlFloat(name+"/safeDistance"))
+  safeDistance(Gamedata::getInstance().getXmlFloat(name+"/safeDistance")),
+  minx(-1),
+  maxx(-1),
+  alive(true)
 {}
 
 SmartSprite::SmartSprite(const SmartSprite& s) :
@@ -50,7 +55,25 @@ SmartSprite::SmartSprite(const SmartSprite& s) :
   playerHeight(s.playerHeight),
   currentMode(s.currentMode),
   direction(s.direction),
-  safeDistance(s.safeDistance)
+  safeDistance(s.safeDistance),
+  minx(-1),
+  maxx(-1),
+  alive(true)
+{}
+
+SmartSprite::SmartSprite(const std::string& name) :
+  TwoWayMultiSprite(name, 0, 0),
+  strategy(new RectangularCollisionStrategy()),
+  floor(NULL),
+  playerPos(),
+  playerWidth(0),
+  playerHeight(0),
+  currentMode(NORMAL),
+  direction(RIGHT),
+  safeDistance(Gamedata::getInstance().getXmlFloat(name+"/safeDistance")),
+  minx(-1),
+  maxx(-1),
+  alive(true)
 {}
 
 SmartSprite::~SmartSprite(){
@@ -70,27 +93,33 @@ void SmartSprite::goLeft()  {
   for(auto w: LevelManager::getInstance().getWalls()){
     if(strategy->collisionLeft(this, w.second)){
       isAble = false;
+      minx = w.second->getMinx();
     }
   }
+  if(minx != -1 && getX() <= minx){ isAble = false; }
   if(isAble){
     setVelocityX( -speed );
   } else {
     direction = RIGHT;
   }
 }
+
 void SmartSprite::goRight() {
   bool isAble = true;
   for(auto w: LevelManager::getInstance().getWalls()){
     if(strategy->collisionRight(this, w.second)){
       isAble = false;
+      maxx = getX();
     }
   }
+  if(maxx != -1 && getX() >= maxx){ isAble = false; }
   if(isAble){
     setVelocityX( speed );
   } else {
     direction = LEFT;
   }
 }
+
 void SmartSprite::goUp()    {
   bool isAble = true;
   for(auto w: LevelManager::getInstance().getWalls()){
@@ -113,6 +142,50 @@ void SmartSprite::goDown()  {
   setVelocityY( speed );
 }
 
+void SmartSprite::checkForFloor(){
+  for(auto w : LevelManager::getInstance().getWalls()){
+    if(strategy->collisionBottom(this, w.second) &&
+       w.second->getType() == WallType::floor){
+      floor = w.second;
+      // set min & max x that the enemy should walk between
+      maxx = w.second->getMaxx() - 5 - getScaledWidth();
+      minx = w.second->getMinx() + 5;
+      // reset y so that enemy is level with floor if they fell through a bit
+      setY(w.second->getMaxy() - getScaledHeight());
+      break;
+    }
+  }
+}
+
+void SmartSprite::update(Uint32 ticks) {
+  TwoWayMultiSprite::update(ticks);
+  setVelocity(Vector2f(0,0));
+
+  /* if enemy has not made contact with a floor then it should fall until it
+     finds one */
+  if(floor == NULL){
+    goDown();
+    checkForFloor();
+  } else {
+    if(direction == RIGHT){
+      goRight();
+    } else {
+      goLeft();
+    }
+  }
+}
+
+void SmartSprite::kill(){
+  alive = false;
+  explode();
+}
+
+void SmartSprite::reset(){
+  alive = true;
+  floor = NULL;
+  currentMode = NORMAL;
+}
+
 /* return distance between player and sprite --- mainly debugging use */
 float SmartSprite::getDistance() {
   float x= getX()+getImage()->getWidth()/2;
@@ -121,62 +194,4 @@ float SmartSprite::getDistance() {
   float ey= playerPos[1]+playerHeight/2;
 
   return ::distance( x, y, ex, ey );
-}
-
-
-
-void SmartSprite::update(Uint32 ticks) {
-  TwoWayMultiSprite::update(ticks);
-  float x= getX()+getImage()->getWidth()/2;
-  float ex= playerPos[0]+playerWidth/2;
-  // float y= getY()+getImage()->getHeight()/2;
-  // float ey= playerPos[1]+playerHeight/2;
-  float distanceToEnemy = getDistance();
-  setVelocity(Vector2f(0,0));
-
-  /* if enemy has not made contact with a floor then it should fall until it
-     finds one */
-  if(floor == NULL){
-    goDown();
-    for(auto w : LevelManager::getInstance().getWalls()){
-      if(strategy->collisionBottom(this, w.second) &&
-         w.second->getType() == WallType::floor){
-        floor = w.second;
-        break;
-      }
-    }
-  } else {
-    if(direction == RIGHT){
-      goRight();
-    } else {
-      goLeft();
-    }
-  }
-
-
-  // always wandering back and forth for now. different enemies may have diff
-  // behaviors.
-  if  ( currentMode == NORMAL ) {
-    // if(distanceToEnemy < safeDistance){
-    //   currentMode = ATTACK;
-    // }
-  }
-  else if  ( currentMode == EVADE ) {
-    if(distanceToEnemy > safeDistance){
-      currentMode=NORMAL;
-    }
-    else {
-      if ( x < ex && x > 0) goLeft();
-      if ( x > ex && x < worldWidth) goRight();
-    }
-  }
-  else if  ( currentMode == ATTACK ) {
-    if(distanceToEnemy > safeDistance){
-      currentMode=NORMAL;
-    }
-    else {
-      if ( x < ex && x > 0) goRight();
-      if ( x > ex && x < worldWidth) goLeft();
-    }
-  }
 }

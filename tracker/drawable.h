@@ -5,15 +5,15 @@
 #include <string>
 #include "vector2f.h"
 #include "image.h"
- 
+
 // Drawable is an Abstract Base Class (ABC) that specifies the methods
 // that derived classes may or must have.
 class Drawable {
 public:
-  Drawable(const std::string& n, const Vector2f& pos, const Vector2f& vel): 
+  Drawable(const std::string& n, const Vector2f& pos, const Vector2f& vel):
     name(n), position(pos), velocity(vel), scale(1.0) {}
 
-  Drawable(const Drawable& s) : 
+  Drawable(const Drawable& s) :
     name(s.name), position(s.position), velocity(s.velocity), scale(s.scale)
     { }
 
@@ -48,6 +48,9 @@ public:
   void  setVelocityX(float vx) { velocity[0] = vx;   }
   float getVelocityY() const   { return velocity[1]; }
   void  setVelocityY(float vy) { velocity[1] = vy;   }
+
+  virtual void explode() { std::cout << "I don't explode" << std::endl; }
+  virtual bool isExploding() const { return false; }
 private:
   std::string name;
   Vector2f position;

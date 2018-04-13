@@ -21,7 +21,6 @@
 #include "background.h"
 
 Engine::~Engine() {
-  for(auto e: sprites) delete e;
   delete player;
   delete strategy;
 
@@ -40,7 +39,6 @@ Engine::Engine() :
     Gamedata::getInstance().getXmlInt("pauseMenu/height"),
     Gamedata::getInstance().getXmlInt("view/width")/2,
     Gamedata::getInstance().getXmlInt("view/height")/2)),
-  sprites(std::vector<SmartSprite*>()),
   player(new Player("Player")),
   strategy(),
   background(
@@ -53,13 +51,7 @@ Engine::Engine() :
 {
   hud.toggleDisplay();
 
-  player->setPosition(LevelManager::getInstance().getSpawnPoint());
-  int spriteCount = Gamedata::getInstance().getXmlInt("Enemy/count");
-  sprites.reserve(spriteCount + 1);
-
-  for(int i = 0; i < spriteCount; i++){
-    addSprite();
-  }
+  player->respawn(LevelManager::getInstance().getSpawnPoint());
 
   strategy = new RectangularCollisionStrategy;
 
@@ -70,25 +62,11 @@ Engine::Engine() :
   std::cout << "Loading complete" << std::endl;
 }
 
-// add sprite to default location
-// TODO: should add this ability as an XML debug setting
-void Engine::addSprite(){
-  Vector2f pos = player->getPosition();
-  int w = player->getScaledWidth();
-  int h = player->getScaledHeight();
-  SmartSprite* s = new SmartSprite("Enemy", pos, w, h);
-  sprites.push_back(s);
-  player->attach(s);
-}
-
-// add sprite to (x,y) in the viewport
+// add sprite to ~(x,y) in the viewport
 void Engine::addSprite(int x, int y){
-  Vector2f pos = player->getPosition();
-  int w = player->getScaledWidth();
-  int h = player->getScaledHeight();
-  SmartSprite* s = new SmartSprite("Enemy", pos, w, h, x + Viewport::getInstance().getX(), y+Viewport::getInstance().getY());
-  sprites.push_back(s);
-  player->attach(s);
+  std::cout << "add enemy" << std::endl;
+  LevelManager::getInstance().addEnemy(
+    (x + Viewport::getInstance().getX())/LevelManager::UNIT_SIZE, (y+Viewport::getInstance().getY())/LevelManager::UNIT_SIZE);
 }
 
 void Engine::draw() const {
@@ -103,7 +81,7 @@ void Engine::draw() const {
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
     c->draw();
   }
-  for(auto e: sprites) e->draw();
+  for(auto e: LevelManager::getInstance().getEnemies()) e->draw();
 
   if(player->isDead()){
     SDL_Color white = {255, 255, 255, 255};
@@ -112,15 +90,14 @@ void Engine::draw() const {
   }
 
   if(hud.getDisplay()){
-    std::stringstream strm;
-    strm << sprites.size() << " Sprites Remaining";
-    IoMod::getInstance().writeText(strm.str(), 15, 15);
-    strategy->draw();
+    IoMod::getInstance().writeText("Debug Info", 15, 15);
+    // strategy->draw();
 
     // write FPS to screen
-    strm.str(std::string()); // clear strm
+    std::stringstream strm;
+    // strm.str(std::string()); // clear strm
     strm << Clock::getInstance().getFps();
-    IoMod::getInstance().writeText("FPS: " + strm.str(), 15, 40);
+    IoMod::getInstance().writeText("FPS: " + strm.str(), 15, 50);
     IoMod::getInstance().writeText("PlayerState: "+player->getStateStr(), 15, 75);
     IoMod::getInstance().writeText("PlayerEngergy: " +
       std::to_string(player->getEnergy()), 15, 100);
@@ -180,16 +157,12 @@ void Engine::draw() const {
 }
 
 void Engine::checkForCollisions() {
-  auto it = sprites.begin();
-  while ( it != sprites.end() ) {
-    if ( strategy->execute(*(player->getPlayer()), **it) ) {
-      SmartSprite* doa = *it;
-      player->detach(doa);
-      delete doa;
-      it = sprites.erase(it);
+  for(auto e: LevelManager::getInstance().getEnemies()){
+    if((!player->isDead() && !e->isDead()) &&
+        strategy->execute(*(player->getPlayer()), *e)){
+      e->kill();
       player->damagePlayer();
     }
-    else ++it;
   }
 
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
@@ -202,7 +175,12 @@ void Engine::checkForCollisions() {
 void Engine::update(Uint32 ticks) {
   checkForCollisions();
   player->update(ticks);
-  for(auto e: sprites) e->update(ticks);
+  for(auto e: LevelManager::getInstance().getEnemies()){
+    e->update(ticks);
+    if(e->isDead() && e->isExploding() == false){
+      LevelManager::getInstance().removeEnemy(e);
+    }
+  }
 
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
     c->update(ticks);
@@ -307,9 +285,9 @@ void Engine::play() {
       if (keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_SPACE]) {
         static_cast<Player*>(player)->up(ticks);
       }
-      // if (keystate[SDL_SCANCODE_S]) {
-      //   static_cast<Player*>(player)->down();
-      // }
+      if (keystate[SDL_SCANCODE_S]) {
+        static_cast<Player*>(player)->down();
+      }
       update(ticks);
       draw();
       if ( makeVideo ) {
