@@ -9,6 +9,8 @@
 #include "collectable.h"
 #include "smartSprite.h"
 
+enum class LevelState { loading, running, editing };
+
 class LevelManager {
 public:
   LevelManager();
@@ -39,7 +41,19 @@ public:
   int getTotalLightIntersections() const;
   int getTotalFreeIntersections() const;
 
+  void saveLevel() const;
+  void toggleLevelEdit();
+  bool inEditMode() const { return state == LevelState::editing; }
+
+  void setCursor(const Vector2f& v);
+  const Vector2f getCursor() const { return cursorCoords*UNIT_SIZE; }
+  void setAnchor();
+  Vector2f* getAnchor() const { return anchor; }
+  void resetAnchor() { delete anchor; anchor = NULL; }
+
   static int UNIT_SIZE;
+
+  const LevelManager& operator=(const LevelManager& rhs) = delete;
 private:
   enum LOADING_TYPE { NONE, ENEMY, PLAYER, WALL, COLLECTABLE};
   std::map<std::string, Wall*> walls;
@@ -51,6 +65,9 @@ private:
   std::vector<SmartSprite*> freeEnemies;
   Vector2f spawnPoint;
   LOADING_TYPE loadingType;
+  LevelState state;
+  Vector2f cursorCoords;
+  Vector2f* anchor;
 
   void setSpawnPoint(Vector2f v);
   void parseLine(std::string& l);

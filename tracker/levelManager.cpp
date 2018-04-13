@@ -38,7 +38,10 @@ LevelManager::LevelManager() :
   enemies(),
   freeEnemies(),
   spawnPoint(),
-  loadingType() {
+  loadingType(),
+  state(LevelState::loading),
+  cursorCoords(),
+  anchor(NULL) {
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
@@ -203,6 +206,7 @@ void LevelManager::parseLine(std::string& l){
 
 void LevelManager::loadLevel(const std::string& name){
   std::cout << "Loading Level: " << name << std::endl;
+  state = LevelState::loading;
   // std::cout << "=== Before Load ===" << std::endl;
   // std::cout << "Collectables: " << collectables.size() << std::endl;
   // std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
@@ -262,6 +266,7 @@ void LevelManager::loadLevel(const std::string& name){
   // std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
   // std::cout << "Walls: " << walls.size() << std::endl;
   // std::cout << "freeWalls: " << freeWalls.size() << std::endl;
+  state = LevelState::running;
 }
 
 
@@ -277,4 +282,58 @@ int LevelManager::getTotalFreeIntersections() const {
   for(Collectable* c: collectables) count +=
     c->getLight()->getIntersectionPoolSize();
   return count;
+}
+
+void LevelManager::saveLevel() const{
+  if(state == LevelState::editing){
+    std::ofstream customLevel;
+    customLevel.open("levels/customLevel");
+    if(customLevel.is_open()){
+      customLevel << "player:\n1 1\n";
+      customLevel << "walls:\n";
+      for(auto w: walls){
+        customLevel << w.second->getSmallCoordString() << std::endl;
+      }
+      // customLevel << "Test\n";
+      customLevel.close();
+      std::cout << "Changes saved to levels/customLevel" << std::endl;
+    } else {
+      std::cout << "Error opening file 'levels/customLevel'" << std::endl;
+    }
+  } else {
+    std::cout << "Couldn't save level, not in edit mode." << std::endl;
+  }
+}
+
+void LevelManager::toggleLevelEdit(){
+  if(state == LevelState::loading){
+    std::cout << "Unable to edit level while loading." << std::endl;
+  } else if (state == LevelState::editing) {
+    std::cout << "=== Edit level disabled ===" << std::endl;
+    state = LevelState::running;
+  } else if (state == LevelState::running){
+    state = LevelState::editing;
+    std::cout << "=== Edit level enabled ===" << std::endl;
+    std::cout << "Press f9 to save any changes." << std::endl;
+  }
+}
+
+// set cursor to nearest whole number coord
+void LevelManager::setCursor(const Vector2f& v) {
+  cursorCoords = Vector2f(
+    (int)(v[0] + UNIT_SIZE/2)/UNIT_SIZE,
+    (int)(v[1] + UNIT_SIZE/2)/UNIT_SIZE);
+}
+
+void LevelManager::setAnchor(){
+  if(anchor != NULL){
+    addWall(
+      (int)((*anchor)[0] + UNIT_SIZE/2)/UNIT_SIZE,
+      (int)((*anchor)[1] + UNIT_SIZE/2)/UNIT_SIZE,
+      cursorCoords[0],
+      cursorCoords[1]);
+  }
+  delete anchor;
+  anchor = new Vector2f(cursorCoords*UNIT_SIZE);
+
 }

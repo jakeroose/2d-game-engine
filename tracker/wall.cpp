@@ -1,6 +1,8 @@
 #include <vector>
 #include <SDL.h>
 #include <string>
+#include <sstream>
+
 
 #include "wall.h"
 #include "viewport.h"
@@ -29,8 +31,25 @@ Wall::Wall(const SDL_Rect& r) :
   count++;
 }
 
-std::ostream& operator<<(std::ostream out, const Wall& w){
-  return out << w.getId();
+std::ostream& operator<<(std::ostream& out, const Wall* w){
+  // return out << w.getId();
+  SDL_Rect r = w->getRect();
+  return out <<
+    (int)(r.x/LevelManager::UNIT_SIZE) <<
+    (int)(r.y/LevelManager::UNIT_SIZE) <<
+    (int)((r.w+r.x)/LevelManager::UNIT_SIZE) <<
+    (int)((r.h+r.y)/LevelManager::UNIT_SIZE);
+}
+
+// returns coords of walls scaled to level units
+std::string Wall::getSmallCoordString(){
+  SDL_Rect r = rect;
+  std::stringstream s;
+  s << (int)(r.x/LevelManager::UNIT_SIZE) << " " <<
+  (int)(r.y/LevelManager::UNIT_SIZE) << " " <<
+  (int)((r.w+r.x)/LevelManager::UNIT_SIZE) << " " <<
+  (int)((r.h+r.y)/LevelManager::UNIT_SIZE) << " ";
+  return s.str();
 }
 
 std::vector<Vector2f> Wall::getVertices(){

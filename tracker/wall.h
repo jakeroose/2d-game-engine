@@ -13,11 +13,12 @@ public:
   Wall(int x1, int y1, int x2, int y2);
   Wall(const SDL_Rect& r);
   void draw() const;
-  const SDL_Rect& getRect(){ return rect; }
+  SDL_Rect getRect() const { return rect; }
   void display(){
     std::cout << rect.x << "," << rect.y << "," << rect.w << "," << rect.h << std::endl;
   }
   const std::string& getId() const { return id; }
+  std::string getSmallCoordString();
   std::vector<Vector2f> getVertices();
   WallType getType() { return type; }
   int getMaxx(){ return rect.x + rect.w; }

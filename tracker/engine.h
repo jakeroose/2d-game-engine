@@ -12,6 +12,8 @@ class Player;
 class CollisionStrategy;
 class SmartSprite;
 
+enum class EngineState { run, pause, edit };
+
 class Engine {
 public:
   Engine ();

@@ -66,7 +66,8 @@ Engine::Engine() :
 void Engine::addSprite(int x, int y){
   std::cout << "add enemy" << std::endl;
   LevelManager::getInstance().addEnemy(
-    (x + Viewport::getInstance().getX())/LevelManager::UNIT_SIZE, (y+Viewport::getInstance().getY())/LevelManager::UNIT_SIZE);
+    (x + Viewport::getInstance().getX())/LevelManager::UNIT_SIZE,
+    (y + Viewport::getInstance().getY())/LevelManager::UNIT_SIZE);
 }
 
 void Engine::draw() const {
@@ -82,6 +83,42 @@ void Engine::draw() const {
     c->draw();
   }
   for(auto e: LevelManager::getInstance().getEnemies()) e->draw();
+
+  if(LevelManager::getInstance().inEditMode()){
+    // draw coord grid
+    SDL_SetRenderDrawColor(renderer, 0,0,255,255/2);
+    int w = viewport.getWorldWidth() / LevelManager::UNIT_SIZE;
+    int h = viewport.getWorldHeight() / LevelManager::UNIT_SIZE;
+    for(int i = 0; i < w; i++){
+      SDL_RenderDrawLine(renderer,
+        (int)(i*LevelManager::UNIT_SIZE - viewport.getX()), 0,
+        (int)(i*LevelManager::UNIT_SIZE - viewport.getX()), viewport.getViewHeight());
+    }
+    for(int i = 0; i < h; i++){
+      SDL_RenderDrawLine(renderer, 0,
+        (int)(i*LevelManager::UNIT_SIZE - viewport.getY()),
+        viewport.getViewWidth(),
+        (int)(i*LevelManager::UNIT_SIZE - viewport.getY()));
+    }
+
+    // draw coord at nearest viable coordinate
+    SDL_SetRenderDrawColor(renderer, 255,0,128,255);
+    Vector2f v = LevelManager::getInstance().getCursor();
+    SDL_Rect r = { (int)(v[0] - 5 - viewport.getX()),
+      (int)(v[1] - 5 - viewport.getY()), 10, 10};
+    SDL_RenderDrawRect(renderer, &r);
+
+    // draw rect in the making from anchor to coord
+    if(LevelManager::getInstance().getAnchor()){
+      Vector2f anchor = *(LevelManager::getInstance().getAnchor());
+      r = {(int)(v[0] - viewport.getX()),
+        (int)(v[1] - viewport.getY()),
+        (int)(anchor[0]-v[0]),
+        (int)(anchor[1]-v[1])
+      };
+      SDL_RenderDrawRect(renderer, &r);
+    }
+  }
 
   if(player->isDead()){
     SDL_Color white = {255, 255, 255, 255};
@@ -145,6 +182,9 @@ void Engine::draw() const {
   // draw our menus
   hud.draw();
   pauseMenu.draw();
+
+
+
 
   // display my name extravagantly
   Uint8 rndm = 128.0*sin(Clock::getInstance().getTicks()*0.001)+127;
@@ -223,17 +263,19 @@ void Engine::play() {
           pauseMenu.toggleDisplay();
           pauseMenu.drawCentered();
         }
-        // if ( keystate[SDL_SCANCODE_M] ) {
-        //   currentStrategy = (1 + currentStrategy) % strategies.size();
-        // }
         if ( keystate[SDL_SCANCODE_T] ) {
           switchSprite();
         }
         if ( keystate[SDL_SCANCODE_R] ) {
           LevelManager::getInstance().loadLevel("levels/" +
                           Gamedata::getInstance().getXmlStr("level/name"));
-          // LevelManager::getInstance().loadLevel("levels/empty");
           player->reset();
+        }
+        if ( keystate[SDL_SCANCODE_F8]) {
+          LevelManager::getInstance().toggleLevelEdit();
+        }
+        if ( keystate[SDL_SCANCODE_F9]) {
+          LevelManager::getInstance().saveLevel();
         }
         if (keystate[SDL_SCANCODE_F1]) {
           hud.toggleDisplay();
@@ -249,27 +291,37 @@ void Engine::play() {
           std::cout << "Terminating frame capture" << std::endl;
           makeVideo = false;
         }
-        // if (keystate[SDL_SCANCODE_W]) {
-        //   static_cast<Player*>(player)->up();
-        // }
       }
 
       // handle mouse interaction
       if(event.type == SDL_MOUSEBUTTONDOWN) {
-        // get mouse position
-        int x, y;
-        SDL_GetMouseState( &x, &y);
-        addSprite(x, y);
+        if(LevelManager::getInstance().inEditMode()){
+          if(event.button.button == SDL_BUTTON_RIGHT){
+            std::cout << "reset anchor" << std::endl;
+            LevelManager::getInstance().resetAnchor();
+          } else {
+            std::cout << "set anchor" << std::endl;
+
+            LevelManager::getInstance().setAnchor();
+          }
+        } else {
+          int x, y;
+          SDL_GetMouseState( &x, &y);
+          addSprite(x, y);
+        }
       }
 
-      // move player with mouse
-      // if(event.type == SDL_MOUSEMOTION) {
-      //   // get mouse position
-      //   int x, y;
-      //   SDL_GetMouseState( &x, &y);
-      //   player->setPosition(Vector2f(x, y));
-      //   // addSprite(x, y);
-      // }
+      if(event.type == SDL_MOUSEMOTION) {
+        if(LevelManager::getInstance().inEditMode()){
+          // get mouse position
+          int x, y;
+          SDL_GetMouseState( &x, &y);
+          LevelManager::getInstance().setCursor(Vector2f(
+            x+Viewport::getInstance().getX(),
+            y+Viewport::getInstance().getY())
+          );
+        }
+      }
     }
 
     // In this section of the event loop we allow key bounce:
