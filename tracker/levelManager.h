@@ -19,12 +19,14 @@ public:
 
   void addWall(Wall* w);
   void addWall(const std::string& s);
+  // vvv should use object pooling vvv
   void addWall(int x1, int y1, int x2, int y2){
     addWall(new Wall(x1, y1, x2, y2));
   }
   void addWall(const SDL_Rect& r){
     addWall(new Wall(r));
   }
+
   const std::map<std::string, Wall*>& getWalls(){ return walls; }
   const std::map<std::string, std::vector<Vector2f> >& getWallVertices(){
     return wallVertices;

@@ -1,30 +1,18 @@
 #include "collectable.h"
+#include "gamedata.h"
 
 Collectable::Collectable(const std::string& name) :
   sprite(new MultiSprite(name)),
   collected(false),
-  deleted(false),
+  exploded(false),
   player(NULL),
   light(new Light(getPosition()))
   {
   }
-Collectable::Collectable(const Collectable& c) :
-  sprite(c.sprite),
-  collected(c.collected),
-  deleted(c.deleted),
-  player(c.player),
-  light(c.light)
-  {}
-
-Collectable& Collectable::operator=(const Collectable& rhs){
-  collected = rhs.collected;
-  player = rhs.player;
-  deleted = rhs.deleted;
-  return *this;
-}
 
 bool Collectable::operator==(const Collectable& rhs){
-  return getPosition() == rhs.getPosition();// && collected == rhs.collected;
+  if(&rhs == this) return true;
+  return getPosition() == rhs.getPosition(); // && collected == rhs.collected;
 }
 
 void Collectable::setPosition(const Vector2f& v){
@@ -33,9 +21,7 @@ void Collectable::setPosition(const Vector2f& v){
 }
 
 void Collectable::update(Uint8 ticks){
-  if(deleted && !(sprite->isExploding())){
-    return;
-  }
+  if(doneExploding()) return;
 
   sprite->update(ticks);
   // make sure light polygon has been calculated
@@ -47,28 +33,39 @@ void Collectable::update(Uint8 ticks){
 }
 
 void Collectable::draw() const {
-  if(deleted == false || (deleted && sprite->isExploding())){
+  // if sprite is not exploded or is in the process of exploding
+  if(exploded == false || sprite->isExploding()){
     sprite->draw();
   }
 }
 
 void Collectable::collect(Player* p){
-  if(collected == false){
+  if(collected == false && exploded == false){
     player = p;
     player->addCollectable(this);
     collected = true;
   }
 }
 
-void Collectable::softDelete(){
-  deleted = true;
-  light->setRenderStatus(false);
+bool Collectable::doneExploding(){
+  return exploded && (sprite->isExploding() == false);
+}
+
+void Collectable::explode(){
+  exploded = true;
   sprite->explode();
+  light->setRenderStatus(false);
+}
+
+void Collectable::reinitialize(){
+  setTo(false, false, true, NULL);
+  light->setIntensity(Gamedata::getInstance().getXmlInt("lights/alpha"));
 }
 
 // it will always have sprite and light so we don't need to set those.
-void Collectable::setTo(bool c, bool d, Player* p){
+void Collectable::setTo(bool c, bool e, bool l, Player* p){
   collected = c;
-  deleted = d;
+  exploded = e;
   player = p;
+  light->setRenderStatus(l);
 }

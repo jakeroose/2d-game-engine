@@ -11,26 +11,31 @@ class Player;
 class Collectable {
 public:
   Collectable(const std::string& name);
-  Collectable(const Collectable& c);
+  Collectable(const Collectable& c) = delete;
   ~Collectable(){ delete sprite; delete light; }
 
   void update(Uint8 t);
   void draw() const;
   void collect(Player* p);
   void softDelete();
-  void setTo(bool c, bool d, Player* p);
+  void setTo(bool c, bool d, bool l, Player* p);
+  void reinitialize();
 
   void setPosition(const Vector2f& v);
   const Vector2f& getPosition() const { return sprite->getPosition(); }
   MultiSprite* getSprite() { return sprite; }
   Light* getLight() { return light; }
   void setLightIntensity(int i) { light->setIntensity(i); }
-  Collectable& operator=(const Collectable& rhs);
+  void explode();
+  bool getExploded() { return exploded; }
+  bool doneExploding();
+
+  Collectable& operator=(const Collectable& rhs) = delete;
   bool operator==(const Collectable& rhs);
 private:
   MultiSprite* sprite;
   bool collected;
-  bool deleted;
+  bool exploded;
   Player* player;
   Light* light;
 };

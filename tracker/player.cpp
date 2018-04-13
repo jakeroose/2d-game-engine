@@ -7,6 +7,7 @@
 #include "wall.h"
 #include "collectable.h"
 #include "clock.h"
+#include <algorithm>
 
 /* TODO:
   Use collision detection in RectangularCollisionStrategy instead of here.
@@ -284,6 +285,12 @@ void Player::respawn(const Vector2f& v){
   updateLight();
 }
 
+void Player::reset(){
+  auto it = collectables.begin();
+  while(it != collectables.end()) it = collectables.erase(it);
+  respawn(LevelManager::getInstance().getSpawnPoint());
+}
+
 void Player::updateLight(){
   if(light->shouldDraw()){
     light->setPosition(Vector2f(
@@ -302,16 +309,37 @@ int Player::calculateLightIntensity(Light* l){
 
 void Player::addCollectable(Collectable* c) {
   collectables.push_back(c);
-  totalEnergies += 1;
+  // totalEnergies += 1;
 }
 
-void Player::removeCollectable(){
+// void Player::removeCollectable(){
+//   if((int)collectables.size() > 0){
+//     LevelManager::getInstance().removeCollectable(collectables.back());
+//     collectables.pop_back();
+//     --totalEnergies;
+//   }
+// }
+
+void Player::damagePlayer(){
   if((int)collectables.size() > 0){
-    LevelManager::getInstance().removeCollectable(collectables.back());
+    collectables.back()->explode();
     collectables.pop_back();
-    --totalEnergies;
+  } else {
+    // TODO: PLAYER IS DEAD!!!
   }
 }
+
+
+
+// void Player::removeCollectable(Collectable* c){
+//   auto it = std::find_if(collectables.begin(), collectables.end(),
+//               [&c](Collectable* e){return e == c;});
+//   if(it != collectables.end()){
+//     collectables.erase(it);
+//     // --totalEnergies;
+//     std::cout << "removed energy" << std::endl;
+//   }
+// }
 
 void Player::updateCollectables(){
   for(int i = 0; i < (int)collectables.size(); i++){
@@ -340,6 +368,7 @@ void Player::update(Uint32 ticks) {
     (*ptr)->setPlayerPos( getPosition() );
     ++ptr;
   }
+  totalEnergies = (int)collectables.size() + 1;
 
   handleGravity();
   updatePlayerState();

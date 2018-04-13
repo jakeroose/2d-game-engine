@@ -7,14 +7,8 @@
 
 class Chunk : public Sprite {
 public:
-  explicit Chunk( const Vector2f& pos, const Vector2f vel, 
-                  const string& name, Image* fm) :
-    Sprite(name, pos, vel, fm), 
-    distance(0), 
-    maxDistance(Gamedata::getInstance().getXmlInt(name+"/distance")), 
-    tooFar(false),
-    image(fm)
-  { }
+  explicit Chunk( const Vector2f& pos, const Vector2f vel,
+                  const string& name, Image* fm);
 
   Chunk(const Chunk& )=default;
   Chunk(      Chunk&&)=default;
@@ -33,6 +27,9 @@ public:
 private:
   float distance;
   float maxDistance;
+  float variation;
+  float lifespan;
+  float age;
   bool tooFar;
   Image* image;
 };

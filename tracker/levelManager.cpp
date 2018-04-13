@@ -13,8 +13,6 @@ coordinates instead of specific pixel coordinates.
 It should keep track of all of the walls in the game so that classes such as
 Light and Player don't have to have their own copies.
 Reads in level from /levels at runtime
-TODO: pooling for walls? only load walls that are in the viewport
-ActiveWalls and Walls. Only ActiveWalls are used for light rendering
 */
 
 int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize");
@@ -95,7 +93,7 @@ void LevelManager::addCollectable(int x, int y){
   if(freeCollectables.size() > 0){
     c = freeCollectables.back();
     freeCollectables.pop_back();
-    c->setTo(false, false, NULL);
+    c->reinitialize();
   } else {
     c = new Collectable("Collectable");
   }
@@ -104,17 +102,16 @@ void LevelManager::addCollectable(int x, int y){
   collectables.push_back(c);
 }
 
-void LevelManager::addCollectables(){
-}
-
-// TODO: this should put collectable into freeCollectables, but that currently
-// will cause the explosion to not be drawn. Need to find fix for this because
-// currently just wasting memory
+// Remove collectable and place it in freeCollectables object pool
 void LevelManager::removeCollectable(Collectable* c){
   std::vector<Collectable*>::const_iterator it;
   it = std::find_if(collectables.begin(), collectables.end(),
     [&c](Collectable* c1){return c1 == c; });
-  if(it != collectables.end()) (*it)->softDelete();
+
+  if(it != collectables.end()){
+    freeCollectables.push_back(*it);
+    collectables.erase(it);
+  }
 }
 
 std::vector<int> strToIntVec(std::string& s){
@@ -142,7 +139,12 @@ void LevelManager::parseLine(std::string& l){
 }
 
 void LevelManager::loadLevel(const std::string& name){
-  // std::cout << walls.size() << std::endl;
+  std::cout << "Loading Level: " << name << std::endl;
+  std::cout << "=== Before Load ===" << std::endl;
+  std::cout << "Collectables: " << collectables.size() << std::endl;
+  std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
+  std::cout << "Walls: " << walls.size() << std::endl;
+  std::cout << "freeWalls: " << freeWalls.size() << std::endl;
   wallVertices.erase(wallVertices.begin(), wallVertices.end());
   if(walls.size() > 0){
     auto it = walls.begin();
@@ -158,8 +160,6 @@ void LevelManager::loadLevel(const std::string& name){
       it = collectables.erase(it);
     }
   }
-  // I don't like that we have to call this directly vvv
-  // for(Collectable* c : freeCollectables) c->getLight()->update();
 
   std::ifstream levelData;
   std::string line;
@@ -175,10 +175,9 @@ void LevelManager::loadLevel(const std::string& name){
     }
     levelData.close();
     std::cout << walls.size() << std::endl;
-
   }
 
-  // border of the screen
+  // border of the world
   SDL_Rect worldBorder[] = {
     { 0, 0, Gamedata::getInstance().getXmlInt("world/width"), // top
       1 },
@@ -189,7 +188,13 @@ void LevelManager::loadLevel(const std::string& name){
     { 0, 0, 1,
       Gamedata::getInstance().getXmlInt("world/height") },
   };
+
   for(SDL_Rect r: worldBorder){
     addWall(r);
   }
+  std::cout << "=== After Load ===" << std::endl;
+  std::cout << "Collectables: " << collectables.size() << std::endl;
+  std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
+  std::cout << "Walls: " << walls.size() << std::endl;
+  std::cout << "freeWalls: " << freeWalls.size() << std::endl;
 }

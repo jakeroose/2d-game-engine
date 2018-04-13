@@ -47,6 +47,7 @@ public:
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
   void respawn(const Vector2f& v);
+  void reset();
   void updateLight();
 
   void right();
@@ -63,6 +64,7 @@ public:
   void removeCollectable();
   void removeCollectable(Collectable* c);
   int getTotalEnergies() const { return totalEnergies; }
+  void damagePlayer();
 
 private:
   MultiSprite player;

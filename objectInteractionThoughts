@@ -1,0 +1,9 @@
+Player, Collectable & LevelManager Relationship
+
+Player should only worry about if it has a collectable or not, and should be told when to add or remove a collectable. 
+
+Collectable keeps track of if it's exploding, when it should be drawing the explosion.
+Maybe shouldn't have control over whether it is deleted or not. That should probably be handles somewhere else.
+I think collectable can have the knowledge of whether or not it's consumed/depleted. From there, engine and levelManager can update it.
+
+LevelManager keeps track of valid collectables and un-used collectables. It is able to move collectables between the two lists. It does not directly affect the state of a collectable.

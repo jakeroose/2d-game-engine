@@ -172,7 +172,7 @@ void Engine::checkForCollisions() {
       player->detach(doa);
       delete doa;
       it = sprites.erase(it);
-      player->removeCollectable();
+      player->damagePlayer();
     }
     else ++it;
   }
@@ -191,6 +191,9 @@ void Engine::update(Uint32 ticks) {
 
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
     c->update(ticks);
+    if(c->doneExploding()){
+      LevelManager::getInstance().removeCollectable(c);
+    }
   }
 
   background->update(ticks);
@@ -237,7 +240,7 @@ void Engine::play() {
           LevelManager::getInstance().loadLevel("levels/" +
                           Gamedata::getInstance().getXmlStr("level/name"));
           // LevelManager::getInstance().loadLevel("levels/empty");
-          player->respawn(LevelManager::getInstance().getSpawnPoint());
+          player->reset();
         }
         if (keystate[SDL_SCANCODE_F1]) {
           hud.toggleDisplay();

@@ -109,6 +109,8 @@
   <chunk>
     <size>15</size>
     <distance>50</distance>
+    <lifespan>1500</lifespan>
+    <percentVariation>50</percentVariation>
   </chunk>
 </Collectable>
 
