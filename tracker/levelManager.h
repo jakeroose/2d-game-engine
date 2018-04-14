@@ -49,7 +49,8 @@ public:
   const Vector2f getCursor() const { return cursorCoords*UNIT_SIZE; }
   void setAnchor();
   Vector2f* getAnchor() const { return anchor; }
-  void resetAnchor() { delete anchor; anchor = NULL; }
+  void resetAnchor();
+  void eraseWall();
 
   static int UNIT_SIZE;
 

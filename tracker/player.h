@@ -37,7 +37,7 @@ public:
   int getScaledWidth()  const { return player.getScaledWidth(); }
   int getScaledHeight()  const { return player.getScaledHeight(); }
   const SDL_Surface* getSurface() const { return player.getSurface(); }
-  const Light* getLight() { return light; }
+  Light* getLight() const { return light; }
 
   const Vector2f& getPosition() const { return player.getPosition(); }
   void setPosition(const Vector2f& v) { player.setPosition(v); }
@@ -62,6 +62,7 @@ public:
   void damagePlayer();
   void killPlayer();
   bool isDead() const { return !alive; }
+  void toggleNoClip() { noClip = !noClip; }
 
 private:
   MultiSprite player;

@@ -335,5 +335,32 @@ void LevelManager::setAnchor(){
   }
   delete anchor;
   anchor = new Vector2f(cursorCoords*UNIT_SIZE);
+}
 
+void LevelManager::resetAnchor(){
+  if(anchor == NULL){
+    eraseWall();
+  } else {
+    delete anchor;
+    anchor = NULL;
+  }
+}
+
+// deletes wall under the cursor.
+// NOTE: must be on the vertex of a wall
+void LevelManager::eraseWall(){
+  Vector2f v = cursorCoords*UNIT_SIZE;
+  std::string toDelete;
+  for(auto w : wallVertices){
+    for(auto e : w.second){
+      if(e[0] == v[0]){
+        toDelete = w.first;
+        break;
+      }
+    }
+  }
+  wallVertices.erase(wallVertices.find(toDelete));
+  auto it = walls.find(toDelete);
+  freeWalls.push_back((*it).second);
+  walls.erase(it);
 }

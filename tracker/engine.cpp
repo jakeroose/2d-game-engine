@@ -271,6 +271,9 @@ void Engine::play() {
                           Gamedata::getInstance().getXmlStr("level/name"));
           player->reset();
         }
+        if ( keystate[SDL_SCANCODE_N] ) {
+          player->toggleNoClip();
+        }
         if ( keystate[SDL_SCANCODE_F8]) {
           LevelManager::getInstance().toggleLevelEdit();
         }
@@ -297,13 +300,11 @@ void Engine::play() {
       if(event.type == SDL_MOUSEBUTTONDOWN) {
         if(LevelManager::getInstance().inEditMode()){
           if(event.button.button == SDL_BUTTON_RIGHT){
-            std::cout << "reset anchor" << std::endl;
             LevelManager::getInstance().resetAnchor();
           } else {
-            std::cout << "set anchor" << std::endl;
-
             LevelManager::getInstance().setAnchor();
           }
+          player->getLight()->update();
         } else {
           int x, y;
           SDL_GetMouseState( &x, &y);

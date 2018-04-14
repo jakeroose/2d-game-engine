@@ -175,9 +175,23 @@ void Player::up()    {
 // tick based approach fails when frame rates drop :/
 void Player::up(Uint32 ticks)    {
   state = PlayerState::jumping;
-  if(noClip == false && checkForCollisions()){
-    for(Wall* w : collisions){
-      if(collisionTop(w)) return;
+  if(noClip){
+    if(player.getY() > 0){
+      player.setVelocityY(-initialVelocity[1]);
+    } else {
+      player.setVelocityY(initialVelocity[1]);
+    }
+  }
+  else {
+    if(noClip == false && checkForCollisions()){
+      for(Wall* w : collisions){
+        if(collisionTop(w)) return;
+      }
+    }
+    if(player.getY() > 0 && useEnergy((int)ticks)){
+      player.setVelocityY( -(int)flyPower);
+    } else {
+      player.setVelocityY(flyPower);
     }
   }
 
@@ -185,11 +199,6 @@ void Player::up(Uint32 ticks)    {
   // flyPower, instead of hard setting it.
 
   // reduce energy by flyPower and set YVelocity
-  if(player.getY() > 0 && useEnergy((int)ticks)){
-    player.setVelocityY( -(int)flyPower);
-  } else {
-    player.setVelocityY(flyPower);
-  }
   updateLighting = true;
 }
 
@@ -201,7 +210,7 @@ void Player::down()  {
   //   }
   // }
   if ( player.getY() < worldHeight-getScaledHeight()) {
-    player.setVelocityY( flyPower );
+    player.setVelocityY( initialVelocity[1] );
   }
   updateLighting = true;
 }
