@@ -10,6 +10,7 @@ public:
   float y;
   float param;
   float angle;
+  void round();
 
   // sort based on angle!
   bool operator< (const Intersection& i){

@@ -47,6 +47,7 @@ void BackgroundSprite::update(Uint32 t) {
 void BackgroundSprite::draw() const {
   SDL_Renderer* renderer = RenderContext::getInstance()->getRenderer();
   Image* i = image;
+  
 
   // need to scale center of image to match scaled image
   SDL_Point center = {

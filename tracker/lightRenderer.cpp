@@ -30,30 +30,30 @@ void LightRenderer::draw() const {
       vy = Viewport::getInstance().getY();
 
   if(renderLights){
-  /* Optimization so that we only DRAW what is in the viewport and within a
-     rectangle surrounding the lightPolygon
-  */
-  for(Light* l : lights){
-    if(l->getMinx() < minx){ minx = l->getMinx(); }
-    if(l->getMiny() < miny){ miny = l->getMiny(); }
-    if(l->getMaxx() > maxx){ maxx = l->getMaxx(); }
-    if(l->getMaxy() > maxy){ maxy = l->getMaxy(); }
-  }
-  if(minx < vx){ minx = vx;}
-  if(miny < vy){ miny = vy;}
-  if(maxx > vx + Viewport::getInstance().getViewWidth()){
-    maxx = Viewport::getInstance().getViewWidth()+vx;
-  }
-  if(maxy > Viewport::getInstance().getViewHeight()+vy){
-    maxy = Viewport::getInstance().getViewHeight()+vy;
-  }
+    /* Optimization so that we only DRAW what is in the viewport and within a
+       rectangle surrounding the lightPolygon
+    */
+    for(Light* l : lights){
+      if(l->getMinx() < minx){ minx = l->getMinx(); }
+      if(l->getMiny() < miny){ miny = l->getMiny(); }
+      if(l->getMaxx() > maxx){ maxx = l->getMaxx(); }
+      if(l->getMaxy() > maxy){ maxy = l->getMaxy(); }
+    }
+    if(minx < vx){ minx = vx;}
+    if(miny < vy){ miny = vy;}
+    if(maxx > vx + Viewport::getInstance().getViewWidth()){
+      maxx = Viewport::getInstance().getViewWidth()+vx;
+    }
+    if(maxy > Viewport::getInstance().getViewHeight()+vy){
+      maxy = Viewport::getInstance().getViewHeight()+vy;
+    }
 
-  /* Render the Lighting Polygon */
-  // fill algorithm courtesy of http://alienryderflex.com/polygon_fill/
-  int polyCorners, intensity;
-  int nodes, pixelX, pixelY, i, j, swap, IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
-  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-  SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
+    /* Render the Lighting Polygon */
+    // fill algorithm courtesy of http://alienryderflex.com/polygon_fill/
+    int polyCorners, intensity;
+    int nodes, pixelX, pixelY, i, j, swap, IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
 
     //  Loop through the rows of the image.
     for (pixelY=miny; pixelY<maxy; pixelY++) {

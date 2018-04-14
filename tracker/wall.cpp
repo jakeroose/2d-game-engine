@@ -52,12 +52,25 @@ std::string Wall::getSmallCoordString(){
   return s.str();
 }
 
+// int roundInt(int i){
+//   int r = i % LevelManager::UNIT_SIZE;
+//   if(r < LevelManager::UNIT_SIZE/2){
+//     return i - r;
+//   } else {
+//     return i + (LevelManager::UNIT_SIZE - r);
+//   }
+// }
+
 std::vector<Vector2f> Wall::getVertices(){
   std::vector<Vector2f> v = {
     Vector2f(rect.x, rect.y), // top left
     Vector2f(rect.x + rect.w, rect.y), // top right
     Vector2f(rect.x + rect.w, rect.y + rect.h), // bottom right
     Vector2f(rect.x, rect.y + rect.h)  // bottom left
+    // Vector2f(roundInt(rect.x), roundInt(rect.y)), // top left
+    // Vector2f(roundInt(rect.x + rect.w), roundInt(rect.y)), // top right
+    // Vector2f(roundInt(rect.x + rect.w), roundInt(rect.y + rect.h)), // bottom right
+    // Vector2f(roundInt(rect.x), roundInt(rect.y + rect.h))  // bottom left
   };
   return v;
 }

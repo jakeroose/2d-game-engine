@@ -12,7 +12,7 @@ public:
   Light(const Light&) = delete;
   ~Light();
   void draw() const;
-  void update();
+  void update(Uint8 ticks=0);
   const Light& operator=(const Light& l) {
      rc = l.rc; return *this;
   }
@@ -35,6 +35,7 @@ public:
   bool getRenderStatus() const { return renderStatus; }
 
   int getIntersectionPoolSize() const { return (int)intersectionPool.size(); }
+  int getTicks() const { return totalTicks; }
 
 private:
   Vector2f position;
@@ -45,6 +46,7 @@ private:
   int minx, miny, maxx, maxy;
   int intensity, baseIntensity;
   bool renderStatus;
+  int totalTicks;
 
   /* methods */
   Intersection* getIntersection(Vector2f r1, Vector2f r2, Vector2f s1, Vector2f s2);

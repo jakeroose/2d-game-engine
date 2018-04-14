@@ -23,7 +23,6 @@
 Engine::~Engine() {
   delete player;
   delete strategy;
-
   std::cout << "Terminating program" << std::endl;
 }
 
@@ -31,7 +30,6 @@ Engine::Engine() :
   rc( RenderContext::getInstance() ),
   clock( Clock::getInstance() ),
   renderer( rc->getRenderer() ),
-  world("back", Gamedata::getInstance().getXmlInt("back/factor") ),
   viewport( Viewport::getInstance() ),
   hud(HUD("hud")),
   pauseMenu(HUD( "pauseMenu",
@@ -59,6 +57,9 @@ Engine::Engine() :
   background->initialize();
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
+
+
+
   std::cout << "Loading complete" << std::endl;
 }
 
@@ -71,12 +72,10 @@ void Engine::addSprite(int x, int y){
 }
 
 void Engine::draw() const {
-  world.draw();
-
+  SDL_SetRenderDrawColor( renderer, 15, 15, 15, 255 );
+  SDL_RenderClear(renderer);
   background->draw();
-
   LightRenderer::getInstance().draw();
-
 
   player->draw();
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
@@ -101,8 +100,10 @@ void Engine::draw() const {
         (int)(i*LevelManager::UNIT_SIZE - viewport.getY()));
     }
 
-    // draw coord at nearest viable coordinate
     SDL_SetRenderDrawColor(renderer, 255,0,128,255);
+    for(auto w: LevelManager::getInstance().getWalls()) w.second->draw();
+
+    // draw coord at nearest viable coordinate
     Vector2f v = LevelManager::getInstance().getCursor();
     SDL_Rect r = { (int)(v[0] - 5 - viewport.getX()),
       (int)(v[1] - 5 - viewport.getY()), 10, 10};
@@ -146,6 +147,10 @@ void Engine::draw() const {
     int freeIntersections = LevelManager::getInstance().getTotalFreeIntersections() + player->getLight()->getIntersectionPoolSize();
     IoMod::getInstance().writeText("Light Intersections: " +      std::to_string(totalIntersections), 15, 225);
     IoMod::getInstance().writeText("Free Intersections : " +      std::to_string(freeIntersections), 15, 250);
+    if(LevelManager::getInstance().inEditMode()){
+      Vector2f v =LevelManager::getInstance().getCursor();
+      IoMod::getInstance().writeText((std::to_string((int)v[0]) + " " + std::to_string((int)v[1])), 15, 275);
+    }
 
     // IoMod::getInstance().writeText("PlayerEngergy: " +
     //   std::to_string(player->getTotalEnergies()), 15, 125);
@@ -209,11 +214,13 @@ void Engine::checkForCollisions() {
     if ( strategy->execute(*(player->getPlayer()), *(c->getSprite())) ) {
       c->collect(player);
     }
+    // c->setPosition(c->getPosition()*1.000001);
   }
 }
 
 void Engine::update(Uint32 ticks) {
   checkForCollisions();
+  // LevelManager::getInstance().updateViewBorder();
   player->update(ticks);
   for(auto e: LevelManager::getInstance().getEnemies()){
     e->update(ticks);
@@ -230,7 +237,7 @@ void Engine::update(Uint32 ticks) {
   }
 
   background->update(ticks);
-  world.update();
+  // world.update();
   viewport.update(); // always update viewport last
 }
 

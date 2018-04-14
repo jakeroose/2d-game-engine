@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <list>
+#include <stdlib.h>
 
 #include "renderContext.h"
 #include "light.h"
@@ -31,7 +32,8 @@ Light::Light(const Vector2f& p) :
   minx(0),miny(0),maxx(0),maxy(0),
   intensity(Gamedata::getInstance().getXmlInt("lights/alpha")),
   baseIntensity(intensity),
-  renderStatus(true)
+  renderStatus(true),
+  totalTicks(0)
   {
     lightPolygon.reserve(256);
     LightRenderer::getInstance().addLight(this);
@@ -51,7 +53,6 @@ void Light::setPosition(const Vector2f& pos){
   position = pos;
   if(shouldUpdate) update();
 }
-
 
 /* Returns the point of intersection between ray(r1, r2) and the line(s1, s2)
 */
@@ -140,11 +141,7 @@ bool validIntersect(Intersection* i){
   return false;
 }
 
-bool sameLine(Intersection* i1, Intersection* i2){
-  // return !(static_cast<int>(i1.x) == static_cast<int>(i2.x)) !=
-    //  !(static_cast<int>(i1.y) == static_cast<int>(i2.y));
-  return static_cast<int>(i1->x) == static_cast<int>(i2->x);
-}
+
 
 /* Checks the Intersection object pool for a free Intersection. If none
    available it creates a new one.
@@ -163,6 +160,21 @@ Intersection* Light::getFreeIntersection(float x, float y, float p, float a){
   }
 }
 
+int roundInt(int i){
+  int r = i % LevelManager::UNIT_SIZE;
+  if(r < LevelManager::UNIT_SIZE/2){
+    return i - r;
+  } else {
+    return i + (LevelManager::UNIT_SIZE - r);
+  }
+}
+bool sameLine(Intersection* i1, Intersection* i2){
+  // return !(static_cast<int>(i1.x) == static_cast<int>(i2.x)) !=
+    //  !(static_cast<int>(i1.y) == static_cast<int>(i2.y));
+  // return static_cast<int>(i1->x) == static_cast<int>(i2->x);
+  return abs(i1->x - i2->x) < 1.5;
+}
+
 /* cleanPolygon is used to remove duplicate points on the same line of
    our lightPolygon to reduce its complexity
    It works by checking for 3 points in a row with the same x/y and removing
@@ -172,6 +184,7 @@ void Light::cleanPolygon(){
   int i = 0, j = lightPolygon.size() - 1;
   std::vector<Intersection*> newPoly = std::vector<Intersection*>();
   newPoly.reserve(lightPolygon.size()/2);
+
   // if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
   while(i < (int)lightPolygon.size()){
     // always add j to the new list
@@ -199,6 +212,9 @@ void Light::cleanPolygon(){
   cleanPolygonX();
 }
 
+bool sameLine2(Intersection* i1, Intersection* i2){
+  return abs(i1->y - i2->y) < 1.5; // check if pixels are
+}
 void Light::cleanPolygonX(){
   int i = 0, j = lightPolygon.size() - 1;
   std::vector<Intersection*> newPoly = std::vector<Intersection*>();
@@ -206,13 +222,20 @@ void Light::cleanPolygonX(){
     newPoly.push_back(getFreeIntersection(lightPolygon[j]->x,
        lightPolygon[j]->y, lightPolygon[j]->param, lightPolygon[j]->angle));
     updateMinMaxCoords(lightPolygon[j]);
-    if((int)lightPolygon[j]->y == (int)lightPolygon[i]->y){
+    // if((int)lightPolygon[j]->y == (int)lightPolygon[i]->y){
+    //   while(i < (int)lightPolygon.size() &&
+    //    static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()]->y) ==
+    //    static_cast<int>(lightPolygon[i]->y)){
+    //     i++;
+    //   }
+    if(sameLine2(lightPolygon[j], lightPolygon[i])){
       while(i < (int)lightPolygon.size() &&
-       static_cast<int>(lightPolygon[(i+1)%lightPolygon.size()]->y) ==
-       static_cast<int>(lightPolygon[i]->y)){
-        i++;
-      }
-      j = i++;
+       sameLine2(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
+       sameLine2(lightPolygon[j], lightPolygon[i])
+    ){
+      i++;
+    }
+    j = i++;
     } else {
       j = (j+1)%lightPolygon.size();
       i++;
@@ -232,7 +255,8 @@ void Light::updateMinMaxCoords(Intersection* i){
 
 /* updates the lightPolygon
 */
-void Light::update() {
+void Light::update(Uint8 ticks) {
+  totalTicks += (int)ticks;
   // reset our light polygon
   for(Intersection* e : lightPolygon){
     intersectionPool.push_back(e);
@@ -252,6 +276,10 @@ void Light::update() {
 
   for(auto e: LevelManager::getInstance().getWallVertices()){
     for(Vector2f p: e.second){
+      // check if wall is within render distance of the light.
+      if(LevelManager::getInstance().withinRenderDistance(p, position) == false)
+        continue;
+
       float angle = atan2(p[1]-y, p[0]-x);
 
       // if angle is not in uniqueAngles then add it

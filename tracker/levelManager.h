@@ -52,6 +52,10 @@ public:
   void resetAnchor();
   void eraseWall();
 
+  bool withinRenderDistance(const Vector2f& v) const;
+  bool withinRenderDistance(const Vector2f& v, const Vector2f& v2) const;
+  void updateViewBorder();
+
   static int UNIT_SIZE;
 
   const LevelManager& operator=(const LevelManager& rhs) = delete;

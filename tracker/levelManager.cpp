@@ -8,6 +8,7 @@
 #include "vector2f.h"
 #include "wall.h"
 #include "smartSprite.h"
+#include "viewport.h"
 
 /*
 LevelManager should let me easily add walls to a level using arbitrary in-game
@@ -318,6 +319,54 @@ void LevelManager::toggleLevelEdit(){
   }
 }
 
+// return true if p is within x units of the viewport
+bool LevelManager::withinRenderDistance(const Vector2f& p) const {
+  int x = Viewport::getInstance().getX() +
+          Viewport::getInstance().getViewWidth()/2;
+  int y = Viewport::getInstance().getY() +
+          Viewport::getInstance().getViewHeight()/2;
+
+  return withinRenderDistance(p, Vector2f(x,y));
+}
+
+// return true if p is within x units of the viewport window centered on anchor
+bool LevelManager::withinRenderDistance(const Vector2f& p, const Vector2f& anchor) const {
+  int rad = 2*UNIT_SIZE;
+
+  float viewWidth = Viewport::getInstance().getViewWidth();
+  float viewHeight = Viewport::getInstance().getViewHeight();
+
+  float _nx = anchor[0] - viewWidth/2 - rad;
+  float _ny = anchor[1] - viewHeight/2 - rad;
+  float _mx = viewWidth + _nx + 2*rad;
+  float _my = viewHeight + _ny + 2*rad;
+
+  if(p[0] < _nx || p[0] > _mx || p[1] < _ny || p[1] > _my){
+    return false;
+  }
+
+  return true;
+}
+
+// creates a border around the viewport for calculating light
+void LevelManager::updateViewBorder(){
+  int rad = 20;
+  wallVertices["view_border"] = {
+    Vector2f(
+      Viewport::getInstance().getX()+rad,
+      Viewport::getInstance().getY()+rad),
+    Vector2f(
+      Viewport::getInstance().getX()+Viewport::getInstance().getViewWidth()-rad,
+      Viewport::getInstance().getY()+rad),
+    Vector2f(
+      Viewport::getInstance().getX()+Viewport::getInstance().getViewWidth()-rad,
+      Viewport::getInstance().getY()+Viewport::getInstance().getViewHeight()-rad),
+    Vector2f(
+      Viewport::getInstance().getX()+rad,
+      Viewport::getInstance().getY()+Viewport::getInstance().getViewHeight()-rad)
+  };
+}
+
 // set cursor to nearest whole number coord
 void LevelManager::setCursor(const Vector2f& v) {
   cursorCoords = Vector2f(
@@ -353,14 +402,20 @@ void LevelManager::eraseWall(){
   std::string toDelete;
   for(auto w : wallVertices){
     for(auto e : w.second){
-      if(e[0] == v[0]){
+      if(e[0] == v[0] && e[1] == v[1]){
         toDelete = w.first;
         break;
       }
     }
   }
-  wallVertices.erase(wallVertices.find(toDelete));
-  auto it = walls.find(toDelete);
-  freeWalls.push_back((*it).second);
-  walls.erase(it);
+  if(toDelete.length()){
+    wallVertices.erase(wallVertices.find(toDelete));
+    auto it = walls.find(toDelete);
+    if(it != walls.end()){
+      std::cout << "deleting wall: " << toDelete << std::endl;
+      freeWalls.push_back((*it).second);
+      walls.erase(it);
+    }
+
+  }
 }

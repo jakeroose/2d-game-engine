@@ -24,9 +24,7 @@ public:
 private:
   const RenderContext* rc;
   Clock& clock;
-
   SDL_Renderer * const renderer;
-  World world;
   Viewport& viewport;
   HUD hud;
   HUD pauseMenu;

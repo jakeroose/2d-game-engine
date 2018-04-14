@@ -1,5 +1,6 @@
 #include "collectable.h"
 #include "gamedata.h"
+#include "levelManager.h"
 
 Collectable::Collectable(const std::string& name) :
   sprite(new MultiSprite(name)),
@@ -23,10 +24,13 @@ void Collectable::setPosition(const Vector2f& v){
 void Collectable::update(Uint8 ticks){
   if(doneExploding()) return;
 
+  // light->setRenderStatus(false);
+
   sprite->update(ticks);
   // make sure light polygon has been calculated
-  if(light->getPolygonSize() == 0){
-    light->update();
+  if((light->getPolygonSize() == 0 || light->getTicks() < 100) &&
+      LevelManager::getInstance().withinRenderDistance(getPosition())){
+    light->update(ticks);
   }
   light->setPosition(getPosition() + Vector2f(sprite->getScaledWidth()/2,
                                               sprite->getScaledHeight()/2));

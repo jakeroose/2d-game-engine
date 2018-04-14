@@ -12,18 +12,19 @@
 <username>jroose</username>
 
 <view>
-  <width>1000</width>
+  <width>900</width>
   <height>540</height>
 </view>
 
 <world>
-  <width>1240</width>
-  <height>900</height>
-  <unitSize>64</unitSize> <!-- length of 1 in game unit in pixels -->
+  <width>3000</width>
+  <height>3000</height>
+  <unitSize>100</unitSize> <!-- length of 1 in game unit in pixels -->
 </world>
 
 <level>
-  <name>customLevel</name>
+  <name>bigLevel</name>
+  <renderDistance>2</renderDistance>
 </level>
 
 <test>
@@ -37,7 +38,7 @@
 </back>
 
 <background>
-  <count>100</count>
+  <count>500</count>
   <gravity>0.1</gravity>
 </background>
 
@@ -52,8 +53,8 @@
 
 <hud>
   <title>Menu</title>
-  <width>250</width>
-  <height>350</height>
+  <width>275</width>
+  <height>275</height>
   <x>10</x>
   <y>10</y>
 </hud>
@@ -85,7 +86,7 @@
   <chunk>
     <size>20</size>
     <distance>200</distance>
-    <lifespan>3000</lifespan>
+    <lifespan>2000</lifespan>
     <percentVariation>50</percentVariation>
   </chunk>
 </Player>
