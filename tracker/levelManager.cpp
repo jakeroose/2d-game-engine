@@ -92,7 +92,6 @@ void LevelManager::addWall(const std::string& s){
       v[2] = tmp;
     }
   }
-  // std::cout << "addWall" << std::endl;
   if(freeWalls.size() > 0){
     Wall* w = freeWalls.back();
     freeWalls.pop_back();
@@ -189,10 +188,12 @@ void LevelManager::parseLine(std::string& l){
       loadingType = WALL;
     } else {
       std::cout << "Cannot load type \""<< l << "\"" << std::endl;
+      loadingType = NONE;
     }
   } else if(regex_match(l, n)){
     if(loadingType == NONE){
-      std::cout << "uhh something's wrong with the level file.." << std::endl;
+      std::cout << "Skipping line: " << l << std::endl;
+      return;
     }
     std::vector<int> v = strToIntVec(l);
     if(loadingType == PLAYER){

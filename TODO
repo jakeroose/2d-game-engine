@@ -6,15 +6,16 @@ look into blitting light polygon shape onto an image to render on GPU
 https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
 
 Polish:
-plug all of the leaks
+simple introduction level to learn mechanics
 more ballanced jumping 
 Scoring / Ending
-lights don't clip through walls
+pop-ups to give player directions
 don't stop camera from following along edges of the map
 Walls have width?
 Music
 Sound
 have lights follow player via some slerp function (flocking?)
+lights don't clip through walls
 smoothly regain and lose energy
 cancel explosion method
 
@@ -29,6 +30,7 @@ each enemy, collectable, light may need it's own list of walls to compute from?
 
 Bugs:
 jumping/flying depends on frame rate
+border walls not added to free walls
 
 Words for title:
 vitality - capacity for survival or for the continuation of a meaningful or purposeful existence

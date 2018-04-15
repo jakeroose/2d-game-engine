@@ -24,6 +24,7 @@ Engine::~Engine() {
   delete player;
   delete strategy;
   std::cout << "Terminating program" << std::endl;
+  delete background;
 }
 
 Engine::Engine() :
@@ -38,7 +39,7 @@ Engine::Engine() :
     Gamedata::getInstance().getXmlInt("view/width")/2,
     Gamedata::getInstance().getXmlInt("view/height")/2)),
   player(new Player("Player")),
-  strategy(),
+  strategy(new RectangularCollisionStrategy()),
   background(
     new Background(Gamedata::getInstance().getXmlInt("background/count"))
   ),
@@ -48,18 +49,12 @@ Engine::Engine() :
   makeVideo( false )
 {
   hud.toggleDisplay();
-
   player->respawn(LevelManager::getInstance().getSpawnPoint());
-
-  strategy = new RectangularCollisionStrategy;
 
   // initialize background
   background->initialize();
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
-
-
-
   std::cout << "Loading complete" << std::endl;
 }
 

@@ -31,12 +31,6 @@
   <attr1>"att1 \n newline?"</attr1>
 </test>
 
-<back>
-  <file>assets/night_bg.png</file>
-  <factor>2</factor>
-  <transparency>false</transparency>
-</back>
-
 <background>
   <count>500</count>
   <gravity>0.1</gravity>
@@ -82,7 +76,7 @@
   <speedY>150</speedY>
   <transparency>false</transparency>
   <flyPower></flyPower>
-  <noClip>true</noClip>
+  <noClip>false</noClip>
   <collectableLight>false</collectableLight>
   <chunk>
     <size>20</size>
@@ -91,6 +85,25 @@
     <percentVariation>50</percentVariation>
   </chunk>
 </Player>
+
+<Collectable>
+  <file>assets/smallSphere.png</file>
+  <startLoc x="50" y="400"/>
+  <frames>6</frames>
+  <frameInterval>200</frameInterval>
+  <speedX>0</speedX>
+  <speedY>0</speedY>
+  <transparency>false</transparency>
+  <count>0</count>
+  <safeDistance>300</safeDistance>
+  <rotation>true</rotation>
+  <chunk>
+    <size>15</size>
+    <distance>50</distance>
+    <lifespan>1500</lifespan>
+    <percentVariation>50</percentVariation>
+  </chunk>
+</Collectable>
 
 <Enemy>
   <file>assets/enemy.png</file>
@@ -109,25 +122,6 @@
     <percentVariation>50</percentVariation>
   </chunk>
 </Enemy>
-
-<Collectable>
-  <file>assets/smallSphere.png</file>
-  <startLoc x="50" y="400"/>
-  <frames>6</frames>
-  <frameInterval>200</frameInterval>
-  <speedX>0</speedX>
-  <speedY>0</speedY>
-  <transparency>false</transparency>
-  <count>0</count>
-  <safeDistance>300</safeDistance>
-  <rotation>false</rotation>
-  <chunk>
-    <size>15</size>
-    <distance>50</distance>
-    <lifespan>1500</lifespan>
-    <percentVariation>50</percentVariation>
-  </chunk>
-</Collectable>
 
 <Square>
   <file>assets/blacksquare32.png</file>
