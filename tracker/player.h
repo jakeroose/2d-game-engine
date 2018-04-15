@@ -79,6 +79,7 @@ private:
   int energy;
   int flyPower;
   int totalEnergies;
+  bool renderCollectableLight;
   bool alive;
 
   bool checkWallCollision(Wall* w);

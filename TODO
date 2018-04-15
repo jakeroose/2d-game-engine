@@ -5,12 +5,6 @@ look into blitting light polygon shape onto an image to render on GPU
 - CUDA example from class
 https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
 
-Lighting/collectable:
-if collectable is within x units of viewport then start updating it. 
-I think viewport position starts off a 0,0 which is when lighting is first initialized. light should determine if walls are within x units of itself (not the play) and update based on that. just need to add extra param to LevelManager::withinRenderDistance
-
-each enemy, collectable, light may need it's own list of walls to compute from?
-
 Polish:
 plug all of the leaks
 more ballanced jumping 
@@ -20,20 +14,23 @@ don't stop camera from following along edges of the map
 Walls have width?
 Music
 Sound
-do something with background image.
 have lights follow player via some slerp function (flocking?)
 smoothly regain and lose energy
 cancel explosion method
 
 === End of "Need to Do" ===
 Things to consider:
-object pooling for walls (when levels get larger)
 potentially a way to combine lightPolygons so that there is only one pass over
   the x coordinates of the viewport
-tiling background so that it doesn't glitch to hell for tall maps
 if adding slerp functionality to movement then that will help prevent falling through
   walls durring heavy lag (i.e. valgrind)
 player inherit from SmartSprite or other way around
+each enemy, collectable, light may need it's own list of walls to compute from?
 
 Bugs:
 jumping/flying depends on frame rate
+
+Words for title:
+vitality - capacity for survival or for the continuation of a meaningful or purposeful existence
+labyrinth
+

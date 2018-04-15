@@ -29,6 +29,7 @@ public:
   void explode();
   bool getExploded() { return exploded; }
   bool doneExploding();
+  bool getRotate() { return rotate; }
 
   Collectable& operator=(const Collectable& rhs) = delete;
   bool operator==(const Collectable& rhs);
@@ -36,6 +37,7 @@ private:
   MultiSprite* sprite;
   bool collected;
   bool exploded;
+  bool rotate;
   Player* player;
   Light* light;
 };

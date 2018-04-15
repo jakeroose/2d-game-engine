@@ -83,6 +83,7 @@
   <transparency>false</transparency>
   <flyPower></flyPower>
   <noClip>true</noClip>
+  <collectableLight>false</collectableLight>
   <chunk>
     <size>20</size>
     <distance>200</distance>
@@ -119,6 +120,7 @@
   <transparency>false</transparency>
   <count>0</count>
   <safeDistance>300</safeDistance>
+  <rotation>true</rotation>
   <chunk>
     <size>15</size>
     <distance>50</distance>

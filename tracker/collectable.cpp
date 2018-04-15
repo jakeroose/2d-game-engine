@@ -6,6 +6,7 @@ Collectable::Collectable(const std::string& name) :
   sprite(new MultiSprite(name)),
   collected(false),
   exploded(false),
+  rotate(Gamedata::getInstance().getXmlBool("Collectable/rotation")),
   player(NULL),
   light(new Light(getPosition()))
   {

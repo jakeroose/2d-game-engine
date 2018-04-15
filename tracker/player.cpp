@@ -56,6 +56,7 @@ Player::Player( const std::string& name) :
   energy(1),
   flyPower(LevelManager::UNIT_SIZE),
   totalEnergies(1),
+  renderCollectableLight(Gamedata::getInstance().getXmlBool("Player/collectableLight")),
   alive(true)
   {
     checkForCollisions();
@@ -315,7 +316,11 @@ void Player::updateLight(){
 
 // scale light based on energy left, keep a minimum of 1/5 intensity
 int Player::calculateLightIntensity(Light* l){
-  return l->getBaseIntensity()*(1+(4.0*energy/maxEnergy()))/5.0;
+  if(renderCollectableLight){
+    return l->getBaseIntensity()*(1+(4.0*energy/maxEnergy()))/5.0;
+  } else {
+    return l->getBaseIntensity()*(1+(4.0*energy/maxEnergy()))/5.0*(collectables.size()+1);
+  }
 }
 
 void Player::addCollectable(Collectable* c) {
@@ -339,7 +344,10 @@ void Player::killPlayer(){
 
 void Player::updateCollectables(){
   for(int i = 0; i < (int)collectables.size(); i++){
-    float angle = Clock::getInstance().getTicks()*0.001 + i*10;
+    float angle = 3.14 * ((float)i/collectables.size())*2; // fixed position
+    if(collectables[i]->getRotate()){
+      angle += Clock::getInstance().getTicks()*0.001 ; // rotating
+    }
     Collectable* c = collectables[i];
     collectables[i]->setPosition(Vector2f(cos(angle), sin(angle)) * 25 +
       // offset according to player center and collectable center
@@ -353,7 +361,11 @@ void Player::updateCollectables(){
     // check for rightside and bottom of map too, eventually walls
 
     // update lights on collectable
-    c->setLightIntensity(calculateLightIntensity(c->getLight()));
+    if(renderCollectableLight){
+      c->setLightIntensity(calculateLightIntensity(c->getLight()));
+    } else {
+      c->getLight()->setRenderStatus(false);
+    }
   }
 }
 
