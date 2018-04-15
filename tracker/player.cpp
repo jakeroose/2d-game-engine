@@ -9,10 +9,6 @@
 #include "clock.h"
 #include <algorithm>
 
-/* TODO:
-  Use collision detection in RectangularCollisionStrategy instead of here.
-*/
-
 std::ostream& operator<<(std::ostream& out, PlayerState s){
   std::string state = "idk";
   if(s == PlayerState::idle){
@@ -59,7 +55,7 @@ Player::Player( const std::string& name) :
   renderCollectableLight(Gamedata::getInstance().getXmlBool("Player/collectableLight")),
   alive(true)
   {
-    checkForCollisions();
+    // checkForCollisions();
 }
 
 Player::~Player(){
@@ -103,34 +99,6 @@ bool Player::checkForCollisions(){
 
 void Player::stop() {
   player.setVelocity( Vector2f(0, 0) );
-  // updateLighting = false;
-}
-
-bool Player::collisionRight(Wall* w){
-  SDL_Rect r = w->getRect();
-    // if wall is between player middle and player right
-  if(w->getType() == WallType::wall &&
-    (r.x < player.getX() + player.getScaledWidth()) &&
-    (r.x > player.getX() + player.getScaledWidth()/2)) return true;
-  return false;
-}
-
-bool Player::collisionLeft(Wall* w){
-  SDL_Rect r = w->getRect();
-  // if wall is between player middle and player right
-  if(w->getType() == WallType::wall &&
-    (r.x > player.getX()) &&
-    (r.x < player.getX() + player.getScaledWidth()/2)) return true;
-  return false;
-}
-
-bool Player::collisionTop(Wall* w){
-  SDL_Rect r = w->getRect();
-  // if wall is between middle of player and top of player
-  if(w->getType() == WallType::floor &&
-     r.y > player.getY() &&
-     r.y < player.getY() + player.getScaledHeight()/2) return true;
-  return false;
 }
 
 bool Player::collisionBottom(Wall* w){
@@ -144,9 +112,10 @@ bool Player::collisionBottom(Wall* w){
 
 void Player::right() {
   state = PlayerState::walking;
-  if(noClip == false && checkForCollisions()){
+  if(noClip == false){
     for(Wall* w : collisions){
-      if(collisionRight(w)) return;
+      if(LevelManager::getInstance().getStrategy()->collisionRight(&player, w))
+        return;
     }
   }
   if ( player.getX() < worldWidth-getScaledWidth()) {
@@ -157,9 +126,10 @@ void Player::right() {
 
 void Player::left()  {
   state = PlayerState::walking;
-  if(noClip == false && checkForCollisions()){
+  if(noClip == false){
     for(Wall* w : collisions){
-      if(collisionLeft(w)) return;
+      if(LevelManager::getInstance().getStrategy()->collisionLeft(&player, w))
+        return;
     }
   }
   if ( player.getX() > 0) {
@@ -182,34 +152,26 @@ void Player::up(Uint32 ticks)    {
     } else {
       player.setVelocityY(initialVelocity[1]);
     }
-  }
-  else {
-    if(noClip == false && checkForCollisions()){
+  } else {
+    if(noClip == false){
       for(Wall* w : collisions){
-        if(collisionTop(w)) return;
+        if(LevelManager::getInstance().getStrategy()->collisionTop(&player, w)){
+          useEnergy((int)ticks); // always use energy if pressing up
+          return;
+        }
       }
     }
     if(player.getY() > 0 && useEnergy((int)ticks)){
       player.setVelocityY( -(int)flyPower);
-    } else {
-      player.setVelocityY(flyPower);
+    } else if(player.getVelocityY() > flyPower){
+      player.setVelocityY(flyPower); // allow player to fall slowly
     }
   }
-
-  // for smooth falling, if energy == 0 then subtract velocity and cap it at
-  // flyPower, instead of hard setting it.
-
-  // reduce energy by flyPower and set YVelocity
-  updateLighting = true;
 }
 
+// only used when player is in noClip mode
 void Player::down()  {
   if(noClip == false) return;
-  // if(noClip == false && checkForCollisions()){
-  //   for(Wall* w : collisions){
-  //     if(collisionBottom(w)) return;
-  //   }
-  // }
   if ( player.getY() < worldHeight-getScaledHeight()) {
     player.setVelocityY( initialVelocity[1] );
   }
@@ -228,7 +190,7 @@ void Player::updatePlayerState(){
     state = PlayerState::jumping;
   } else if(player.getVelocityX() != 0){
     state = PlayerState::walking;
-    player.setVelocityX(0);
+    player.setVelocityX(0);  // done to stop player from skating around
   } else {
     state = PlayerState::idle;
     updateLighting = false;
@@ -243,19 +205,18 @@ void Player::handleGravity(){
   float gravity = 10; // cool constant you have there..
   float terminalVelocity = 400;
 
-  // Here down should probably all be in update state.
-  checkForCollisions();
   // check if they should be falling
+  checkForCollisions();
   bool falling = true;
   for(Wall* w : collisions){
     if(collisionBottom(w)){
       falling = false;
       refillEnergy();
     }
-    if(collisionTop(w)){
+    if(LevelManager::getInstance().getStrategy()->collisionTop(&player, w)){
       player.setVelocityY(0);
     }
-    if(collisionRight(w) || collisionLeft(w)){
+    if(LevelManager::getInstance().getStrategy()->collisionRight(&player, w) || LevelManager::getInstance().getStrategy()->collisionLeft(&player, w)){
       player.setVelocityX(0);
     }
   }
@@ -277,7 +238,7 @@ void Player::handleGravity(){
 
 void Player::refillEnergy(){
   energy = maxEnergy();
-  light->setIntensity(light->getBaseIntensity());
+  light->setIntensity(calculateLightIntensity(light));
 }
 
 // reduces energy by i, returns energy remaining
@@ -292,7 +253,8 @@ int Player::maxEnergy(){
 }
 
 void Player::respawn(const Vector2f& v){
-  player.setPosition(v + Vector2f(-getScaledWidth()/2, -(hoverHeight + getScaledHeight()/2)));
+  player.setPosition(v + Vector2f(-getScaledWidth()/2,
+                                  -(hoverHeight + getScaledHeight()/2)));
   updateLight();
   alive = true;
 }
@@ -319,7 +281,8 @@ int Player::calculateLightIntensity(Light* l){
   if(renderCollectableLight){
     return l->getBaseIntensity()*(1+(4.0*energy/maxEnergy()))/5.0;
   } else {
-    return l->getBaseIntensity()*(1+(4.0*energy/maxEnergy()))/5.0*(collectables.size()+1);
+    return l->getBaseIntensity()*
+           (1+(4.0*energy/maxEnergy()))/5.0*(collectables.size()+1);
   }
 }
 
@@ -363,7 +326,7 @@ void Player::updateCollectables(){
     // update lights on collectable
     if(renderCollectableLight){
       c->setLightIntensity(calculateLightIntensity(c->getLight()));
-    } else {
+    } else if(c->getLight()->getRenderStatus()){
       c->getLight()->setRenderStatus(false);
     }
   }
@@ -380,7 +343,6 @@ void Player::update(Uint32 ticks) {
   if(updateLighting){
     updateLight();
   }
-
   updateCollectables();
 }
 

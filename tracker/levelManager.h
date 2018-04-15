@@ -56,6 +56,8 @@ public:
   bool withinRenderDistance(const Vector2f& v, const Vector2f& v2) const;
   void updateViewBorder();
 
+  RectangularCollisionStrategy* getStrategy() { return strategy; }
+
   static int UNIT_SIZE;
 
   const LevelManager& operator=(const LevelManager& rhs) = delete;
@@ -68,6 +70,7 @@ private:
   std::vector<Collectable*> freeCollectables;
   std::vector<SmartSprite*> enemies;
   std::vector<SmartSprite*> freeEnemies;
+  RectangularCollisionStrategy* strategy;
   Vector2f spawnPoint;
   LOADING_TYPE loadingType;
   LevelState state;

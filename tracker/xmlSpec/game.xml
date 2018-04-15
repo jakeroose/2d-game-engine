@@ -120,7 +120,7 @@
   <transparency>false</transparency>
   <count>0</count>
   <safeDistance>300</safeDistance>
-  <rotation>true</rotation>
+  <rotation>false</rotation>
   <chunk>
     <size>15</size>
     <distance>50</distance>

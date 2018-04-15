@@ -84,9 +84,6 @@ private:
 
   bool checkWallCollision(Wall* w);
   bool checkForCollisions();
-  bool collisionRight(Wall* w);
-  bool collisionLeft(Wall* w);
-  bool collisionTop(Wall* w);
   bool collisionBottom(Wall* w);
   void updatePlayerState();
   void handleGravity();

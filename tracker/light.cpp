@@ -27,8 +27,6 @@ Light::Light(const Vector2f& p) :
   renderer(rc->getRenderer()),
   lightPolygon(std::vector<Intersection*>()),
   intersectionPool(),
-  // debug(Gamedata::getInstance().getXmlBool("lights/debug")),
-  // renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")),
   minx(0),miny(0),maxx(0),maxy(0),
   intensity(Gamedata::getInstance().getXmlInt("lights/alpha")),
   baseIntensity(intensity),
@@ -185,7 +183,6 @@ void Light::cleanPolygon(){
   std::vector<Intersection*> newPoly = std::vector<Intersection*>();
   newPoly.reserve(lightPolygon.size()/2);
 
-  // if(debug) std::cout << "lightPolygon vertices, before: " << j+1;
   while(i < (int)lightPolygon.size()){
     // always add j to the new list
     newPoly.push_back(getFreeIntersection(lightPolygon[j]->x, lightPolygon[j]->y, lightPolygon[j]->param, lightPolygon[j]->angle));
@@ -193,9 +190,7 @@ void Light::cleanPolygon(){
     if(sameLine(lightPolygon[j], lightPolygon[i])){
       while(i < (int)lightPolygon.size() &&
        sameLine(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
-       sameLine(lightPolygon[j], lightPolygon[i])
-    ){
-        // lightPolygon.erase(lightPolygon.begin() + i);
+       sameLine(lightPolygon[j], lightPolygon[i])){
         i++;
       }
       j = i++;
@@ -215,6 +210,7 @@ void Light::cleanPolygon(){
 bool sameLine2(Intersection* i1, Intersection* i2){
   return abs(i1->y - i2->y) < 1.5; // check if pixels are
 }
+
 void Light::cleanPolygonX(){
   int i = 0, j = lightPolygon.size() - 1;
   std::vector<Intersection*> newPoly = std::vector<Intersection*>();
@@ -231,8 +227,7 @@ void Light::cleanPolygonX(){
     if(sameLine2(lightPolygon[j], lightPolygon[i])){
       while(i < (int)lightPolygon.size() &&
        sameLine2(lightPolygon[(i+1)%lightPolygon.size()], lightPolygon[i]) &&
-       sameLine2(lightPolygon[j], lightPolygon[i])
-    ){
+       sameLine2(lightPolygon[j], lightPolygon[i])){
       i++;
     }
     j = i++;
@@ -243,7 +238,6 @@ void Light::cleanPolygonX(){
   }
   for(Intersection* i : lightPolygon){ intersectionPool.push_back(i); }
   lightPolygon = newPoly;
-  // if(debug) std::cout << ", after: " << lightPolygon.size() << std::endl;
 }
 
 void Light::updateMinMaxCoords(Intersection* i){
@@ -263,7 +257,6 @@ void Light::update(Uint8 ticks) {
   }
   lightPolygon.clear();
   minx = 999999; miny = 999999; maxx = -5; maxy = -5;
-  // if(debug) std::cout << "Pool Size: " << intersectionPool.size() << std::endl;
 
   int x = position[0];
   int y = position[1];
@@ -327,7 +320,5 @@ void Light::update(Uint8 ticks) {
 
   // remove dupes
   cleanPolygon();
-  // if(debug) std::cout << "Pool Size: " << intersectionPool.size() <<
-  //   ", Polygon Size: " << lightPolygon.size() << std::endl;
 
 }

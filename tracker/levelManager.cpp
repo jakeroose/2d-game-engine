@@ -38,6 +38,7 @@ LevelManager::LevelManager() :
   freeCollectables(),
   enemies(),
   freeEnemies(),
+  strategy(new RectangularCollisionStrategy()),
   spawnPoint(),
   loadingType(),
   state(LevelState::loading),
@@ -53,6 +54,7 @@ LevelManager::~LevelManager(){
   for(Collectable* c: freeCollectables) delete c;
   for(SmartSprite* e: enemies) delete e;
   for(SmartSprite* e: freeEnemies) delete e;
+  delete strategy;
 }
 
 LevelManager& LevelManager::getInstance(){
@@ -295,7 +297,6 @@ void LevelManager::saveLevel() const{
       for(auto w: walls){
         customLevel << w.second->getSmallCoordString() << std::endl;
       }
-      // customLevel << "Test\n";
       customLevel.close();
       std::cout << "Changes saved to levels/customLevel" << std::endl;
     } else {
