@@ -38,12 +38,14 @@ LevelManager::LevelManager() :
   freeCollectables(),
   enemies(),
   freeEnemies(),
+  goal(new Sprite("Square1")),
   strategy(new RectangularCollisionStrategy()),
   spawnPoint(),
   loadingType(),
   state(LevelState::loading),
   cursorCoords(),
-  anchor(NULL) {
+  anchor(NULL),
+  goalReached(false) {
   loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
@@ -54,6 +56,7 @@ LevelManager::~LevelManager(){
   for(Collectable* c: freeCollectables) delete c;
   for(SmartSprite* e: enemies) delete e;
   for(SmartSprite* e: freeEnemies) delete e;
+  delete goal;
   delete strategy;
 }
 
@@ -173,6 +176,7 @@ void LevelManager::parseLine(std::string& l){
     std::regex e("(enemies\\:)");
     std::regex c("(collectables\\:)");
     std::regex w("(walls\\:)");
+    std::regex s("(end\\:)");
 
     if(regex_match(l, p)){
       std::cout << "Loading Player" << std::endl;
@@ -186,6 +190,9 @@ void LevelManager::parseLine(std::string& l){
     } else if(regex_match(l, w)){
       std::cout << "Loading Walls" << std::endl;
       loadingType = WALL;
+    } else if(regex_match(l, s)){
+      std::cout << "Loading Goal" << std::endl;
+      loadingType = GOAL;
     } else {
       std::cout << "Cannot load type \""<< l << "\"" << std::endl;
       loadingType = NONE;
@@ -204,6 +211,8 @@ void LevelManager::parseLine(std::string& l){
       addCollectable(v[0], v[1]);
     } else if(loadingType == WALL){
       addWall(l);
+    } else if(loadingType == GOAL){
+      goal->setPosition(Vector2f(v[0], v[1])*(UNIT_SIZE));
     }
   }
 }
@@ -236,6 +245,10 @@ void LevelManager::loadLevel(const std::string& name){
     freeEnemies.push_back(*ite);
     ite = enemies.erase(ite);
   }
+
+  goal->setPosition(Vector2f(0, 0));
+  goal->setScale(UNIT_SIZE/goal->getImage()->getWidth());
+  goalReached = false;
 
   std::ifstream levelData;
   std::string line;

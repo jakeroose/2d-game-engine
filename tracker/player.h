@@ -86,8 +86,8 @@ private:
   bool checkForCollisions();
   bool collisionBottom(Wall* w);
   void updatePlayerState();
-  void handleGravity();
-  void refillEnergy();
+  void handleGravity(Uint8 t);
+  void refillEnergy(Uint8 t);
   void updateCollectables();
   int  useEnergy(int i);
   int  maxEnergy();

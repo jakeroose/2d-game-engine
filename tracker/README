@@ -4,36 +4,42 @@ Course: CPSC 4160
 
 Clemson Email Address: jroose@g.clemson.edu
 
-Project no: 4
+Project no: 5
 
-Project due date: 04/06/2018
+Project due date: 04/20/2018
 
 Project description:
-Created a Player object via composition that uses WASD to move.
-Added collision detection to player & smart sprites.
-Added avoidance AI to smart sprites.
-Built a HUD that displays controls and toggle-able with F1.
-NOTE: I used a placeholder sprite for the smart sprites because it was difficult
-  to see the bird sprites that I had before. I most likely won't be using any of
-  these sprites for my final game.
+LOTS of changes. I added lighting, which is the main mechanic of the game. 
+I created a signleton class called LevelManager which is able to read in levels from a file. LevelManager also allows the user to edit levels durring runtime and save them to the level called customLevel. Left click places a wall corner, right click cancels the wall placement, right clicking on an existing corner deletes the wall. F8 opens/closes the level editor and F9 saves the level when editor is active. 
+I added gravity and collision detection on walls for enemies and player. 
+I added a class "Collectable" which the player can pick up and get buffs.
+I added explosion effect and death when player gets hit by an enemy.
+Player can restart a level by pressing "R". This is achieved by reloading the level from the level file. Can also use this mechanic to load a completely new level.
+I used object pooling for all of the walls, collectables and enemies in the level. I also used object pooling for creating the lighting.
+I utilized the painters algorithm for creating falling squares in the background. The sqaures are all placed at a random distance away, which affects their size, rotation speed and falling speed, as well as what order they are drawn. Each square is also parallaxed at a different rate depending on their distance. The background is all encapsulated in a Background class that gets initialized, drawn, and updated from engine.
+I moved collision detection from player to engine and levelManager.
+game.xml can control most of the different options for the game settings.
+I used the HUD to only display debug info for testing, plus there are a lot of keybindings that I can't reasonably fit into the HUD along with the debug info. The basic controls are simple enough that I think most people should be able to figure them out. AD to move left/right, W/SPACE to jump/fly. S to move down if in noClip mode. Holding W/SPACE while flying w/ no fly energy causes slow falling. 
+Advanced controls:
+F1 - toggle HUD
+F2 - toggle debug lines for lighting and walls
+F8 - toggle level edit mode
+F9 - save level (if in level edit mode)
+R  - restart level
+P  - pause game
+N  - toggle noClip (fly through walls, no gravity)
+ESC- exit game
+Mouse click - place enemy (temporary)
+Left click (level edit) - place wall vertex
+Right click (level edit)- cancel wall placement / remove wall
 
 The easiest part of this project:
-Creating the player.
+I think the levelEditor was probably the easiest part. It was not as complex to add as I had imagined and it didn't really interfere with any other code or cause issues.
 
 Problems that I had in completing this project:
-Getting the collision detection to work properly. It was really difficult trying
-to debug to figure out where it was breaking.
+There was a lot added in this project and getting everything to interact consistently was a constant battle. Overall I think most of the behaviors are pretty well encapsulated and have been improved over time as I have added to the game. There are still some behaviors I would like to fix, like player not having to do it's own collision detection to see if its on the floor (everything else is handled by RectangularCollisionStrategy) moving the levelEditor methods to it's own class, and simplifying HUD so that I just add a string to a menu and it handles coordinates etc. 
+By far the most time consuming part of this project was adding the lighting. Getting it working to begin with required a lot of research and experimenting. Then, when I added more than one light, the frame rate dropped dramatically, so I had to make some optimizations. Once I added a large level with a lot of walls I had to optimize again to make the lighting shapes less complex and only calculate the lighting based on the walls that are closest to the light. Also making sure that the light shape was correctly calculated in all use cases (lights outside the viewport, resetting the level, moving the player, rotating the collectable with a light around the player) required a lot of changes. 
 
-Game Level Description:
-I would like to create a level where there player is a ball of light/energy and
-they have to solve mazes & jumping puzzles while avoiding enemies. The level will
-be dark so the player can only see the walls and floor with the light they emit.
-They will have to gather more light energies throughout the level to jump higher
-to be able to complete the level. The light energies will surround the player so
-they will be able to see how many they have.
-The score will be based on either how fast they complete the level, how much
-light they collect, or a combination of both.
-I think I will have 2 kinds of enemies: those attracted to light and those scared
-of it. Getting hit will cause you to lose light energy. If you get stuck in an
-area there will be some way to suicide and either start at the beginning or at a
-checkpoint.
+I have thoroughly enjoyed this project though. Any free-time I have I've been spending on this game because it's so rewarding to work on. On top of that I feel like my abilities as a programmer have increased dramatically, ESPECIALLY in c++.
+
+

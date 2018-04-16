@@ -5,28 +5,38 @@ look into blitting light polygon shape onto an image to render on GPU
 - CUDA example from class
 https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
 
+Final Reqs:
+music
+sound
+
 Polish:
 simple introduction level to learn mechanics
 more ballanced jumping 
-Scoring / Ending
 pop-ups to give player directions
-don't stop camera from following along edges of the map
-Walls have width?
-Music
-Sound
 have lights follow player via some slerp function (flocking?)
 lights don't clip through walls
-smoothly regain and lose energy
 cancel explosion method
 
 === End of "Need to Do" ===
 Things to consider:
 potentially a way to combine lightPolygons so that there is only one pass over
-  the x coordinates of the viewport
+  the x coordinates of the viewport. it is definitely the looping over screen pixels 
+  that is causing the lag, not just the draw function
 if adding slerp functionality to movement then that will help prevent falling through
   walls durring heavy lag (i.e. valgrind)
 player inherit from SmartSprite or other way around
 each enemy, collectable, light may need it's own list of walls to compute from?
+advanced HUD
+- provide hud object with a string or array of strings to display, which it then
+  displays and calculates position
+- could provide it with a lambda that returns a bool of when it should display or hide
+  the HUD so that it could pop up at desired times/locations
+- could then have each menu as it's own file in a directory
+- compiling another c program https://www.geeksforgeeks.org/system-call-in-c/
+- probs better to use JSON or something instead of reading from multiple files
+potentially remove vertices shared by 2 walls. May have to create some massive polygon
+  for all connected walls though.
+Walls have width (turns out, super easy just need to update collision det.)
 
 Bugs:
 jumping/flying depends on frame rate
@@ -36,3 +46,5 @@ Words for title:
 vitality - capacity for survival or for the continuation of a meaningful or purposeful existence
 labyrinth
 
+multiplayer idea:
+players can battle, if they hit each other they both lose energy?

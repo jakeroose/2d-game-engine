@@ -70,6 +70,7 @@ void Engine::draw() const {
   SDL_SetRenderDrawColor( renderer, 15, 15, 15, 255 );
   SDL_RenderClear(renderer);
   background->draw();
+  LevelManager::getInstance().getGoal()->draw();
   LightRenderer::getInstance().draw();
 
   player->draw();
@@ -119,8 +120,14 @@ void Engine::draw() const {
   if(player->isDead()){
     SDL_Color white = {255, 255, 255, 255};
     IoMod::getInstance().writeText(" You Died!", Viewport::getInstance().getViewWidth()/2 - 50, Viewport::getInstance().getViewHeight()/2 - 30, white);
-    IoMod::getInstance().writeText("R to restart", Viewport::getInstance().getViewWidth()/2 - 50, Viewport::getInstance().getViewHeight()/2 + 20, white);
+    IoMod::getInstance().writeText("[R] Restart", Viewport::getInstance().getViewWidth()/2 - 50, Viewport::getInstance().getViewHeight()/2 + 20, white);
+  } else if(LevelManager::getInstance().getGoalReached()){
+    SDL_Color white = {255, 255, 255, 255};
+    IoMod::getInstance().writeText("   Level Complete!", Viewport::getInstance().getViewWidth()/2 - 50, Viewport::getInstance().getViewHeight()/2 - 30, white);
+    IoMod::getInstance().writeText("[Enter] Go to Next Level", Viewport::getInstance().getViewWidth()/2 - 50, Viewport::getInstance().getViewHeight()/2 + 20, white);
   }
+
+
 
   if(hud.getDisplay()){
     IoMod::getInstance().writeText("Debug Info", 15, 15);
@@ -183,9 +190,6 @@ void Engine::draw() const {
   hud.draw();
   pauseMenu.draw();
 
-
-
-
   // display my name extravagantly
   Uint8 rndm = 128.0*sin(Clock::getInstance().getTicks()*0.001)+127;
   SDL_Color custColor = {128,rndm,128,255};
@@ -209,7 +213,11 @@ void Engine::checkForCollisions() {
     if ( strategy->execute(*(player->getPlayer()), *(c->getSprite())) ) {
       c->collect(player);
     }
-    // c->setPosition(c->getPosition()*1.000001);
+  }
+
+  if(strategy->execute(*(player->getPlayer()),
+     *(LevelManager::getInstance().getGoal()))){
+    LevelManager::getInstance().setGoalReached(true);
   }
 }
 
@@ -230,6 +238,8 @@ void Engine::update(Uint32 ticks) {
       LevelManager::getInstance().removeCollectable(c);
     }
   }
+  // LevelManager::getInstance().getGoal()->update(ticks);
+
 
   background->update(ticks);
   // world.update();
@@ -265,9 +275,6 @@ void Engine::play() {
           pauseMenu.toggleDisplay();
           pauseMenu.drawCentered();
         }
-        if ( keystate[SDL_SCANCODE_T] ) {
-          switchSprite();
-        }
         if ( keystate[SDL_SCANCODE_R] ) {
           LevelManager::getInstance().loadLevel("levels/" +
                           Gamedata::getInstance().getXmlStr("level/name"));
@@ -296,6 +303,12 @@ void Engine::play() {
           std::cout << "Terminating frame capture" << std::endl;
           makeVideo = false;
         }
+        if(LevelManager::getInstance().getGoalReached() &&
+            (keystate[SDL_SCANCODE_RETURN] || keystate[SDL_SCANCODE_KP_ENTER])){
+          LevelManager::getInstance().loadLevel("levels/bigLevel");
+          player->reset();
+        }
+
       }
 
       // handle mouse interaction

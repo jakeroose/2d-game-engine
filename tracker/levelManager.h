@@ -40,6 +40,9 @@ public:
   int getFreeCollectableCount() const { return (int)freeCollectables.size();}
   int getTotalLightIntersections() const;
   int getTotalFreeIntersections() const;
+  Sprite* getGoal() const { return goal; }
+  bool getGoalReached() const { return goalReached; }
+  void setGoalReached(bool g) { goalReached = g; }
 
   void saveLevel() const;
   void toggleLevelEdit();
@@ -62,7 +65,7 @@ public:
 
   const LevelManager& operator=(const LevelManager& rhs) = delete;
 private:
-  enum LOADING_TYPE { NONE, ENEMY, PLAYER, WALL, COLLECTABLE};
+  enum LOADING_TYPE { NONE, ENEMY, PLAYER, WALL, COLLECTABLE, GOAL};
   std::map<std::string, Wall*> walls;
   std::vector<Wall*> freeWalls;
   std::map<std::string, std::vector<Vector2f> > wallVertices;
@@ -70,12 +73,15 @@ private:
   std::vector<Collectable*> freeCollectables;
   std::vector<SmartSprite*> enemies;
   std::vector<SmartSprite*> freeEnemies;
+  Sprite* goal;
   RectangularCollisionStrategy* strategy;
   Vector2f spawnPoint;
   LOADING_TYPE loadingType;
   LevelState state;
   Vector2f cursorCoords;
   Vector2f* anchor;
+  bool goalReached;
+
 
   void setSpawnPoint(Vector2f v);
   void parseLine(std::string& l);

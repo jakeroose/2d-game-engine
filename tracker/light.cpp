@@ -250,6 +250,7 @@ void Light::updateMinMaxCoords(Intersection* i){
 /* updates the lightPolygon
 */
 void Light::update(Uint8 ticks) {
+  if(renderStatus == false) return; // don't need to update if not drawing
   totalTicks += (int)ticks;
   // reset our light polygon
   for(Intersection* e : lightPolygon){

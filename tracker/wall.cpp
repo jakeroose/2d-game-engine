@@ -3,24 +3,25 @@
 #include <string>
 #include <sstream>
 
-
 #include "wall.h"
 #include "viewport.h"
 #include "renderContext.h"
 #include "vector2f.h"
 #include "levelManager.h"
+#include "gamedata.h"
 
 int Wall::count = 0;
+int ww = Gamedata::getInstance().getXmlInt("world/wallWidth");
 
 Wall::Wall(int x1, int y1, int x2, int y2) :
   // convert from coords to rect with 1 width
   rect({
     x1*LevelManager::UNIT_SIZE,
     y1*LevelManager::UNIT_SIZE,
-    (x2 == x1 ? 1 : (x2-x1)*LevelManager::UNIT_SIZE),
-    (y2 == y1 ? 1 : (y2-y1)*LevelManager::UNIT_SIZE) }),
+    (x2 == x1 ? ww : (x2-x1)*LevelManager::UNIT_SIZE),
+    (y2 == y1 ? ww : (y2-y1)*LevelManager::UNIT_SIZE) }),
   id("wall_" + std::to_string(Wall::count)),
-  type(rect.w == 1 ? WallType::wall : WallType::floor) {
+  type(rect.w == ww ? WallType::wall : WallType::floor) {
   count++;
 }
 
@@ -52,25 +53,12 @@ std::string Wall::getSmallCoordString(){
   return s.str();
 }
 
-// int roundInt(int i){
-//   int r = i % LevelManager::UNIT_SIZE;
-//   if(r < LevelManager::UNIT_SIZE/2){
-//     return i - r;
-//   } else {
-//     return i + (LevelManager::UNIT_SIZE - r);
-//   }
-// }
-
 std::vector<Vector2f> Wall::getVertices(){
   std::vector<Vector2f> v = {
     Vector2f(rect.x, rect.y), // top left
     Vector2f(rect.x + rect.w, rect.y), // top right
     Vector2f(rect.x + rect.w, rect.y + rect.h), // bottom right
     Vector2f(rect.x, rect.y + rect.h)  // bottom left
-    // Vector2f(roundInt(rect.x), roundInt(rect.y)), // top left
-    // Vector2f(roundInt(rect.x + rect.w), roundInt(rect.y)), // top right
-    // Vector2f(roundInt(rect.x + rect.w), roundInt(rect.y + rect.h)), // bottom right
-    // Vector2f(roundInt(rect.x), roundInt(rect.y + rect.h))  // bottom left
   };
   return v;
 }

@@ -20,10 +20,11 @@
   <width>3000</width>
   <height>3000</height>
   <unitSize>100</unitSize> <!-- length of 1 in game unit in pixels -->
+  <wallWidth>0</wallWidth>
 </world>
 
 <level>
-  <name>bigLevel</name>
+  <name>tutorial</name>
   <renderDistance>2</renderDistance>
 </level>
 
@@ -133,6 +134,10 @@
   <file>assets/greysquare32.png</file>
   <transparency>false</transparency>
   <scroll>2</scroll>
+  <speedX>0</speedX>
+  <speedY>0</speedY>
+  <startLoc x="50" y="400"/>
+  
 </Square1>
 
 </GameData>

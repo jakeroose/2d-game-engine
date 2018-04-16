@@ -142,16 +142,6 @@ void LightRenderer::draw() const {
                            intersect->x-vx, intersect->y-vy);
         lastIntersect = intersect;
       }
-
-      // draw outline of lightPolygon
-      // NOTE: Move to ^ if we want to keep re-enable
-      // int j = lightPolygon.size()-1;
-      // for(int i = 0; i < (int)lightPolygon.size(); i++){
-      //   SDL_SetRenderDrawColor( renderer, 0, i*10 % 256, 255, 255 );
-      //   SDL_RenderDrawLine(renderer, lightPolygon[i]->x - vx,
-      //      lightPolygon[i]->y-vy, lightPolygon[j]->x-vx, lightPolygon[j]->y-vy);
-      //   j=i;
-      // }
     }
 
   }

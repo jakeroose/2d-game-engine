@@ -156,7 +156,8 @@ void Player::up(Uint32 ticks)    {
     if(noClip == false){
       for(Wall* w : collisions){
         if(LevelManager::getInstance().getStrategy()->collisionTop(&player, w)){
-          useEnergy((int)ticks); // always use energy if pressing up
+          // always use energy if pressing up
+          if(useEnergy((int)ticks)) player.setVelocityY(0);
           return;
         }
       }
@@ -197,7 +198,7 @@ void Player::updatePlayerState(){
   }
 }
 
-void Player::handleGravity(){
+void Player::handleGravity(Uint8 ticks){
   if(noClip == true) {
     energy = maxEnergy();
     return;
@@ -211,7 +212,7 @@ void Player::handleGravity(){
   for(Wall* w : collisions){
     if(collisionBottom(w)){
       falling = false;
-      refillEnergy();
+      refillEnergy(ticks);
     }
     if(LevelManager::getInstance().getStrategy()->collisionTop(&player, w)){
       player.setVelocityY(0);
@@ -236,9 +237,12 @@ void Player::handleGravity(){
   }
 }
 
-void Player::refillEnergy(){
-  energy = maxEnergy();
-  light->setIntensity(calculateLightIntensity(light));
+void Player::refillEnergy(Uint8 ticks){
+  if(player.getVelocityY() == 0 && energy < maxEnergy()){
+    energy += (int)ticks*5;
+    light->setIntensity(calculateLightIntensity(light));
+  }
+  if(energy > maxEnergy()) energy = maxEnergy();
 }
 
 // reduces energy by i, returns energy remaining
@@ -337,7 +341,7 @@ void Player::update(Uint32 ticks) {
   player.update(ticks);
   totalEnergies = (int)collectables.size() + 1;
 
-  handleGravity();
+  handleGravity(ticks);
   updatePlayerState();
 
   if(updateLighting){
