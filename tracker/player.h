@@ -58,7 +58,7 @@ public:
   void addCollectable(Collectable* c);
   void removeCollectable();
   void removeCollectable(Collectable* c);
-  int getTotalEnergies() const { return totalEnergies; }
+  int getTotalEnergies() const { return (int)collectables.size(); }
   void damagePlayer();
   void killPlayer();
   bool isDead() const { return !alive; }

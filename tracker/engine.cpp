@@ -13,12 +13,9 @@
 #include "engine.h"
 #include "frameGenerator.h"
 #include "player.h"
-#include "collisionStrategy.h"
-#include "viewport.h"
 #include "levelManager.h"
 #include "collectable.h"
 #include "lightRenderer.h"
-#include "background.h"
 
 Engine::~Engine() {
   delete player;
@@ -27,17 +24,14 @@ Engine::~Engine() {
   delete background;
 }
 
+HUDElement* tmp = new HUDElement("tmp", 225, 225, 15, 15);
+
 Engine::Engine() :
   rc( RenderContext::getInstance() ),
   clock( Clock::getInstance() ),
   renderer( rc->getRenderer() ),
   viewport( Viewport::getInstance() ),
-  hud(HUD("hud")),
-  pauseMenu(HUD( "pauseMenu",
-    Gamedata::getInstance().getXmlInt("pauseMenu/width"),
-    Gamedata::getInstance().getXmlInt("pauseMenu/height"),
-    Gamedata::getInstance().getXmlInt("view/width")/2,
-    Gamedata::getInstance().getXmlInt("view/height")/2)),
+  hud(HUDManager::getInstance()),
   player(new Player("Player")),
   strategy(new RectangularCollisionStrategy()),
   background(
@@ -48,11 +42,14 @@ Engine::Engine() :
   collision(false),
   makeVideo( false )
 {
-  hud.toggleDisplay();
+  // hud.toggleDisplay();
   player->respawn(LevelManager::getInstance().getSpawnPoint());
 
   // initialize background
   background->initialize();
+
+  std::function<bool ()> f = std::bind(HUDManager::condition, player);
+  tmp->setCondition(f);
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
   std::cout << "Loading complete" << std::endl;
@@ -128,67 +125,11 @@ void Engine::draw() const {
   }
 
 
-
+  // HUDElement* tmp = new HUDElement("tmp", 500, 500, 15, 15);
   if(hud.getDisplay()){
-    IoMod::getInstance().writeText("Debug Info", 15, 15);
-    // strategy->draw();
-
-    // write FPS to screen
-    std::stringstream strm;
-    // strm.str(std::string()); // clear strm
-    strm << Clock::getInstance().getFps();
-    IoMod::getInstance().writeText("FPS: " + strm.str(), 15, 50);
-    IoMod::getInstance().writeText("PlayerState: "+player->getStateStr(), 15, 75);
-    IoMod::getInstance().writeText("PlayerEngergy: " +
-      std::to_string(player->getEnergy()), 15, 100);
-    IoMod::getInstance().writeText("Walls:             " +      std::to_string(LevelManager::getInstance().getWallCount()), 15, 125);
-    IoMod::getInstance().writeText("Free Walls:        " +      std::to_string(LevelManager::getInstance().getFreeWallCount()), 15, 150);
-    IoMod::getInstance().writeText("Collectables:      " +      std::to_string(LevelManager::getInstance().getCollectableCount()), 15, 175);
-    IoMod::getInstance().writeText("Free Collectables: " +      std::to_string(LevelManager::getInstance().getFreeCollectableCount()), 15, 200);
-    int totalIntersections = LevelManager::getInstance().getTotalLightIntersections() + player->getLight()->getPolygonSize();
-    int freeIntersections = LevelManager::getInstance().getTotalFreeIntersections() + player->getLight()->getIntersectionPoolSize();
-    IoMod::getInstance().writeText("Light Intersections: " +      std::to_string(totalIntersections), 15, 225);
-    IoMod::getInstance().writeText("Free Intersections : " +      std::to_string(freeIntersections), 15, 250);
-    if(LevelManager::getInstance().inEditMode()){
-      Vector2f v =LevelManager::getInstance().getCursor();
-      IoMod::getInstance().writeText((std::to_string((int)v[0]) + " " + std::to_string((int)v[1])), 15, 275);
-    }
-
-    // IoMod::getInstance().writeText("PlayerEngergy: " +
-    //   std::to_string(player->getTotalEnergies()), 15, 125);
-
-    // strm.str(std::string()); // clear strm
-    // strm << clock.getElapsedTicks();
-    // IoMod::getInstance().writeText("Ticks: " + strm.str(), 15, 125);
-
-    // IoMod::getInstance().writeText("Controls:", 15, 75);
-    // IoMod::getInstance().writeText("M   - Collision Strat.", 15, 100);
-    // IoMod::getInstance().writeText("F1  - Toggle HUD", 15, 125);
-    // IoMod::getInstance().writeText("P   - Pause", 15, 150);
-    // IoMod::getInstance().writeText("ESC - Quit", 15, 175);
-    // IoMod::getInstance().writeText("Click - Add Sprite", 15, 200);
-    //
-    // // draw movement info to HUD
-    // IoMod::getInstance().writeText("WASD to move", 15, 250);
-    // const Uint8* keystate;
-    // keystate = SDL_GetKeyboardState(NULL);
-    // if (keystate[SDL_SCANCODE_A]) {
-    //   IoMod::getInstance().writeText("left", 15, 300);
-    // }
-    // if (keystate[SDL_SCANCODE_D]) {
-    //   IoMod::getInstance().writeText("right", 65, 300);
-    // }
-    // if (keystate[SDL_SCANCODE_W]) {
-    //   IoMod::getInstance().writeText("up", 40, 275);
-    // }
-    // if (keystate[SDL_SCANCODE_S]) {
-    //   IoMod::getInstance().writeText("down", 25, 325);
-    // }
+    hud.draw();
+    tmp->draw();
   }
-
-  // draw our menus
-  hud.draw();
-  pauseMenu.draw();
 
   // display my name extravagantly
   Uint8 rndm = 128.0*sin(Clock::getInstance().getTicks()*0.001)+127;
@@ -241,8 +182,41 @@ void Engine::update(Uint32 ticks) {
   // LevelManager::getInstance().getGoal()->update(ticks);
 
 
+  // TODO: Move all of this to HUDManager and config files
+  if(hud.getDisplay()){
+    tmp->clear();
+    // write FPS to screen
+    std::stringstream strm;
+    strm << "FPS:" << Clock::getInstance().getFps();
+
+    int totalIntersections =
+    LevelManager::getInstance().getTotalLightIntersections() +
+    player->getLight()->getPolygonSize();
+    int freeIntersections =
+    LevelManager::getInstance().getTotalFreeIntersections() +
+    player->getLight()->getIntersectionPoolSize();
+
+    std::vector<std::string> s = {
+      "DEBUG INFO",
+      strm.str(),
+      "PlayerState: "+ player->getStateStr(),
+      "PlayerEngergy: " + std::to_string(player->getEnergy()),
+      "Walls:             " +      std::to_string(LevelManager::getInstance().getWallCount()),
+      "Free Walls:        " +      std::to_string(LevelManager::getInstance().getFreeWallCount()),
+      "Collectables:      " +      std::to_string(LevelManager::getInstance().getCollectableCount()),
+      "Free Collectables: " +      std::to_string(LevelManager::getInstance().getFreeCollectableCount()),
+      "Light Intersections: " + std::to_string(totalIntersections),
+      "Free Intersections : " + std::to_string(freeIntersections)
+    };
+    if(LevelManager::getInstance().inEditMode()){
+      Vector2f v = LevelManager::getInstance().getCursor();
+      s.push_back(std::to_string((int)v[0]) + " " + std::to_string((int)v[1]));
+    }
+
+    tmp->addLines(s);
+  }
+
   background->update(ticks);
-  // world.update();
   viewport.update(); // always update viewport last
 }
 
@@ -257,7 +231,7 @@ void Engine::play() {
   bool done = false;
   Uint32 ticks = clock.getElapsedTicks();
   FrameGenerator frameGen;
-  pauseMenu.toggleDisplay();
+  // pauseMenu.toggleDisplay();
 
   while ( !done ) {
     // The next loop polls for events, guarding against key bounce:
@@ -272,8 +246,8 @@ void Engine::play() {
         if ( keystate[SDL_SCANCODE_P] ) {
           if ( clock.isPaused() ) clock.unpause();
           else clock.pause();
-          pauseMenu.toggleDisplay();
-          pauseMenu.drawCentered();
+          // pauseMenu.toggleDisplay();
+          // pauseMenu.drawCentered();
         }
         if ( keystate[SDL_SCANCODE_R] ) {
           LevelManager::getInstance().loadLevel("levels/" +

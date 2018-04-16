@@ -38,7 +38,7 @@
 </background>
 
 <font name="font">
-  <file>fonts/arial.ttf</file>
+  <file>fonts/FiraMono-Medium.otf</file>
   <size>24</size>
   <red>255</red>
   <green>255</green>
@@ -137,7 +137,7 @@
   <speedX>0</speedX>
   <speedY>0</speedY>
   <startLoc x="50" y="400"/>
-  
+
 </Square1>
 
 </GameData>

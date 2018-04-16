@@ -1,53 +1,55 @@
 #include <string>
 #include <regex>
-#include "hud.h"
+#include "hudElement.h"
 #include "renderContext.h"
 #include "ioMod.h"
+#include "viewport.h"
 
-HUD::HUD(std::string n, int w, int h, int _x, int _y) :
-  name(n), width(w), height(h), x(_x), y(_y), renderer(RenderContext::getInstance()->getRenderer()), display(true) {}
+HUDElement::HUDElement(std::string n, int w, int h, int _x, int _y) :
+  name(n),
+  location(Location::screen),
+  width(w), height(h),
+  paddingX(10), paddingY(5),
+  x(_x), y(_y),
+  renderer(RenderContext::getInstance()->getRenderer()),
+  display(true),
+  strings(),
+  condition() {
+  }
 
-HUD::HUD(std::string n) :
+HUDElement::HUDElement(std::string n) :
   name( n ),
+  location(Location::screen),
   width( Gamedata::getInstance().getXmlInt("hud/width") ),
   height( Gamedata::getInstance().getXmlInt("hud/height") ),
+  paddingX(10), paddingY(5),
   x( Gamedata::getInstance().getXmlInt("hud/x") ),
   y( Gamedata::getInstance().getXmlInt("hud/y") ),
   renderer( RenderContext::getInstance()->getRenderer()),
-  display( true ) {}
+  display( true ),
+  strings(),
+  condition() {
+  }
 
-
-// NOTE: this IS kind of pointless since it just draws at middle of screen
-// which could be set during initialization..
-void HUD::drawCentered() const {
+void HUDElement::draw() const {
   if(display == false) return;
-  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255/2);
-  SDL_Rect r;
-  r.x = x - width/2;
-  r.y = y - height/2;
-  r.w = width;
-  r.h = height;
-  SDL_RenderFillRect(renderer, &r);
+  if(condition() == false) return;
 
-  // Now set the color for the outline of the hud:
-  SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255/2 );
-  SDL_RenderDrawRect( renderer, &r );
+  int lineHeight = 25;
+  int posX = x;
+  int posY = y;
+  if(location == Location::world){
+    posX -= Viewport::getInstance().getX();
+    posY -= Viewport::getInstance().getY();
+  }
 
-  SDL_RenderPresent(renderer);
-
-  IoMod::getInstance().writeText(name, x + 10, y + 10);
-}
-
-void HUD::draw() const {
-  if(display == false) return;
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   SDL_SetRenderDrawColor(renderer, 50, 50, 50, 100);
   SDL_Rect r;
-  r.x = x;
-  r.y = y;
+  r.x = posX;
+  r.y = posY;
   r.w = width;
-  r.h = height;
+  r.h = lineHeight*strings.size() + paddingY*2;
   SDL_RenderFillRect(renderer, &r);
 
   // Now set the color for the outline of the hud:
@@ -56,15 +58,26 @@ void HUD::draw() const {
 
   SDL_RenderPresent(renderer);
 
-  // draw title
-  // IoMod::getInstance().writeText(name, x + 10, y + 10);
+  for(int i = 0; i < (int)strings.size(); i++){
+    IoMod::getInstance().writeText(strings[i], posX+paddingX,
+                                   posY+lineHeight*i + paddingY);
+  }
 }
 
+void HUDElement::update(Uint8 ticks){
+  if(ticks) return;
+}
+
+void HUDElement::addLines(std::vector<std::string> s){
+  for(int i = 0; i < (int)s.size(); i++){
+    addLine(s[i]);
+  }
+}
 
 /* WORK IN PROGRESS
   Idea is to grab menu items from xml and display them dynamically
 */
-void HUD::getMenuItems(){
+void HUDElement::getMenuItems(){
   // const std::map<std::string, std::string>& data = Gamedata::getInstance().getGameData();
   // auto it = data.begin();
   std::regex reg("hud*");

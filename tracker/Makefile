@@ -23,7 +23,6 @@ OBJS = \
 	clock.o \
 	engine.o \
 	player.o \
-	hud.o \
 	collisionStrategy.o \
 	smartSprite.o \
 	light.o \
@@ -35,6 +34,8 @@ OBJS = \
 	background.o \
 	explodingSprite.o \
 	chunk.o \
+	hudElement.o \
+	hudManager.o \
 	main.o
 EXEC = run
 

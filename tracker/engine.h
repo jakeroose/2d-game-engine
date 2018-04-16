@@ -4,7 +4,7 @@
 #include "clock.h"
 #include "world.h"
 #include "viewport.h"
-#include "hud.h"
+#include "hudManager.h"
 #include "collisionStrategy.h"
 #include "background.h"
 
@@ -26,9 +26,7 @@ private:
   Clock& clock;
   SDL_Renderer * const renderer;
   Viewport& viewport;
-  HUD hud;
-  HUD pauseMenu;
-
+  HUDManager hud;
   Player* player;
   RectangularCollisionStrategy* strategy;
   Background* background;
@@ -36,7 +34,6 @@ private:
   int currentStrategy;
   int currentSprite;
   bool collision;
-
   bool makeVideo;
 
   void draw() const;
