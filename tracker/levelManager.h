@@ -9,7 +9,7 @@
 #include "collectable.h"
 #include "smartSprite.h"
 
-enum class LevelState { loading, running, editing };
+enum class LevelState { loading, running, editing, paused };
 
 class LevelManager {
 public:
@@ -48,6 +48,9 @@ public:
   void saveLevel() const;
   void toggleLevelEdit();
   bool inEditMode() const { return state == LevelState::editing; }
+  const std::string& getLevelName() const { return levelName; }
+  bool isPaused() const { return state == LevelState::paused; }
+  void togglePause();
 
   void setCursor(const Vector2f& v);
   const Vector2f getCursor() const { return cursorCoords*UNIT_SIZE; }
@@ -55,6 +58,8 @@ public:
   Vector2f* getAnchor() const { return anchor; }
   void resetAnchor();
   void eraseWall();
+
+  Vector2f gameToWorldCoord(const Vector2f& v) { return v*UNIT_SIZE; }
 
   bool withinRenderDistance(const Vector2f& v) const;
   bool withinRenderDistance(const Vector2f& v, const Vector2f& v2) const;

@@ -46,37 +46,7 @@ Engine::Engine() :
   // initialize background
   background->initialize();
 
-  // TODO: Move all of this to HUDManager and config files
-  if(true){
-    HUDElement* tmp = new HUDElement("hud", 225, 225, 15, 15);
-    std::function<bool ()> f = std::bind(HUDManager::condition, player);
-    tmp->setCondition(f);
-    hud.addElement(tmp);
-
-    tmp = new HUDElement("playerDied", 250, 100,
-    Viewport::getInstance().getViewWidth()/2 - 50,
-    Viewport::getInstance().getViewHeight()/2 - 30);
-    f = std::bind(HUDManager::playerDied, player);
-    tmp->setCondition(f);
-    hud.addElement(tmp);
-    std::vector<std::string> v = {
-      " You Died!",
-      "[R] Restart"
-    };
-    tmp->addLines(v);
-
-    tmp = new HUDElement("levelComplete", 250, 100,
-    Viewport::getInstance().getViewWidth()/2 - 50,
-    Viewport::getInstance().getViewHeight()/2 - 30);
-    f = std::bind(HUDManager::levelComplete);
-    tmp->setCondition(f);
-    hud.addElement(tmp);
-    v = {
-      "  Level Complete!",
-      "[Enter] Next Level"
-    };
-    tmp->addLines(v);
-  }
+  hud.initialize(player);
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
   std::cout << "Loading complete" << std::endl;
@@ -175,58 +145,66 @@ void Engine::checkForCollisions() {
 }
 
 void Engine::update(Uint32 ticks) {
-  checkForCollisions();
-  // LevelManager::getInstance().updateViewBorder();
-  player->update(ticks);
-  for(auto e: LevelManager::getInstance().getEnemies()){
-    e->update(ticks);
-    if(e->isDead() && e->isExploding() == false){
-      LevelManager::getInstance().removeEnemy(e);
-    }
-  }
 
-  for(Collectable* c: LevelManager::getInstance().getCollectables()){
-    c->update(ticks);
-    if(c->doneExploding()){
-      LevelManager::getInstance().removeCollectable(c);
-    }
-  }
-  // LevelManager::getInstance().getGoal()->update(ticks);
-
-
-  // TODO: Move all of this to HUDManager and config files
-  if(hud.getDisplay()){
-    HUDElement* tmp = HUDManager::getInstance().getElement("hud");
-    tmp->clear();
-    // write FPS to screen
-    std::stringstream strm;
-    strm << "FPS:" << Clock::getInstance().getFps();
-
-    int totalIntersections =
-    LevelManager::getInstance().getTotalLightIntersections() +
-    player->getLight()->getPolygonSize();
-    int freeIntersections =
-    LevelManager::getInstance().getTotalFreeIntersections() +
-    player->getLight()->getIntersectionPoolSize();
-
-    std::vector<std::string> s = {
-      "DEBUG INFO",
-      strm.str(),
-      "PlayerState: "+ player->getStateStr(),
-      "PlayerEngergy: " + std::to_string(player->getEnergy()),
-      "Walls:             " +      std::to_string(LevelManager::getInstance().getWallCount()),
-      "Free Walls:        " +      std::to_string(LevelManager::getInstance().getFreeWallCount()),
-      "Collectables:      " +      std::to_string(LevelManager::getInstance().getCollectableCount()),
-      "Free Collectables: " +      std::to_string(LevelManager::getInstance().getFreeCollectableCount()),
-      "Light Intersections: " + std::to_string(totalIntersections),
-      "Free Intersections : " + std::to_string(freeIntersections)
-    };
-    if(LevelManager::getInstance().inEditMode()){
-      Vector2f v = LevelManager::getInstance().getCursor();
-      s.push_back(std::to_string((int)v[0]) + " " + std::to_string((int)v[1]));
+  if(LevelManager::getInstance().isPaused() == false){
+    checkForCollisions();
+    player->update(ticks);
+    for(auto e: LevelManager::getInstance().getEnemies()){
+      e->update(ticks);
+      if(e->isDead() && e->isExploding() == false){
+        LevelManager::getInstance().removeEnemy(e);
+      }
     }
 
-    tmp->addLines(s);
+    for(Collectable* c: LevelManager::getInstance().getCollectables()){
+      c->update(ticks);
+      if(c->doneExploding()){
+        LevelManager::getInstance().removeCollectable(c);
+      }
+    }
+
+    // TODO: Move all of this to HUDManager and config files
+    // would require either variables in the string file that get mapped to
+    // a function or pass a function pointer that returns the strings
+    if(hud.getDisplay()){
+      HUDElement* tmp = HUDManager::getInstance().getElement("hud");
+      tmp->clear();
+      // write FPS to screen
+      std::stringstream strm;
+      strm << "FPS:" << Clock::getInstance().getFps();
+
+      int totalIntersections =
+      LevelManager::getInstance().getTotalLightIntersections() +
+      player->getLight()->getPolygonSize();
+      int freeIntersections =
+      LevelManager::getInstance().getTotalFreeIntersections() +
+      player->getLight()->getIntersectionPoolSize();
+
+      std::vector<std::string> s = {
+        "DEBUG INFO",
+        strm.str(),
+        "PlayerState: "+ player->getStateStr(),
+        "PlayerEngergy: " + std::to_string(player->getEnergy()),
+        "Walls:             " +
+        std::to_string(LevelManager::getInstance().getWallCount()),
+        "Free Walls:        " +
+        std::to_string(LevelManager::getInstance().getFreeWallCount()),
+        "Collectables:      " +
+        std::to_string(LevelManager::getInstance().getCollectableCount()),
+        "Free Collectables: " +
+        std::to_string(LevelManager::getInstance().getFreeCollectableCount()),
+        "Light Intersections: " + std::to_string(totalIntersections),
+        "Free Intersections : " + std::to_string(freeIntersections)
+      };
+      if(LevelManager::getInstance().inEditMode()){
+        Vector2f v = LevelManager::getInstance().getCursor() /
+        LevelManager::UNIT_SIZE;
+        s.push_back("X: " + std::to_string((int)v[0]) +
+        ", Y: " + std::to_string((int)v[1]));
+      }
+
+      tmp->addLines(s);
+    }
   }
 
   background->update(ticks);
@@ -257,8 +235,9 @@ void Engine::play() {
           break;
         }
         if ( keystate[SDL_SCANCODE_P] ) {
-          if ( clock.isPaused() ) clock.unpause();
-          else clock.pause();
+          // if ( clock.isPaused() ) clock.unpause();
+          // else clock.pause();
+          LevelManager::getInstance().togglePause();
           // pauseMenu.toggleDisplay();
           // pauseMenu.drawCentered();
         }
@@ -291,10 +270,10 @@ void Engine::play() {
         }
         if(LevelManager::getInstance().getGoalReached() &&
             (keystate[SDL_SCANCODE_RETURN] || keystate[SDL_SCANCODE_KP_ENTER])){
+          // TODO: store next level name as a variable in the level file
           LevelManager::getInstance().loadLevel("levels/bigLevel");
           player->reset();
         }
-
       }
 
       // handle mouse interaction

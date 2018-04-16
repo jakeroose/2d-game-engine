@@ -10,10 +10,6 @@ music
 sound
 
 HUD:
-- could then have each menu as it's own file in a directory
-- probs better to use JSON/XML instead of reading from multiple files
-- HUD tips on starting level
-- pause menu, show controls
 - dynamic width
 - color controls
 

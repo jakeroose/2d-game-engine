@@ -68,6 +68,14 @@ LevelManager& LevelManager::getInstance(){
   return levelManager;
 }
 
+void LevelManager::togglePause(){
+  if(state == LevelState::running){
+    state = LevelState::paused;
+  } else if(state == LevelState::paused){
+    state = LevelState::running;
+  }
+}
+
 void LevelManager::addWall(Wall* w){
   walls.emplace(w->getId(), w);
   wallVertices.emplace(w->getId(), w->getVertices());
@@ -106,7 +114,6 @@ void LevelManager::addWall(const std::string& s){
   } else {
     addWall(new Wall(v[0], v[1], v[2], v[3]));
   }
-
 }
 
 /* Adds a collectable to the tile at x, y */
@@ -125,8 +132,6 @@ void LevelManager::addCollectable(int x, int y){
   c->setPosition(Vector2f(scaledX + UNIT_SIZE*x, scaledY + UNIT_SIZE*y));
   collectables.push_back(c);
 }
-
-
 
 // Remove collectable and place it in freeCollectables object pool
 void LevelManager::removeCollectable(Collectable* c){

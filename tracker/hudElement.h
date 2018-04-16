@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include "vector2f.h"
 
 class HUDElement {
 public:
@@ -20,6 +21,9 @@ public:
   void clear(){ strings.erase(strings.begin(), strings.end()); }
   void setCondition(std::function<bool ()> c) { condition = c; }
   const std::string getName(){ return name; }
+  void setPosition(const Vector2f& v) { x = v[0]; y = v[1]; }
+  void setLocationWorld() { location = Location::world; }
+  void setLocationScreen() { location = Location::screen; }
 
   const HUDElement& operator=(const HUDElement& h) = delete;
 private:
