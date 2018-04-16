@@ -19,6 +19,7 @@ public:
   void addLines(std::vector<std::string> s);
   void clear(){ strings.erase(strings.begin(), strings.end()); }
   void setCondition(std::function<bool ()> c) { condition = c; }
+  const std::string getName(){ return name; }
 
   const HUDElement& operator=(const HUDElement& h) = delete;
 private:

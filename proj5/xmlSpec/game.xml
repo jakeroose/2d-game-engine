@@ -1,0 +1,143 @@
+<?xml version = "1.0"?>
+<GameData>
+<!-- screenTitle is also used to identify you and your animation.
+     So make sure to include your name as part of the screenTitle -->
+<title>Lit (Jake)</title>
+<maxStringSize>50</maxStringSize>
+
+<frameCapOn>true</frameCapOn>
+<period>17</period>
+
+<maxFrames>300</maxFrames>
+<username>jroose</username>
+
+<view>
+  <width>900</width>
+  <height>540</height>
+</view>
+
+<world>
+  <width>3000</width>
+  <height>3000</height>
+  <unitSize>100</unitSize> <!-- length of 1 in game unit in pixels -->
+  <wallWidth>0</wallWidth>
+</world>
+
+<level>
+  <name>tutorial</name>
+  <renderDistance>2</renderDistance>
+</level>
+
+<test>
+  <attr1>"att1 \n newline?"</attr1>
+</test>
+
+<background>
+  <count>500</count>
+  <gravity>0.1</gravity>
+</background>
+
+<font name="font">
+  <file>fonts/FiraMono-Bold.otf</file>
+  <size>24</size>
+  <red>255</red>
+  <green>255</green>
+  <blue>0</blue>
+  <alpha>0</alpha>
+</font>
+
+<hud>
+  <title>Menu</title>
+  <width>275</width>
+  <height>275</height>
+  <x>10</x>
+  <y>10</y>
+</hud>
+
+<pauseMenu>
+  <title>Paused</title>
+  <width>500</width>
+  <height>500</height>
+  <x>10</x>
+  <y>10</y>
+</pauseMenu>
+
+<lights>
+  <renderLights>true</renderLights>
+  <debug>false</debug>
+  <alpha>50</alpha>
+</lights>
+
+<Player>
+  <file>assets/expandingSphere.png</file>
+  <startLoc x="64" y="192"/>
+  <frames>6</frames>
+  <frameInterval>250</frameInterval>
+  <speedX>150</speedX>
+  <speedY>150</speedY>
+  <transparency>false</transparency>
+  <flyPower></flyPower>
+  <noClip>false</noClip>
+  <collectableLight>false</collectableLight>
+  <chunk>
+    <size>20</size>
+    <distance>200</distance>
+    <lifespan>2000</lifespan>
+    <percentVariation>50</percentVariation>
+  </chunk>
+</Player>
+
+<Collectable>
+  <file>assets/smallSphere.png</file>
+  <startLoc x="50" y="400"/>
+  <frames>6</frames>
+  <frameInterval>200</frameInterval>
+  <speedX>0</speedX>
+  <speedY>0</speedY>
+  <transparency>false</transparency>
+  <count>0</count>
+  <safeDistance>300</safeDistance>
+  <rotation>true</rotation>
+  <chunk>
+    <size>15</size>
+    <distance>50</distance>
+    <lifespan>1500</lifespan>
+    <percentVariation>50</percentVariation>
+  </chunk>
+</Collectable>
+
+<Enemy>
+  <file>assets/enemy.png</file>
+  <startLoc x="50" y="400"/>
+  <frames>6</frames>
+  <frameInterval>150</frameInterval>
+  <speedX>150</speedX>
+  <speedY>50</speedY>
+  <transparency>false</transparency>
+  <count>0</count>
+  <safeDistance>300</safeDistance>
+  <chunk>
+    <size>20</size>
+    <distance>200</distance>
+    <lifespan>1500</lifespan>
+    <percentVariation>50</percentVariation>
+  </chunk>
+</Enemy>
+
+<Square>
+  <file>assets/blacksquare32.png</file>
+  <transparency>false</transparency>
+  <scroll>1</scroll>
+</Square>
+
+<Square1>
+  <file>assets/greysquare32.png</file>
+  <transparency>false</transparency>
+  <scroll>2</scroll>
+  <speedX>0</speedX>
+  <speedY>0</speedY>
+  <startLoc x="50" y="400"/>
+
+</Square1>
+
+</GameData>

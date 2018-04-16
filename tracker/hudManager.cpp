@@ -5,8 +5,16 @@ HUDManager::HUDManager() :
   hudElements(),
   display(true)
   {
-
 }
+
+bool HUDManager::playerDied(Player* p){
+  return p->isDead();
+}
+
+bool HUDManager::levelComplete(){
+  return LevelManager::getInstance().getGoalReached();
+}
+
 
 HUDManager& HUDManager::getInstance() {
   static HUDManager m;
@@ -14,7 +22,12 @@ HUDManager& HUDManager::getInstance() {
 }
 
 void HUDManager::draw() const {
-  for(HUDElement* e : hudElements){
-    e->draw();
+  if(display){
+    for(auto e : hudElements){
+      e.second->draw();
+    }
   }
+}
+
+void HUDManager::initialize(){
 }

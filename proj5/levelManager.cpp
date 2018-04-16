@@ -18,8 +18,6 @@ Light and Player don't have to have their own copies.
 Reads in level from /levels at runtime
 */
 
-// TODO: Move level editing to its own class
-
 int LevelManager::UNIT_SIZE = Gamedata::getInstance().getXmlInt("world/unitSize");
 
 std::vector<int> strToIntVec(std::string& s){
@@ -47,9 +45,8 @@ LevelManager::LevelManager() :
   state(LevelState::loading),
   cursorCoords(),
   anchor(NULL),
-  goalReached(false),
-  levelName("levels/" + Gamedata::getInstance().getXmlStr("level/name")) {
-  loadLevel(levelName);
+  goalReached(false) {
+  loadLevel("levels/" + Gamedata::getInstance().getXmlStr("level/name"));
 }
 
 LevelManager::~LevelManager(){
@@ -220,14 +217,9 @@ void LevelManager::parseLine(std::string& l){
   }
 }
 
-void LevelManager::resetLevel(){
-  loadLevel(levelName);
-}
-
 void LevelManager::loadLevel(const std::string& name){
   std::cout << "Loading Level: " << name << std::endl;
   state = LevelState::loading;
-  levelName = name;
   // std::cout << "=== Before Load ===" << std::endl;
   // std::cout << "Collectables: " << collectables.size() << std::endl;
   // std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
@@ -241,7 +233,6 @@ void LevelManager::loadLevel(const std::string& name){
       it = walls.erase(it);
     }
   }
-
   if(collectables.size() > 0){
     auto it = collectables.begin();
     while(it != collectables.end()){
@@ -261,7 +252,7 @@ void LevelManager::loadLevel(const std::string& name){
 
   std::ifstream levelData;
   std::string line;
-  levelData.open(levelName);
+  levelData.open(name);
   if(levelData.is_open()){
     while(std::getline(levelData, line)){
       parseLine(line);

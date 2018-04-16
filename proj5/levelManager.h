@@ -26,7 +26,6 @@ public:
   }
   const Wall* getWall(const std::string& s){ return walls.find(s)->second; }
   void loadLevel(const std::string& s);
-  void resetLevel();
 
   void removeCollectable(Collectable* c);
   const std::vector<Collectable*>& getCollectables(){ return collectables; }
@@ -82,7 +81,7 @@ private:
   Vector2f cursorCoords;
   Vector2f* anchor;
   bool goalReached;
-  std::string levelName;
+
 
   void setSpawnPoint(Vector2f v);
   void parseLine(std::string& l);
