@@ -8,6 +8,9 @@ HUDManager::HUDManager() :
   display(true)
   {
 }
+HUDManager::~HUDManager(){
+  for(auto e : hudElements) delete e.second;
+}
 
 bool HUDManager::playerDied(Player* p){
   return p->isDead();
@@ -49,28 +52,27 @@ void HUDManager::draw() const {
 
 /* Initialize all of the different menus & popups */
 void HUDManager::initialize(Player* player){
-  HUDElement* tmp = new HUDElement("hud", 225, 225, 15, 15);
+  HUDElement* tmp = new HUDElement("hud", 15, 15);
   tmp->setCondition(std::bind(HUDManager::condition));
   addElement(tmp);
 
-  tmp = new HUDElement("playerDied", 250, 100,
+  tmp = new HUDElement("playerDied",
   Viewport::getInstance().getViewWidth()/2 - 50,
   Viewport::getInstance().getViewHeight()/2 - 30);
   tmp->setCondition(std::bind(HUDManager::playerDied, player));
   addElement(tmp);
 
-  tmp = new HUDElement("levelComplete", 250, 100,
+  tmp = new HUDElement("levelComplete",
   Viewport::getInstance().getViewWidth()/2 - 50,
   Viewport::getInstance().getViewHeight()/2 - 30);
   tmp->setCondition(std::bind(HUDManager::levelComplete));
   addElement(tmp);
 
-  tmp = new HUDElement("paused", 250, 250,
+  tmp = new HUDElement("paused",
   Viewport::getInstance().getViewWidth()/2 - 50,
   Viewport::getInstance().getViewHeight()/2 - 30);
   tmp->setCondition(std::bind(HUDManager::gamePaused));
   addElement(tmp);
-
 
   /* === Tutorial Level Tips === */
   // I hope I can understand this 2 days from now...
@@ -80,9 +82,10 @@ void HUDManager::initialize(Player* player){
     LevelManager::getInstance().gameToWorldCoord(Vector2f(14, 11))),
     std::bind(HUDManager::onlyOnLevel, "levels/tutorial")
   };
-  tmp = new HUDElement("stuck", 225, 225, 50, 50);
+  tmp = new HUDElement("stuck");
   tmp->setCondition( std::bind( HUDManager::conditionArray, conds));
-  tmp->setPosition(LevelManager::getInstance().gameToWorldCoord(Vector2f(10, 7)));
+  tmp->setPosition(LevelManager::getInstance().gameToWorldCoord(
+        Vector2f(10, 7)));
   tmp->setLocationWorld();
   addElement(tmp);
 
@@ -92,7 +95,8 @@ void HUDManager::initialize(Player* player){
   };
   tmp = new HUDElement("collectableInfo");
   tmp->setCondition(std::bind(HUDManager::conditionArray, conds));
-  tmp->setPosition(LevelManager::getInstance().gameToWorldCoord(Vector2f(9, 3)));
+  tmp->setPosition(LevelManager::getInstance().gameToWorldCoord(
+        Vector2f(9, 2.9)));
   tmp->setLocationWorld();
   addElement(tmp);
 
@@ -104,7 +108,8 @@ void HUDManager::initialize(Player* player){
   };
   tmp = new HUDElement("tutInstructions");
   tmp->setCondition(std::bind(HUDManager::conditionArray, conds));
-  tmp->setPosition(LevelManager::getInstance().gameToWorldCoord(Vector2f(5, 4)));
+  tmp->setPosition(LevelManager::getInstance().gameToWorldCoord(
+        Vector2f(5, 4.1)));
   tmp->setLocationWorld();
   addElement(tmp);
 

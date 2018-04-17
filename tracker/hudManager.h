@@ -12,6 +12,7 @@
 class HUDManager {
 public:
   explicit HUDManager();
+  ~HUDManager();
   static HUDManager& getInstance();
   void draw() const;
   void initialize(Player* p);

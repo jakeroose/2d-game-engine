@@ -4,12 +4,15 @@
 #include "renderContext.h"
 #include "ioMod.h"
 #include "viewport.h"
+#include "gamedata.h"
 
-HUDElement::HUDElement(std::string n, int w, int h, int _x, int _y) :
+HUDElement::HUDElement(std::string n, int _x, int _y) :
   name(n),
   location(Location::screen),
-  width(w), height(h),
-  paddingX(10), paddingY(5),
+  paddingX(Gamedata::getInstance().getXmlInt("font/paddingX")),
+  paddingY(Gamedata::getInstance().getXmlInt("font/paddingY")),
+  lineHeight(Gamedata::getInstance().getXmlInt("font/size")),
+  maxLength(),
   x(_x), y(_y),
   renderer(RenderContext::getInstance()->getRenderer()),
   display(true),
@@ -20,9 +23,10 @@ HUDElement::HUDElement(std::string n, int w, int h, int _x, int _y) :
 HUDElement::HUDElement(std::string n) :
   name( n ),
   location(Location::screen),
-  width( Gamedata::getInstance().getXmlInt("hud/width") ),
-  height( Gamedata::getInstance().getXmlInt("hud/height") ),
-  paddingX(10), paddingY(5),
+  paddingX(Gamedata::getInstance().getXmlInt("font/paddingX")),
+  paddingY(Gamedata::getInstance().getXmlInt("font/paddingY")),
+  lineHeight(Gamedata::getInstance().getXmlInt("font/size")),
+  maxLength(),
   x( Gamedata::getInstance().getXmlInt("hud/x") ),
   y( Gamedata::getInstance().getXmlInt("hud/y") ),
   renderer( RenderContext::getInstance()->getRenderer()),
@@ -32,10 +36,8 @@ HUDElement::HUDElement(std::string n) :
   }
 
 void HUDElement::draw() const {
-  if(display == false) return;
   if(condition() == false) return;
 
-  int lineHeight = 25;
   int posX = x;
   int posY = y;
   if(location == Location::world){
@@ -48,8 +50,8 @@ void HUDElement::draw() const {
   SDL_Rect r;
   r.x = posX;
   r.y = posY;
-  r.w = width;
-  r.h = lineHeight*strings.size() + paddingY*3;
+  r.w = maxLength*lineHeight*0.63+paddingX;
+  r.h = (lineHeight+paddingY+2)*strings.size();
   SDL_RenderFillRect(renderer, &r);
 
   // Now set the color for the outline of the hud:
@@ -60,7 +62,7 @@ void HUDElement::draw() const {
 
   for(int i = 0; i < (int)strings.size(); i++){
     IoMod::getInstance().writeText(strings[i], posX+paddingX,
-                                   posY+lineHeight*i + paddingY);
+                                   posY+(lineHeight+paddingY)*i+5);
   }
 }
 
@@ -68,31 +70,15 @@ void HUDElement::update(Uint8 ticks){
   if(ticks) return;
 }
 
+void HUDElement::addLine(const std::string s){
+  strings.push_back(s);
+  if((int)s.length() > maxLength) maxLength = s.length();
+}
+
+
 void HUDElement::addLines(std::vector<std::string> s){
   for(int i = 0; i < (int)s.size(); i++){
     addLine(s[i]);
-  }
-}
-
-/* WORK IN PROGRESS
-  Idea is to grab menu items from xml and display them dynamically
-*/
-void HUDElement::getMenuItems(){
-  // const std::map<std::string, std::string>& data = Gamedata::getInstance().getGameData();
-  // auto it = data.begin();
-  std::regex reg("hud*");
-  // // for(auto& e: data){
-  // while(it != data.end()){
-  //   if(std::regex_match(*it.first, reg)){
-  //     // std::cout << it << std::endl;
-  //   }
-  //   // std::cout << *it << std::endl;
-  //   ++it;
-  // }
-  for(auto& elem: Gamedata::getInstance().getGameData()){
-    if(std::regex_match(elem.first, reg)){
-      std::cout << "match: " << elem.first << std::endl;
-    }
-
+    if((int)s[i].length() > maxLength) maxLength = s[i].length();
   }
 }
