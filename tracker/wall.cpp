@@ -83,5 +83,4 @@ void Wall::draw() const {
   };
   SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
   SDL_RenderDrawRect(renderer, &r);
-  SDL_RenderPresent(renderer);
 }

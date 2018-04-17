@@ -143,9 +143,5 @@ void LightRenderer::draw() const {
         lastIntersect = intersect;
       }
     }
-
   }
-
-  SDL_RenderPresent(renderer);
-
 }

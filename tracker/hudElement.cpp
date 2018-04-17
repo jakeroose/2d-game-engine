@@ -58,8 +58,6 @@ void HUDElement::draw() const {
   SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255/2 );
   SDL_RenderDrawRect( renderer, &r );
 
-  SDL_RenderPresent(renderer);
-
   for(int i = 0; i < (int)strings.size(); i++){
     IoMod::getInstance().writeText(strings[i], posX+paddingX,
                                    posY+(lineHeight+paddingY)*i+5);
