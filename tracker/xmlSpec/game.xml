@@ -54,14 +54,6 @@
   <y>10</y>
 </hud>
 
-<pauseMenu>
-  <title>Paused</title>
-  <width>500</width>
-  <height>500</height>
-  <x>10</x>
-  <y>10</y>
-</pauseMenu>
-
 <lights>
   <renderLights>true</renderLights>
   <debug>false</debug>

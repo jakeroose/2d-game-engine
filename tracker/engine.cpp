@@ -71,7 +71,21 @@ void Engine::draw() const {
   for(Collectable* c: LevelManager::getInstance().getCollectables()){
     c->draw();
   }
-  for(auto e: LevelManager::getInstance().getEnemies()) e->draw();
+
+  float x, y, min0, alpha;
+  for(auto e: LevelManager::getInstance().getEnemies()){
+
+    /* === ENEMIES FADE BASED ON DISTANCE FROM PLAYER === */
+    x = e->getX() - player->getX();
+    y = e->getY() - player->getY();
+    // set between range of 0 and 255
+    min0 = std::max((255*(float)(viewport.getViewWidth()/2 -
+      (hypot(x, y)-50))/(float)(viewport.getViewWidth()/2)), 0.0f);
+    alpha = std::min(min0, 255.0f);
+    SDL_SetTextureAlphaMod(e->getImage()->getTexture(), alpha);
+
+    e->draw();
+  }
 
   if(LevelManager::getInstance().inEditMode()){
     // draw coord grid

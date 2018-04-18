@@ -21,6 +21,10 @@ have lights follow player via some slerp function (flocking?)
 lights don't clip through walls
 cancel explosion method
 
+Lighting:
+Have it fade further away from player. Will allow me to reduce number of loops in lighting, add to immersion/lost feeling, and work well with fading sprites. (whats more expensive: calcing if point is w/in radius of circle or hashing 2 intersecting points on x axis of the circle, looking it up & adding offset)
+fading sprites doesn't seem to have much affect on FPS. could add check to see if far enough away to update, but not sure if updateTexture is that expensive.
+
 === End of "Need to Do" ===
 Things to consider:
 potentially a way to combine lightPolygons so that there is only one pass over
