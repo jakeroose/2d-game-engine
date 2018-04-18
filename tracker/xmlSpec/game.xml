@@ -58,6 +58,8 @@
   <renderLights>true</renderLights>
   <debug>false</debug>
   <alpha>50</alpha>
+  <diffusion>false</diffusion>
+  <diffusionRadius>500</diffusionRadius>
 </lights>
 
 <Player>

@@ -14,9 +14,10 @@ LightRenderer::LightRenderer() :
   renderer(RenderContext::getInstance()->getRenderer()),
   lights(),
   debug(Gamedata::getInstance().getXmlBool("lights/debug")),
-  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights"))
+  renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")),
+  diffusion(Gamedata::getInstance().getXmlBool("lights/diffusion")),
+  diffusionRadius(Gamedata::getInstance().getXmlInt("lights/diffusionRadius"))
   {
-
 }
 
 LightRenderer& LightRenderer::getInstance(){
@@ -24,10 +25,25 @@ LightRenderer& LightRenderer::getInstance(){
   return lr;
 }
 
+float LightRenderer::calcIntensity(float d) const{
+  if(diffusion == false) return 1.0f;
+  d = abs(d);
+  // make sure  0 < intensity < 1
+  float max1 = std::min(1.0f, ((diffusionRadius - d) / diffusionRadius));
+  return std::max(max1, 0.0f);
+}
+
+
+// TODO: try rendiner the light with rederDrawLine
+// would probably eat less CPU since it's not looping over every pixel in row
 void LightRenderer::draw() const {
   int minx = 999999, miny=999999, maxx = -1, maxy = -1,
-      vx = Viewport::getInstance().getX(),
-      vy = Viewport::getInstance().getY();
+      vx = Viewport::getInstance().getX(), // view position
+      vy = Viewport::getInstance().getY(),
+      vw = Viewport::getInstance().getViewWidth(), // view width/height
+      vh = Viewport::getInstance().getViewHeight(),
+      cx = vx + vw/2, // center of screen (aka player pos)
+      cy = vy + vh/2;
 
   if(renderLights){
     /* Optimization so that we only DRAW what is in the viewport and within a
@@ -39,6 +55,8 @@ void LightRenderer::draw() const {
       if(l->getMaxx() > maxx){ maxx = l->getMaxx(); }
       if(l->getMaxy() > maxy){ maxy = l->getMaxy(); }
     }
+
+    // TODO: set min & max bassed on diffusionRadius if diffusion
     if(minx < vx){ minx = vx;}
     if(miny < vy){ miny = vy;}
     if(maxx > vx + Viewport::getInstance().getViewWidth()){
@@ -51,12 +69,15 @@ void LightRenderer::draw() const {
     /* Render the Lighting Polygon */
     // fill algorithm courtesy of http://alienryderflex.com/polygon_fill/
     int polyCorners, intensity;
-    int nodes, pixelX, pixelY, i, j, swap, IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
+    int nodes, pixelX, pixelY, i, j, swap,
+    // IMAGE_LEFT = (vx + vw/10), IMAGE_RIGHT = (vx + vw*0.9);
+    IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
 
     //  Loop through the rows of the image.
     for (pixelY=miny; pixelY<maxy; pixelY++) {
+    // for (pixelY=(vy + vh/10); pixelY<(vy + vh*0.9); pixelY++) {
 
       for(Light* l : lights){
         if(l->shouldDraw() == false) continue;
@@ -93,15 +114,21 @@ void LightRenderer::draw() const {
           else { i++; }
         }
 
+        int tense;
         //  Fill the pixels between node pairs.
         for (i=0; i<nodes; i+=2) {
           if   (nodeX[i  ]>=IMAGE_RIGHT) break;
           if   (nodeX[i+1]> IMAGE_LEFT ) {
             if (nodeX[i  ]< IMAGE_LEFT ) nodeX[i  ]=IMAGE_LEFT ;
             if (nodeX[i+1]> IMAGE_RIGHT) nodeX[i+1]=IMAGE_RIGHT;
-            for (pixelX=nodeX[i]; pixelX<nodeX[i+1]; pixelX++){
-              // have to render lighting to the viewport (vx & vy)
-              SDL_RenderDrawPoint(renderer, pixelX - vx, pixelY - vy);
+            if(diffusion){
+              for (pixelX=nodeX[i]; pixelX<nodeX[i+1]; pixelX++){
+                tense = intensity*calcIntensity(hypot(cx - pixelX, cy-pixelY));
+                SDL_SetRenderDrawColor( renderer, 200, 200, 200, tense );
+                SDL_RenderDrawPoint(renderer, pixelX - vx, pixelY - vy);
+              }
+            } else {
+              SDL_RenderDrawLine(renderer, nodeX[i]-vx, pixelY - vy, nodeX[i+1] - vx, pixelY - vy);
             }
           }
         }
