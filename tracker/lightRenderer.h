@@ -18,6 +18,7 @@ private:
   bool renderLights;
   bool diffusion;
   int diffusionRadius;
+  SDL_Color baseColor;
 
   float calcIntensity(float d) const;
   LightRenderer();

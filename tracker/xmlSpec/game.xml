@@ -40,10 +40,10 @@
 <font name="font">
   <file>fonts/FiraMono-Medium.otf</file>
   <size>20</size>
-  <red>255</red>
-  <green>255</green>
-  <blue>0</blue>
-  <alpha>0</alpha>
+  <red>175</red>
+  <green>175</green>
+  <blue>255</blue>
+  <alpha>150</alpha>
   <paddingX>5</paddingX>
   <paddingY>5</paddingY>
 </font>
@@ -59,7 +59,10 @@
   <debug>false</debug>
   <alpha>50</alpha>
   <diffusion>false</diffusion>
-  <diffusionRadius>500</diffusionRadius>
+  <diffusionRadius>250</diffusionRadius>
+  <red>200</red>
+  <green>200</green>
+  <blue>255</blue>
 </lights>
 
 <Player>

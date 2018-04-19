@@ -16,7 +16,13 @@ LightRenderer::LightRenderer() :
   debug(Gamedata::getInstance().getXmlBool("lights/debug")),
   renderLights(Gamedata::getInstance().getXmlBool("lights/renderLights")),
   diffusion(Gamedata::getInstance().getXmlBool("lights/diffusion")),
-  diffusionRadius(Gamedata::getInstance().getXmlInt("lights/diffusionRadius"))
+  diffusionRadius(Gamedata::getInstance().getXmlInt("lights/diffusionRadius")),
+  baseColor({
+    (Uint8)Gamedata::getInstance().getXmlInt("lights/red"),
+    (Uint8)Gamedata::getInstance().getXmlInt("lights/green"),
+    (Uint8)Gamedata::getInstance().getXmlInt("lights/blue"),
+    (Uint8)Gamedata::getInstance().getXmlInt("lights/alpha")
+  })
   {
 }
 
@@ -73,7 +79,7 @@ void LightRenderer::draw() const {
     // IMAGE_LEFT = (vx + vw/10), IMAGE_RIGHT = (vx + vw*0.9);
     IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor( renderer, 200, 200, 200, 255/2 );
+    SDL_SetRenderDrawColor( renderer, 200, 200, 255, 255/2 );
 
     //  Loop through the rows of the image.
     for (pixelY=miny; pixelY<maxy; pixelY++) {
@@ -84,7 +90,7 @@ void LightRenderer::draw() const {
 
         polyCorners = l->getPolygonSize();
         intensity = l->getIntensity();
-        SDL_SetRenderDrawColor( renderer, 200, 200, 200, intensity );
+        SDL_SetRenderDrawColor( renderer, baseColor.r, baseColor.g, baseColor.b, intensity );
 
         std::vector<Intersection*> lightPolygon = l->getPolygon();
         std::vector<int> nodeX; nodeX.reserve(1024);

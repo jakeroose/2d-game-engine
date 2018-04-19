@@ -46,7 +46,7 @@ void HUDElement::draw() const {
   }
 
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-  SDL_SetRenderDrawColor(renderer, 50, 50, 50, 100);
+  SDL_SetRenderDrawColor(renderer, 50, 50, 50, 200);
   SDL_Rect r;
   r.x = posX;
   r.y = posY;
@@ -55,7 +55,7 @@ void HUDElement::draw() const {
   SDL_RenderFillRect(renderer, &r);
 
   // Now set the color for the outline of the hud:
-  SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255/2 );
+  SDL_SetRenderDrawColor( renderer, 255, 255, 255, 200 );
   SDL_RenderDrawRect( renderer, &r );
 
   for(int i = 0; i < (int)strings.size(); i++){

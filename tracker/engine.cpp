@@ -128,6 +128,9 @@ void Engine::draw() const {
   hud.draw();
 
   // display my name extravagantly
+  // no longer extravagant due to new HUD system. need to use the string+color
+  // the the key in the hudElement map
+  // TODO: either fix or just display my name like a regular pleb
   Uint8 rndm = 128.0*sin(Clock::getInstance().getTicks()*0.001)+127;
   SDL_Color custColor = {128,rndm,128,255};
   IoMod::getInstance().writeText("Jake Roose", 10 + (rndm/255.0)*20, Viewport::getInstance().getViewHeight() - 30, custColor);
@@ -236,7 +239,7 @@ void Engine::play() {
   bool done = false;
   Uint32 ticks = clock.getElapsedTicks();
   FrameGenerator frameGen;
-  // pauseMenu.toggleDisplay();
+  // hud.toggleDisplay();
 
   while ( !done ) {
     // The next loop polls for events, guarding against key bounce:
@@ -249,11 +252,7 @@ void Engine::play() {
           break;
         }
         if ( keystate[SDL_SCANCODE_P] ) {
-          // if ( clock.isPaused() ) clock.unpause();
-          // else clock.pause();
           LevelManager::getInstance().togglePause();
-          // pauseMenu.toggleDisplay();
-          // pauseMenu.drawCentered();
         }
         if ( keystate[SDL_SCANCODE_R] ) {
           LevelManager::getInstance().resetLevel();

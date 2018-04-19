@@ -13,11 +13,11 @@ HUDManager::~HUDManager(){
 }
 
 bool HUDManager::playerDied(Player* p){
-  return p->isDead();
+  return p->isDead() && !gamePaused();
 }
 
 bool HUDManager::levelComplete(){
-  return LevelManager::getInstance().getGoalReached();
+  return LevelManager::getInstance().getGoalReached() && !gamePaused();
 }
 bool HUDManager::onlyOnLevel(const std::string n){
   return n.compare(LevelManager::getInstance().getLevelName()) == 0;
@@ -28,7 +28,9 @@ bool HUDManager::playerInArea(Player* p, const Vector2f& v1, const Vector2f& v2)
   return (v[0] >= v1[0] && v[1] >= v1[1] && v[0] <= v2[0] && v[1] <= v2[1]);
 }
 
-bool HUDManager::playerHasCollectable(Player* p){ return p->getTotalEnergies() > 0; }
+bool HUDManager::playerHasCollectable(Player* p){
+  return p->getTotalEnergies() > 0;
+}
 
 bool HUDManager::gamePaused(){
   return LevelManager::getInstance().isPaused();
