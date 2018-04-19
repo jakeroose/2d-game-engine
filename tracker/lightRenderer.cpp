@@ -39,9 +39,6 @@ float LightRenderer::calcIntensity(float d) const{
   return std::max(max1, 0.0f);
 }
 
-
-// TODO: try rendiner the light with rederDrawLine
-// would probably eat less CPU since it's not looping over every pixel in row
 void LightRenderer::draw() const {
   int minx = 999999, miny=999999, maxx = -1, maxy = -1,
       vx = Viewport::getInstance().getX(), // view position
@@ -128,13 +125,17 @@ void LightRenderer::draw() const {
             if (nodeX[i  ]< IMAGE_LEFT ) nodeX[i  ]=IMAGE_LEFT ;
             if (nodeX[i+1]> IMAGE_RIGHT) nodeX[i+1]=IMAGE_RIGHT;
             if(diffusion){
+              // if using diffusion we need to draw each pixel
               for (pixelX=nodeX[i]; pixelX<nodeX[i+1]; pixelX++){
                 tense = intensity*calcIntensity(hypot(cx - pixelX, cy-pixelY));
                 SDL_SetRenderDrawColor( renderer, 200, 200, 200, tense );
                 SDL_RenderDrawPoint(renderer, pixelX - vx, pixelY - vy);
               }
             } else {
-              SDL_RenderDrawLine(renderer, nodeX[i]-vx, pixelY - vy, nodeX[i+1] - vx, pixelY - vy);
+              // if we aren't using diffusion then we can draw with the line
+              // method which is must faster than drawing each pixel
+              SDL_RenderDrawLine(renderer, nodeX[i]-vx, pixelY - vy,
+                                           nodeX[i+1] - vx, pixelY - vy);
             }
           }
         }

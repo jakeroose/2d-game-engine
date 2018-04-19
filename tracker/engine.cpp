@@ -38,7 +38,8 @@ Engine::Engine() :
   currentStrategy(0),
   currentSprite(0),
   collision(false),
-  makeVideo( false )
+  makeVideo( false ),
+  displayName(Gamedata::getInstance().getXmlBool("displayName"))
 {
   // hud.toggleDisplay();
   player->respawn(LevelManager::getInstance().getSpawnPoint());
@@ -76,6 +77,7 @@ void Engine::draw() const {
   for(auto e: LevelManager::getInstance().getEnemies()){
 
     /* === ENEMIES FADE BASED ON DISTANCE FROM PLAYER === */
+    // TODO: Move this to Drawable
     x = e->getX() - player->getX();
     y = e->getY() - player->getY();
     // set between range of 0 and 255
@@ -87,6 +89,7 @@ void Engine::draw() const {
     e->draw();
   }
 
+  // TODO: Move this into LevelEditor class
   if(LevelManager::getInstance().inEditMode()){
     // draw coord grid
     SDL_SetRenderDrawColor(renderer, 0,0,255,255/2);
@@ -131,9 +134,13 @@ void Engine::draw() const {
   // no longer extravagant due to new HUD system. need to use the string+color
   // the the key in the hudElement map
   // TODO: either fix or just display my name like a regular pleb
-  Uint8 rndm = 128.0*sin(Clock::getInstance().getTicks()*0.001)+127;
-  SDL_Color custColor = {128,rndm,128,255};
-  IoMod::getInstance().writeText("Jake Roose", 10 + (rndm/255.0)*20, Viewport::getInstance().getViewHeight() - 30, custColor);
+  if(displayName){
+    Uint8 rndm = 128.0*sin(Clock::getInstance().getTicks()*0.001)+127;
+    SDL_Color custColor = {128,rndm,128,255};
+    IoMod::getInstance().writeText("Jake Roose", 10 + (rndm/255.0)*20,
+      Viewport::getInstance().getViewHeight() - 30, custColor);
+  }
+
 
   // we don't do anything in Viewport::draw() anymore
   // viewport.draw();

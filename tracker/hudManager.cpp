@@ -13,7 +13,7 @@ HUDManager::~HUDManager(){
 }
 
 bool HUDManager::playerDied(Player* p){
-  return p->isDead() && !gamePaused();
+  return p->isDead() && !gamePaused() && !levelComplete();
 }
 
 bool HUDManager::levelComplete(){

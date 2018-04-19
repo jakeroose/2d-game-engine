@@ -10,7 +10,7 @@
 
 <maxFrames>300</maxFrames>
 <username>jroose</username>
-
+<displayName>false</displayName>
 <view>
   <width>900</width>
   <height>540</height>
@@ -134,7 +134,6 @@
   <speedX>0</speedX>
   <speedY>0</speedY>
   <startLoc x="50" y="400"/>
-
 </Square1>
 
 </GameData>

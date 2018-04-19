@@ -10,11 +10,10 @@ music
 sound
 ending sprite
 complete level design
+don't forget to display name for video
 
 HUD:
-- color controls
 - render order
-- exclusion (i.e. pause and next level)
 
 Polish:
 more ballanced jumping

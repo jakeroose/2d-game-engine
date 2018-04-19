@@ -35,6 +35,8 @@ private:
   int currentSprite;
   bool collision;
   bool makeVideo;
+  bool displayName;
+  
 
   void draw() const;
   void update(Uint32);
