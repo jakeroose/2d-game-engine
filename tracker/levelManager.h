@@ -13,17 +13,14 @@ enum class LevelState { loading, running, editing, paused };
 
 class LevelManager {
 public:
-  LevelManager();
-  LevelManager(const LevelManager&) = delete;
-  ~LevelManager();
   static LevelManager& getInstance();
-
   void update();
 
   const std::map<std::string, Wall*>& getWalls(){ return walls; }
-  const std::map<std::string, std::vector<Vector2f> >& getWallVertices(){
+  const std::map<std::string, std::vector<Vector2f> >& getWallVertices() const {
     return wallVertices;
   }
+  const std::map<std::string, std::vector<Vector2f> >& getVerticesInView(const Vector2f& a);
   const Wall* getWall(const std::string& s){ return walls.find(s)->second; }
   void loadLevel(const std::string& s);
   void resetLevel();
@@ -75,6 +72,7 @@ private:
   std::map<std::string, Wall*> walls;
   std::vector<Wall*> freeWalls;
   std::map<std::string, std::vector<Vector2f> > wallVertices;
+  std::map<std::string, std::vector<Vector2f> > verticesInView;
   std::vector<Collectable*> collectables;
   std::vector<Collectable*> freeCollectables;
   std::vector<SmartSprite*> enemies;
@@ -88,6 +86,7 @@ private:
   Vector2f* anchor;
   bool goalReached;
   std::string levelName;
+  Vector2f lastViewPosition;
 
   void setSpawnPoint(Vector2f v);
   void parseLine(std::string& l);
@@ -97,5 +96,9 @@ private:
   void addWall(int x1, int y1, int x2, int y2){addWall(new Wall(x1, y1, x2, y2));}
   void addWall(const SDL_Rect& r){ addWall(new Wall(r)); }
   void addCollectable(int x, int y);
+
+  LevelManager();
+  LevelManager(const LevelManager&) = delete;
+  ~LevelManager();
 };
 #endif

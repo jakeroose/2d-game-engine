@@ -36,6 +36,7 @@ LevelManager::LevelManager() :
   walls(),
   freeWalls(),
   wallVertices(),
+  verticesInView(),
   collectables(),
   freeCollectables(),
   enemies(),
@@ -48,7 +49,8 @@ LevelManager::LevelManager() :
   cursorCoords(),
   anchor(NULL),
   goalReached(false),
-  levelName("levels/" + Gamedata::getInstance().getXmlStr("level/name")) {
+  levelName("levels/" + Gamedata::getInstance().getXmlStr("level/name")),
+  lastViewPosition() {
   loadLevel(levelName);
 }
 
@@ -230,7 +232,7 @@ void LevelManager::resetLevel(){
 }
 
 void LevelManager::loadLevel(const std::string& name){
-  std::cout << "Loading Level: " << name << std::endl;
+  std::cout << "=== Loading Level: " << name << " ===" << std::endl;
   state = LevelState::loading;
   levelName = name;
   // std::cout << "=== Before Load ===" << std::endl;
@@ -239,6 +241,7 @@ void LevelManager::loadLevel(const std::string& name){
   // std::cout << "Walls: " << walls.size() << std::endl;
   // std::cout << "freeWalls: " << freeWalls.size() << std::endl;
   wallVertices.erase(wallVertices.begin(), wallVertices.end());
+  verticesInView.erase(verticesInView.begin(), verticesInView.end());
   if(walls.size() > 0){
     auto it = walls.begin();
     while(it != walls.end()){
@@ -298,6 +301,7 @@ void LevelManager::loadLevel(const std::string& name){
   // std::cout << "Walls: " << walls.size() << std::endl;
   // std::cout << "freeWalls: " << freeWalls.size() << std::endl;
   state = LevelState::running;
+  std::cout << "=== Level Loaded ===" << std::endl;
 }
 
 
@@ -375,6 +379,32 @@ bool LevelManager::withinRenderDistance(const Vector2f& p, const Vector2f& ancho
   }
 
   return true;
+}
+
+// get vertices of all walls within render distance of anchor point
+// NOTE: not really sure why this works when calculating lighting for points not
+// in the render distance of the player. may be adding a lot more vertices to
+// verticesInView than necessary.
+const std::map<std::string, std::vector<Vector2f> >&
+  LevelManager::getVerticesInView(const Vector2f& anchor){
+  if(verticesInView.size() == 0 ||
+     lastViewPosition[0] != Viewport::getInstance().getX()/UNIT_SIZE ||
+     lastViewPosition[1] != Viewport::getInstance().getY()/UNIT_SIZE){
+    verticesInView.erase(verticesInView.begin(), verticesInView.end());
+    auto it = wallVertices.begin();
+    while(it != wallVertices.end()){
+      for(auto e : (*it).second){
+        if(withinRenderDistance(e, anchor)){
+          verticesInView.insert(*it);
+          break;
+        }
+      }
+      it++;
+    }
+    lastViewPosition = Vector2f(Viewport::getInstance().getX(), Viewport::getInstance().getY())/UNIT_SIZE;
+  }
+
+  return verticesInView;
 }
 
 // creates a border around the viewport for calculating light

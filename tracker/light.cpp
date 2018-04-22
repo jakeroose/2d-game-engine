@@ -106,16 +106,18 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
 	Intersection* closestIntersect = NULL;
   Vector2f seg1, seg2;
 
-  for(auto it = LevelManager::getInstance().getWallVertices().begin();
-      it != LevelManager::getInstance().getWallVertices().end(); it++){
+  for(auto it = LevelManager::getInstance().getVerticesInView(position).begin();
+      it != LevelManager::getInstance().getVerticesInView(position).end(); it++){
     int j = it->second.size()-1;
 
     for(unsigned i = 0; i < it->second.size(); i++){
 
       // get intersection of ray (coord1, coord2) and the line
       // segment (coordi, coordj) from our shape vector<coords_of_shape>
-      Intersection* intersect = getIntersection(ray[0], ray[1], it->second[j], it->second[i]);
-      if(intersect && (!closestIntersect || intersect->param < closestIntersect->param)){
+      Intersection* intersect = getIntersection(ray[0], ray[1],
+                                                it->second[j], it->second[i]);
+      if(intersect &&
+        (!closestIntersect || intersect->param < closestIntersect->param)){
         // recycle old closestIntersect;
         if(closestIntersect) intersectionPool.push_back(closestIntersect);
   			closestIntersect = intersect;
@@ -131,15 +133,13 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
 
 /* Makes sure intersection is within the game */
 bool validIntersect(Intersection* i){
-  if(i != NULL && i->x >= -5 && i->y >= -5 &&
+  if(i && i->x >= -5 && i->y >= -5 &&
     i->x <= (Viewport::getInstance().getWorldWidth() +10) &&
     i->y <= (Viewport::getInstance().getWorldHeight() + 10)){
       return true;
     }
   return false;
 }
-
-
 
 /* Checks the Intersection object pool for a free Intersection. If none
    available it creates a new one.
@@ -300,6 +300,7 @@ void Light::update(Uint8 ticks) {
     // ray from position -> offset from angle
     ray[1] = Vector2f(x + dx, y + dy);
 
+
     // Find CLOSEST intersection
     Intersection* closestIntersect = getSegmentIntersections(ray);
 
@@ -307,7 +308,7 @@ void Light::update(Uint8 ticks) {
     if(validIntersect(closestIntersect)){
       closestIntersect->angle = angle;
       lightPolygon.push_back(closestIntersect);
-    } else {
+    } else if(closestIntersect){
       intersectionPool.push_back(closestIntersect);
     }
 	}

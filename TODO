@@ -11,15 +11,17 @@ sound
 ending sprite
 complete level design
 don't forget to display name for video
-
-HUD:
-- render order
+godmode
 
 Polish:
 more ballanced jumping
 have lights follow player via some slerp function (flocking?)
 lights don't clip through walls
 cancel explosion method
+
+HUD:
+render order
+interactable menu 
 
 Lighting:
 Experiment - whats more expensive: calcing if point is w/in radius of circle -or-
@@ -32,6 +34,9 @@ fading sprites doesn't seem to have much affect on FPS. could add check to see i
   enough away to update, but not sure if updateTexture is that expensive.
 add fade to collectable. probably just make it function of Drawable.
 maybe add to bg sprites as well
+
+LevelManager:
+add/remove enemies and collectables
 
 === End of "Need to Do" ===
 Things to consider:
