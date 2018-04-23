@@ -33,6 +33,7 @@ public:
   bool shouldDraw() const { return renderStatus; }
   void setRenderStatus(bool s) { renderStatus = s; }
   bool getRenderStatus() const { return renderStatus; }
+  void setStatic(bool s) { isStatic = s; }
 
   int getIntersectionPoolSize() const { return (int)intersectionPool.size(); }
   int getTicks() const { return totalTicks; }
@@ -46,6 +47,7 @@ private:
   int minx, miny, maxx, maxy;
   int intensity, baseIntensity;
   bool renderStatus;
+  bool isStatic;
   int totalTicks;
 
   /* methods */

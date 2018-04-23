@@ -31,6 +31,7 @@ Light::Light(const Vector2f& p) :
   intensity(Gamedata::getInstance().getXmlInt("lights/alpha")),
   baseIntensity(intensity),
   renderStatus(true),
+  isStatic(true),
   totalTicks(0)
   {
     lightPolygon.reserve(256);
@@ -105,9 +106,15 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
   // Find CLOSEST intersection
 	Intersection* closestIntersect = NULL;
   Vector2f seg1, seg2;
+  std::map<std::string, std::vector<Vector2f> > v;
+  if(isStatic == false){
+    v = LevelManager::getInstance().getVerticesInView(position);
+  } else {
+    v = LevelManager::getInstance().getWallVertices();
+  }
 
-  for(auto it = LevelManager::getInstance().getVerticesInView(position).begin();
-      it != LevelManager::getInstance().getVerticesInView(position).end(); it++){
+  for(auto it = v.begin();
+      it != v.end(); it++){
     int j = it->second.size()-1;
 
     for(unsigned i = 0; i < it->second.size(); i++){

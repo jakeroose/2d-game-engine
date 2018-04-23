@@ -56,7 +56,7 @@ Player::Player( const std::string& name) :
   renderCollectableLight(Gamedata::getInstance().getXmlBool("Player/collectableLight")),
   alive(true)
   {
-    // checkForCollisions();
+  light->setStatic(false);
 }
 
 Player::~Player(){
@@ -306,7 +306,7 @@ void Player::damagePlayer(){
 }
 
 void Player::killPlayer(){
-  if(godMode) return;
+  if(godMode) return; // maybe should be in damagePlayer
   player.explode();
   alive = false;
 }
@@ -332,6 +332,7 @@ void Player::updateCollectables(){
     // update lights on collectable
     if(renderCollectableLight){
       c->setLightIntensity(calculateLightIntensity(c->getLight()));
+      c->getLight()->setStatic(false);
     } else if(c->getLight()->getRenderStatus()){
       c->getLight()->setRenderStatus(false);
     }
