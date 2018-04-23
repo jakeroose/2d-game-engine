@@ -63,6 +63,7 @@ public:
   void killPlayer();
   bool isDead() const { return !alive; }
   void toggleNoClip() { noClip = !noClip; }
+  void toggleGodMode() { godMode = !godMode; }
 
 private:
   MultiSprite player;
@@ -75,6 +76,7 @@ private:
   int worldHeight;
   bool updateLighting;
   bool noClip;
+  bool godMode;
   int hoverHeight;
   int energy;
   int flyPower;

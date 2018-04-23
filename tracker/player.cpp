@@ -48,6 +48,7 @@ Player::Player( const std::string& name) :
   worldHeight(Gamedata::getInstance().getXmlInt("world/height")),
   updateLighting(true),
   noClip(Gamedata::getInstance().getXmlBool(name+"/noClip")),
+  godMode(Gamedata::getInstance().getXmlBool(name+"/godMode")),
   hoverHeight(LevelManager::UNIT_SIZE/4),
   energy(1),
   flyPower(LevelManager::UNIT_SIZE),
@@ -305,6 +306,7 @@ void Player::damagePlayer(){
 }
 
 void Player::killPlayer(){
+  if(godMode) return;
   player.explode();
   alive = false;
 }

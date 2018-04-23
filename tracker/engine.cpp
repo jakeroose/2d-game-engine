@@ -268,6 +268,9 @@ void Engine::play() {
         if ( keystate[SDL_SCANCODE_N] ) {
           player->toggleNoClip();
         }
+        if ( keystate[SDL_SCANCODE_G] ) {
+          player->toggleGodMode();
+        }
         if ( keystate[SDL_SCANCODE_F8]) {
           LevelManager::getInstance().toggleLevelEdit();
         }

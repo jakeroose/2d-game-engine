@@ -75,6 +75,7 @@
   <transparency>false</transparency>
   <flyPower></flyPower>
   <noClip>false</noClip>
+  <godMode>true</godMode>
   <collectableLight>false</collectableLight>
   <chunk>
     <size>20</size>
