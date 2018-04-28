@@ -9,6 +9,7 @@
 #include "smartSprite.h"
 #include "light.h"
 #include "collectable.h"
+#include "sound.h"
 
 class Collectable;
 

@@ -35,6 +35,7 @@ Engine::Engine() :
   background(
     new Background(Gamedata::getInstance().getXmlInt("background/count"))
   ),
+  sound(SDLSound::getInstance()),
   currentStrategy(0),
   currentSprite(0),
   collision(false),
@@ -55,7 +56,7 @@ Engine::Engine() :
 
 // add sprite to ~(x,y) in the viewport
 void Engine::addSprite(int x, int y){
-  std::cout << "add enemy" << std::endl;
+  std::cout << "add enemy at " << (x + Viewport::getInstance().getX())/LevelManager::UNIT_SIZE << ", " << (y + Viewport::getInstance().getY())/LevelManager::UNIT_SIZE << std::endl;
   LevelManager::getInstance().addEnemy(
     (x + Viewport::getInstance().getX())/LevelManager::UNIT_SIZE,
     (y + Viewport::getInstance().getY())/LevelManager::UNIT_SIZE);
@@ -267,6 +268,9 @@ void Engine::play() {
         }
         if ( keystate[SDL_SCANCODE_N] ) {
           player->toggleNoClip();
+        }
+        if ( keystate[SDL_SCANCODE_M] ) {
+          sound.toggleMusic();
         }
         if ( keystate[SDL_SCANCODE_G] ) {
           player->toggleGodMode();

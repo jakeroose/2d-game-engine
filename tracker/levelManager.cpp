@@ -148,7 +148,7 @@ void LevelManager::removeCollectable(Collectable* c){
 }
 
 void LevelManager::addEnemy(int x, int y){
-  int scaledX =  UNIT_SIZE/2, scaledY = UNIT_SIZE/2;
+  // int scaledX =  UNIT_SIZE/2, scaledY = UNIT_SIZE/2;
 
   SmartSprite* e;
   if(freeEnemies.size() > 0){
@@ -159,8 +159,9 @@ void LevelManager::addEnemy(int x, int y){
     e = new SmartSprite("Enemy");
   }
 
-  e->setPosition(Vector2f(scaledX + UNIT_SIZE*x - e->getScaledWidth()/2,
-    scaledY + UNIT_SIZE*y - e->getScaledHeight()/2));
+  std::cout << x << " => " << x*UNIT_SIZE << ", " << y << " => " << y*UNIT_SIZE << std::endl;
+
+  e->setPosition(Vector2f(UNIT_SIZE*x, UNIT_SIZE*y));
   enemies.push_back(e);
 }
 

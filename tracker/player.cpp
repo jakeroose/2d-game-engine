@@ -299,14 +299,18 @@ void Player::damagePlayer(){
   if((int)collectables.size() > 0){
     collectables.back()->explode();
     collectables.pop_back();
+    // lose collectable sound
+    SDLSound::getInstance()[0];
   } else {
+    if(godMode) return; // maybe should be in damagePlayer
     // PLAYER IS DEAD!!!
     killPlayer();
   }
 }
 
 void Player::killPlayer(){
-  if(godMode) return; // maybe should be in damagePlayer
+  // player death sound
+  SDLSound::getInstance()[6];
   player.explode();
   alive = false;
 }

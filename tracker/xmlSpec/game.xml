@@ -20,7 +20,7 @@
   <width>3000</width>
   <height>3000</height>
   <unitSize>75</unitSize> <!-- length of 1 in game unit in pixels -->
-  <wallWidth>0</wallWidth>
+  <wallWidth>1</wallWidth>
 </world>
 
 <level>
@@ -74,7 +74,7 @@
   <speedY>150</speedY>
   <transparency>false</transparency>
   <flyPower></flyPower>
-  <noClip>false</noClip>
+  <noClip>true</noClip>
   <godMode>true</godMode>
   <collectableLight>false</collectableLight>
   <chunk>

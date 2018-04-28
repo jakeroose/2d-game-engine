@@ -7,6 +7,7 @@
 #include "hudManager.h"
 #include "collisionStrategy.h"
 #include "background.h"
+#include "sound.h"
 
 class Player;
 class CollisionStrategy;
@@ -30,13 +31,14 @@ private:
   Player* player;
   RectangularCollisionStrategy* strategy;
   Background* background;
+  SDLSound& sound;
 
   int currentStrategy;
   int currentSprite;
   bool collision;
   bool makeVideo;
   bool displayName;
-  
+
 
   void draw() const;
   void update(Uint32);

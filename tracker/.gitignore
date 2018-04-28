@@ -31,3 +31,4 @@ chunk.o
 explodingSprite.o
 hudElement.o
 hudManager.o
+sound.o
