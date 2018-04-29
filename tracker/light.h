@@ -38,16 +38,30 @@ public:
   int getIntersectionPoolSize() const { return (int)intersectionPool.size(); }
   int getTicks() const { return totalTicks; }
 
+  const std::map<int, std::vector<int> >& getLightPolygonBorder() {
+    return lightPolygonBorder;
+  }
+  std::vector<int>& getLightPolygonBorder(int i) {
+    // return (*(lightPolygonBorder.find(i))).second;
+    return lightPolygonBorder[i];
+  }
+  void setLightPolygonBorder(int i, std::vector<int> v) {
+    lightPolygonBorder[i] = v;
+  }
+  void updatePolygonBorder();
+
 private:
   Vector2f position;
   const RenderContext* rc;
   SDL_Renderer* const renderer;
   std::vector<Intersection*> lightPolygon;
+  std::map<int, std::vector<int> > lightPolygonBorder;
   std::list<Intersection*> intersectionPool;
   int minx, miny, maxx, maxy;
   int intensity, baseIntensity;
   bool renderStatus;
   bool isStatic;
+  bool shouldUpdate;
   int totalTicks;
 
   /* methods */

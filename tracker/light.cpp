@@ -14,6 +14,11 @@
 #include "levelManager.h"
 #include "lightRenderer.h"
 
+// TODO: add 'chunk' based loading for wall detection. i.e. load walls up to
+// 2 units away, don't unload until they are 4 units away since player will
+// likely move back and forth a bit causing walls to be loaded and unloaded
+// constantly with the current method
+
 // fill polygon implementation
 // http://alienryderflex.com/polygon/
 // draw circle (not implemented)
@@ -26,12 +31,14 @@ Light::Light(const Vector2f& p) :
   rc(RenderContext::getInstance()),
   renderer(rc->getRenderer()),
   lightPolygon(std::vector<Intersection*>()),
+  lightPolygonBorder(),
   intersectionPool(),
   minx(0),miny(0),maxx(0),maxy(0),
   intensity(Gamedata::getInstance().getXmlInt("lights/alpha")),
   baseIntensity(intensity),
   renderStatus(true),
   isStatic(true),
+  shouldUpdate(true),
   totalTicks(0)
   {
     lightPolygon.reserve(256);
@@ -48,7 +55,7 @@ Light::~Light(){
 }
 
 void Light::setPosition(const Vector2f& pos){
-  bool shouldUpdate = (renderStatus && pos != position);
+  shouldUpdate = (renderStatus && pos != position);
   position = pos;
   if(shouldUpdate) update();
 }
@@ -110,6 +117,7 @@ Intersection* Light::getSegmentIntersections(std::vector<Vector2f> ray){
   if(isStatic == false){
     v = LevelManager::getInstance().getVerticesInView(position);
   } else {
+    // TODO: add 'chunk' based loading for wall detection.
     v = LevelManager::getInstance().getWallVertices();
   }
 
@@ -254,6 +262,40 @@ void Light::updateMinMaxCoords(Intersection* i){
   if(i->y > maxy){ maxy = i->y; }
 }
 
+/* calculate all x & y coords on the border of the light polygon */
+void Light::updatePolygonBorder(){
+  int polyCorners, pixelY, i, j;
+
+  //  Loop through the rows of the light polygon
+  for (pixelY=miny; pixelY<maxy; pixelY++) {
+
+    std::vector<int> nodeX; nodeX.reserve(32);
+
+    polyCorners = getPolygonSize();
+
+    //  Build a list of nodes.
+    j=polyCorners-1;
+    for (i=0; i<polyCorners; i++) {
+      if ((lightPolygon[i]->y <  (double) pixelY &&
+      lightPolygon[j]->y >= (double) pixelY) ||
+      (lightPolygon[j]->y <  (double) pixelY &&
+      lightPolygon[i]->y >= (double) pixelY)) {
+        nodeX.push_back(
+          (int)(lightPolygon[i]->x+(pixelY-lightPolygon[i]->y) /
+          (lightPolygon[j]->y-lightPolygon[i]->y) *
+          (lightPolygon[j]->x-lightPolygon[i]->x)));
+      }
+      j=i;
+    }
+
+    std::sort(nodeX.begin(), nodeX.end());
+
+    setLightPolygonBorder(pixelY, nodeX);
+  }
+
+}
+
+
 /* updates the lightPolygon
 */
 void Light::update(Uint8 ticks) {
@@ -264,6 +306,8 @@ void Light::update(Uint8 ticks) {
     intersectionPool.push_back(e);
   }
   lightPolygon.clear();
+  lightPolygonBorder.clear();
+
   minx = 999999; miny = 999999; maxx = -5; maxy = -5;
 
   int x = position[0];
@@ -330,4 +374,5 @@ void Light::update(Uint8 ticks) {
   // remove dupes
   cleanPolygon();
 
+  updatePolygonBorder();
 }

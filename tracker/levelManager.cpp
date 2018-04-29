@@ -180,8 +180,11 @@ void LevelManager::setSpawnPoint(Vector2f v){
 }
 
 void LevelManager::parseLine(std::string& l){
+  // regex for [any characters]:
   std::regex r("([a-zA-z]+)(\\:)");
+  // regex for [digit space]+
   std::regex n("[(\\d+)(\\s)*)]+");
+
   if(regex_match(l, r)){
     std::regex p("(player\\:)");
     std::regex e("(enemies\\:)");
@@ -236,11 +239,8 @@ void LevelManager::loadLevel(const std::string& name){
   std::cout << "=== Loading Level: " << name << " ===" << std::endl;
   state = LevelState::loading;
   levelName = name;
-  // std::cout << "=== Before Load ===" << std::endl;
-  // std::cout << "Collectables: " << collectables.size() << std::endl;
-  // std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
-  // std::cout << "Walls: " << walls.size() << std::endl;
-  // std::cout << "freeWalls: " << freeWalls.size() << std::endl;
+
+  // free all objects in case we are loading a new level
   wallVertices.erase(wallVertices.begin(), wallVertices.end());
   verticesInView.erase(verticesInView.begin(), verticesInView.end());
   if(walls.size() > 0){
@@ -268,6 +268,7 @@ void LevelManager::loadLevel(const std::string& name){
   goal->setScale(UNIT_SIZE/goal->getImage()->getWidth());
   goalReached = false;
 
+  // start loading level data
   std::ifstream levelData;
   std::string line;
   levelData.open(levelName);
@@ -296,11 +297,6 @@ void LevelManager::loadLevel(const std::string& name){
   for(SDL_Rect r: worldBorder){
     addWall(r);
   }
-  // std::cout << "=== After Load ===" << std::endl;
-  // std::cout << "Collectables: " << collectables.size() << std::endl;
-  // std::cout << "freeCollectables: " << freeCollectables.size() << std::endl;
-  // std::cout << "Walls: " << walls.size() << std::endl;
-  // std::cout << "freeWalls: " << freeWalls.size() << std::endl;
   state = LevelState::running;
   std::cout << "=== Level Loaded ===" << std::endl;
 }

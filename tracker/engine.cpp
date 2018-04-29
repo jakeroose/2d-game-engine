@@ -51,6 +51,8 @@ Engine::Engine() :
   hud.initialize(player);
 
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
+  // pre-emptively update all lights
+  for(auto c : LightRenderer::getInstance().getLights()) c->update();
   std::cout << "Loading complete" << std::endl;
 }
 
@@ -248,6 +250,7 @@ void Engine::play() {
   Uint32 ticks = clock.getElapsedTicks();
   FrameGenerator frameGen;
   // hud.toggleDisplay();
+  sound.toggleMusic();
 
   while ( !done ) {
     // The next loop polls for events, guarding against key bounce:
@@ -300,6 +303,8 @@ void Engine::play() {
           // TODO: store next level name as a variable in the level file
           LevelManager::getInstance().loadLevel("levels/bigLevel");
           player->reset();
+          for(auto c : LightRenderer::getInstance().getLights()) c->update();
+          
         }
       }
 
@@ -312,11 +317,12 @@ void Engine::play() {
             LevelManager::getInstance().setAnchor();
           }
           player->getLight()->update();
-        } else {
-          int x, y;
-          SDL_GetMouseState( &x, &y);
-          addSprite(x, y);
         }
+        // else {
+        //   int x, y;
+        //   SDL_GetMouseState( &x, &y);
+        //   addSprite(x, y);
+        // }
       }
 
       if(event.type == SDL_MOUSEMOTION) {

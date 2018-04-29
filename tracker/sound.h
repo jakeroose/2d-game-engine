@@ -20,8 +20,6 @@
 
 class SDLSound {
 public:
-  SDLSound();
-  ~SDLSound();
   static SDLSound& getInstance();
 
   void startMusic();
@@ -38,6 +36,9 @@ private:
   int audioBuffers;
   std::vector<Mix_Chunk*> sounds;
   std::vector<int> channels;
+
+  SDLSound();
+  ~SDLSound();
   SDLSound(const SDLSound&) = delete;
   SDLSound& operator=(const SDLSound&) = delete;
 };

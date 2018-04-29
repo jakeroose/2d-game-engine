@@ -3,6 +3,7 @@
 #include "gamedata.h"
 #include "renderContext.h"
 #include "levelManager.h"
+#include <algorithm>
 
 /* LightRenderer is in charge of drawing all fo the lights on the level.
   Lights are added to lightRenderer in the Light constructor.
@@ -59,67 +60,32 @@ void LightRenderer::draw() const {
       if(l->getMaxy() > maxy){ maxy = l->getMaxy(); }
     }
 
-    // TODO: set min & max bassed on diffusionRadius if diffusion
+    // TODO: set min & max based on diffusionRadius if diffusion
     if(minx < vx){ minx = vx;}
     if(miny < vy){ miny = vy;}
-    if(maxx > vx + Viewport::getInstance().getViewWidth()){
-      maxx = Viewport::getInstance().getViewWidth()+vx;
+    if(maxx > vx + vw){
+      maxx = vw+vx;
     }
-    if(maxy > Viewport::getInstance().getViewHeight()+vy){
-      maxy = Viewport::getInstance().getViewHeight()+vy;
+    if(maxy > vh+vy){
+      maxy = vh+vy;
     }
 
     /* Render the Lighting Polygon */
     // fill algorithm courtesy of http://alienryderflex.com/polygon_fill/
-    int polyCorners, intensity;
-    int nodes, pixelX, pixelY, i, j, swap,
-    // IMAGE_LEFT = (vx + vw/10), IMAGE_RIGHT = (vx + vw*0.9);
+    int intensity, pixelX, pixelY, i, tense,
     IMAGE_RIGHT = maxx, IMAGE_LEFT = minx;
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor( renderer, 200, 200, 255, 255/2 );
 
-    //  Loop through the rows of the image.
-    for (pixelY=miny; pixelY<maxy; pixelY++) {
-    // for (pixelY=(vy + vh/10); pixelY<(vy + vh*0.9); pixelY++) {
+    for(Light* l : lights){
+      if(l->shouldDraw() == false) continue;
+      
+      intensity = l->getIntensity();
+      SDL_SetRenderDrawColor( renderer, 200, 200, 255, intensity);
 
-      for(Light* l : lights){
-        if(l->shouldDraw() == false) continue;
-
-        polyCorners = l->getPolygonSize();
-        intensity = l->getIntensity();
-        SDL_SetRenderDrawColor( renderer, baseColor.r, baseColor.g, baseColor.b, intensity );
-
-        std::vector<Intersection*> lightPolygon = l->getPolygon();
-        std::vector<int> nodeX; nodeX.reserve(1024);
-        //  Build a list of nodes.
-        nodes=0; j=polyCorners-1;
-        for (i=0; i<polyCorners; i++) {
-          if ((lightPolygon[i]->y <  (double) pixelY &&
-          lightPolygon[j]->y >= (double) pixelY) ||
-          (lightPolygon[j]->y <  (double) pixelY &&
-          lightPolygon[i]->y >= (double) pixelY)) {
-            nodeX[nodes++] = (int)(lightPolygon[i]->x+(pixelY-lightPolygon[i]->y) /
-            (lightPolygon[j]->y-lightPolygon[i]->y) *
-            (lightPolygon[j]->x-lightPolygon[i]->x));
-          }
-          j=i;
-        }
-
-        //  Sort the nodes, via a simple “Bubble” sort.
-        i=0;
-        while (i<nodes-1) {
-          if (nodeX[i]>nodeX[i+1]) {
-            swap=nodeX[i];
-            nodeX[i]=nodeX[i+1];
-            nodeX[i+1]=swap;
-            if (i) i--;
-          }
-          else { i++; }
-        }
-
-        int tense;
-        //  Fill the pixels between node pairs.
-        for (i=0; i<nodes; i+=2) {
+      for(auto e : l->getLightPolygonBorder()){
+        pixelY = e.first;
+        std::vector<int> nodeX = e.second;
+        for (i=0; i< (int) nodeX.size(); i+=2) {
           if   (nodeX[i  ]>=IMAGE_RIGHT) break;
           if   (nodeX[i+1]> IMAGE_LEFT ) {
             if (nodeX[i  ]< IMAGE_LEFT ) nodeX[i  ]=IMAGE_LEFT ;
@@ -135,7 +101,7 @@ void LightRenderer::draw() const {
               // if we aren't using diffusion then we can draw with the line
               // method which is must faster than drawing each pixel
               SDL_RenderDrawLine(renderer, nodeX[i]-vx, pixelY - vy,
-                                           nodeX[i+1] - vx, pixelY - vy);
+                nodeX[i+1] - vx, pixelY - vy);
             }
           }
         }

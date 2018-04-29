@@ -10,7 +10,9 @@ public:
   void draw() const;
   void addLight(Light* l){ lights.push_back(l); }
   void toggleDebug() { debug = !debug; }
+  const std::vector<Light*>& getLights() { return lights; }
 
+  void calculateBorder(Light* l) const;
 private:
   SDL_Renderer* const renderer;
   std::vector<Light*> lights;
