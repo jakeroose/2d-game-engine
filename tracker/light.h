@@ -69,7 +69,6 @@ private:
   Intersection* getSegmentIntersections(std::vector<Vector2f> ray);
   std::vector<Intersection>* getAllPoints();
   Intersection* getFreeIntersection(float x, float y, float p, float a);
-
 };
 
 #endif

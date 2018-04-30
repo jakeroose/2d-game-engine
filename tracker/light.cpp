@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <list>
 #include <stdlib.h>
+#include <pthread.h>
+#include <thread>
+#include <mutex>
+
 
 #include "renderContext.h"
 #include "light.h"
@@ -262,37 +266,50 @@ void Light::updateMinMaxCoords(Intersection* i){
   if(i->y > maxy){ maxy = i->y; }
 }
 
-/* calculate all x & y coords on the border of the light polygon */
-void Light::updatePolygonBorder(){
-  int polyCorners, pixelY, i, j;
+/* calculates the border coords for pixelY */
+void borderThreaded(Light* l, std::vector<Intersection*>& lightPolygon,
+  int pixelY, std::mutex* m){
+  int polyCorners, i, j;
+  std::vector<int> nodeX; nodeX.reserve(32);
+  polyCorners = l->getPolygonSize();
 
-  //  Loop through the rows of the light polygon
-  for (pixelY=miny; pixelY<maxy; pixelY++) {
-
-    std::vector<int> nodeX; nodeX.reserve(32);
-
-    polyCorners = getPolygonSize();
-
-    //  Build a list of nodes.
-    j=polyCorners-1;
-    for (i=0; i<polyCorners; i++) {
-      if ((lightPolygon[i]->y <  (double) pixelY &&
-      lightPolygon[j]->y >= (double) pixelY) ||
-      (lightPolygon[j]->y <  (double) pixelY &&
-      lightPolygon[i]->y >= (double) pixelY)) {
-        nodeX.push_back(
-          (int)(lightPolygon[i]->x+(pixelY-lightPolygon[i]->y) /
-          (lightPolygon[j]->y-lightPolygon[i]->y) *
-          (lightPolygon[j]->x-lightPolygon[i]->x)));
-      }
-      j=i;
+  //  Build a list of nodes.
+  j=polyCorners-1;
+  for (i=0; i<polyCorners; i++) {
+    if ((lightPolygon[i]->y <  (double) pixelY &&
+    lightPolygon[j]->y >= (double) pixelY) ||
+    (lightPolygon[j]->y <  (double) pixelY &&
+    lightPolygon[i]->y >= (double) pixelY)) {
+      nodeX.push_back(
+        (int)(lightPolygon[i]->x+(pixelY-lightPolygon[i]->y) /
+        (lightPolygon[j]->y-lightPolygon[i]->y) *
+        (lightPolygon[j]->x-lightPolygon[i]->x)));
     }
-
-    std::sort(nodeX.begin(), nodeX.end());
-
-    setLightPolygonBorder(pixelY, nodeX);
+    j=i;
   }
 
+  std::sort(nodeX.begin(), nodeX.end());
+
+  // acquire lock so that two threads don't try to edit lightPolygonBorder
+  // at the same time
+  std::lock_guard<std::mutex> guard(*m);
+  l->setLightPolygonBorder(pixelY, nodeX);
+}
+
+/* calculate all x & y coords on the border of the light polygon */
+void Light::updatePolygonBorder(){
+  int pixelY;
+  std::mutex border_mutex;
+  std::vector<std::thread> tList; tList.reserve(maxy-miny);
+
+  //  Loop through the rows of the light polygon
+  for (pixelY=0; pixelY<maxy-miny; pixelY++) {
+    // call our threaded function for each row
+    tList.emplace_back(std::thread(borderThreaded, this,
+      std::ref(lightPolygon), (pixelY+miny), &border_mutex));
+  }
+
+  for(auto& e : tList) e.join();
 }
 
 

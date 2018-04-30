@@ -39,9 +39,6 @@ add/remove enemies and collectables
 
 === End of "Need to Do" ===
 Things to consider:
-potentially a way to combine lightPolygons so that there is only one pass over
-  the x coordinates of the viewport. it is definitely the looping over screen pixels
-  that is causing the lag, not just the draw function
 if adding slerp functionality to movement then that will help prevent falling through
   walls durring heavy lag (i.e. valgrind)
 player inherit from SmartSprite or other way around

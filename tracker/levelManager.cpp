@@ -159,7 +159,7 @@ void LevelManager::addEnemy(int x, int y){
     e = new SmartSprite("Enemy");
   }
 
-  std::cout << x << " => " << x*UNIT_SIZE << ", " << y << " => " << y*UNIT_SIZE << std::endl;
+  // std::cout << x << " => " << x*UNIT_SIZE << ", " << y << " => " << y*UNIT_SIZE << std::endl;
 
   e->setPosition(Vector2f(UNIT_SIZE*x, UNIT_SIZE*y));
   enemies.push_back(e);
