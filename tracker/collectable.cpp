@@ -1,6 +1,7 @@
 #include "collectable.h"
 #include "gamedata.h"
 #include "levelManager.h"
+#include "sound.h"
 
 Collectable::Collectable(const std::string& name) :
   sprite(new MultiSprite(name)),
@@ -29,10 +30,12 @@ void Collectable::update(Uint8 ticks){
 
   sprite->update(ticks);
   // make sure light polygon has been calculated
-  if((light->getPolygonSize() == 0 || light->getTicks() < 100) &&
-      LevelManager::getInstance().withinRenderDistance(getPosition())){
-    light->update(ticks);
-  }
+  // NOTE: I think this doesn't need to get called anymore due to
+  // lighting changes
+  // if((light->getPolygonSize() == 0 || light->getTicks() < 100) ){//&&
+  //     // LevelManager::getInstance().withinRenderDistance(getPosition())){
+  //   light->update(ticks);
+  // }
   light->setPosition(getPosition() + Vector2f(sprite->getScaledWidth()/2,
                                               sprite->getScaledHeight()/2));
 }
@@ -46,6 +49,7 @@ void Collectable::draw() const {
 
 void Collectable::collect(Player* p){
   if(collected == false && exploded == false){
+    SDLSound::getInstance()[2];
     player = p;
     player->addCollectable(this);
     collected = true;

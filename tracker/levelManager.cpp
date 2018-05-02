@@ -41,7 +41,7 @@ LevelManager::LevelManager() :
   freeCollectables(),
   enemies(),
   freeEnemies(),
-  goal(new Sprite("Square1")),
+  goal(new MultiSprite("Goal")),
   strategy(new RectangularCollisionStrategy()),
   spawnPoint(),
   loadingType(),
@@ -52,6 +52,7 @@ LevelManager::LevelManager() :
   levelName("levels/" + Gamedata::getInstance().getXmlStr("level/name")),
   lastViewPosition() {
   loadLevel(levelName);
+  goal->setVelocity(Vector2f(0,0));
 }
 
 LevelManager::~LevelManager(){
@@ -362,6 +363,7 @@ bool LevelManager::withinRenderDistance(const Vector2f& p) const {
 // return true if p is within x units of the viewport window centered on anchor
 bool LevelManager::withinRenderDistance(const Vector2f& p, const Vector2f& anchor) const {
   int rad = 2*UNIT_SIZE;
+  // std::cout << "withinRenderDistance" << std::endl;
 
   float viewWidth = Viewport::getInstance().getViewWidth();
   float viewHeight = Viewport::getInstance().getViewHeight();
@@ -385,8 +387,8 @@ bool LevelManager::withinRenderDistance(const Vector2f& p, const Vector2f& ancho
 const std::map<std::string, std::vector<Vector2f> >&
   LevelManager::getVerticesInView(const Vector2f& anchor){
   if(verticesInView.size() == 0 ||
-     lastViewPosition[0] != Viewport::getInstance().getX()/UNIT_SIZE ||
-     lastViewPosition[1] != Viewport::getInstance().getY()/UNIT_SIZE){
+     lastViewPosition[0] != (int)Viewport::getInstance().getX()/UNIT_SIZE ||
+     lastViewPosition[1] != (int)Viewport::getInstance().getY()/UNIT_SIZE){
     verticesInView.erase(verticesInView.begin(), verticesInView.end());
     auto it = wallVertices.begin();
     while(it != wallVertices.end()){
@@ -398,7 +400,9 @@ const std::map<std::string, std::vector<Vector2f> >&
       }
       it++;
     }
-    lastViewPosition = Vector2f(Viewport::getInstance().getX(), Viewport::getInstance().getY())/UNIT_SIZE;
+    lastViewPosition = Vector2f((int)Viewport::getInstance().getX()/UNIT_SIZE,
+      (int)Viewport::getInstance().getY()/UNIT_SIZE);
+    // std::cout << "getVerticesInView" << std::endl;
   }
 
   return verticesInView;

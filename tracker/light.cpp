@@ -7,7 +7,6 @@
 #include <thread>
 #include <mutex>
 
-
 #include "renderContext.h"
 #include "light.h"
 #include "engine.h"
@@ -316,7 +315,10 @@ void Light::updatePolygonBorder(){
 /* updates the lightPolygon
 */
 void Light::update(Uint8 ticks) {
-  if(renderStatus == false) return; // don't need to update if not drawing
+  // don't need to update if not drawing
+  if(LightRenderer::getInstance().getRenderStatus() == false &&
+     LightRenderer::getInstance().getDebugStatus()  == false) return;
+
   totalTicks += (int)ticks;
   // reset our light polygon
   for(Intersection* e : lightPolygon){

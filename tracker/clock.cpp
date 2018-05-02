@@ -7,31 +7,33 @@
 #include "ioMod.h"
 
 Clock& Clock::getInstance() {
-  static Clock clock; 
+  static Clock clock;
   return clock;
 }
 
 Clock::Clock() :
-  started(false), 
-  paused(false), 
-  FRAME_CAP_ON(Gamedata::getInstance().getXmlBool("frameCapOn")), 
-  PERIOD(Gamedata::getInstance().getXmlInt("period")), 
-  frames(0), 
-  timeAtStart(0), 
+  started(false),
+  paused(false),
+  FRAME_CAP_ON(Gamedata::getInstance().getXmlBool("frameCapOn")),
+  PERIOD(Gamedata::getInstance().getXmlInt("period")),
+  frames(0),
+  framesThisSecond(), framesLastSecond(), currentSecond(),
+  timeAtStart(0),
   timeAtPause(0),
-  currTicks(0), prevTicks(0), ticks(0) 
+  currTicks(0), prevTicks(0), ticks(0)
   {
   startClock();
 }
 
 Clock::Clock(const Clock& c) :
-  started(c.started), 
-  paused(c.paused), 
-  FRAME_CAP_ON(c.FRAME_CAP_ON), 
-  PERIOD(c.PERIOD), 
+  started(c.started),
+  paused(c.paused),
+  FRAME_CAP_ON(c.FRAME_CAP_ON),
+  PERIOD(c.PERIOD),
   frames(c.frames),
+  framesThisSecond(), framesLastSecond(), currentSecond(),
   timeAtStart(c.timeAtStart), timeAtPause(c.timeAtPause),
-  currTicks(c.currTicks), prevTicks(c.prevTicks), ticks(c.ticks) 
+  currTicks(c.currTicks), prevTicks(c.prevTicks), ticks(c.ticks)
   {
   startClock();
 }
@@ -40,12 +42,12 @@ void Clock::toggleSloMo() {
   throw( std::string("Slow motion is not implemented yet") );
 }
 
-unsigned int Clock::getTicks() const { 
+unsigned int Clock::getTicks() const {
   if (paused) return timeAtPause;
-  else return SDL_GetTicks() - timeAtStart; 
+  else return SDL_GetTicks() - timeAtStart;
 }
 
-unsigned int Clock::getElapsedTicks() { 
+unsigned int Clock::getElapsedTicks() {
   if (paused) return 0;
 
   currTicks = getTicks();
@@ -64,22 +66,32 @@ unsigned int Clock::getElapsedTicks() {
 
 }
 
-int Clock::getFps() const { 
-  if ( getSeconds() > 0 ) return frames/getSeconds();  
-  else return 0;
+int Clock::getFps() {
+  // if ( getSeconds() > 0 ) return frames/getSeconds();
+  // else return 0;
+
+  if(getSeconds() > 0){
+    if(getSeconds() > currentSecond){
+      currentSecond = getSeconds();
+      framesThisSecond = frames - framesLastSecond;
+      framesLastSecond = frames;
+    }
+  }
+
+  return framesThisSecond;
 }
 
-void Clock::incrFrame() { 
+void Clock::incrFrame() {
   if ( !paused ) {
-    ++frames; 
+    ++frames;
   }
 }
 
-void Clock::startClock() { 
-  started = true; 
-  paused = false; 
+void Clock::startClock() {
+  started = true;
+  paused = false;
   frames = 0;
-  timeAtPause = timeAtStart = SDL_GetTicks(); 
+  timeAtPause = timeAtStart = SDL_GetTicks();
   prevTicks = 0;
 }
 void Clock::pause() {
@@ -94,4 +106,3 @@ void Clock::unpause() {
     paused = false;
   }
 }
-

@@ -37,16 +37,14 @@ SDLSound::SDLSound() :
                    audioBuffers)){
     throw string("Unable to open audio!");
   }
-  music = Mix_LoadMUS("sound/100Years.mp3");
-  // Need to install midi to play the following:
-  // music = Mix_LoadMUS("sound/ballad2.mid");
-  if (!music) throw string("Couldn't load 100Years.mp3")+Mix_GetError();
+  music = Mix_LoadMUS("sound/gameSong.mp3");
+  if (!music) throw string("Couldn't load gameSong.mp3")+Mix_GetError();
 
   startMusic();
 
-  sounds.push_back( Mix_LoadWAV("sound/Boom.wav") );
-  sounds.push_back( Mix_LoadWAV("sound/Gun.wav") );
-  sounds.push_back( Mix_LoadWAV("sound/Thump.wav") );
+  sounds.push_back( Mix_LoadWAV("sound/lose_life.wav") );
+  sounds.push_back( Mix_LoadWAV("sound/game_lose.wav") );
+  sounds.push_back( Mix_LoadWAV("sound/ascend.wav") );
   sounds.push_back( Mix_LoadWAV("sound/phaser.wav") );
   sounds.push_back( Mix_LoadWAV("sound/Putt1.wav") );
   sounds.push_back( Mix_LoadWAV("sound/explosion.wav") );

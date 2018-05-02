@@ -51,7 +51,7 @@ Player::Player( const std::string& name) :
   godMode(Gamedata::getInstance().getXmlBool(name+"/godMode")),
   hoverHeight(LevelManager::UNIT_SIZE/4),
   energy(1),
-  flyPower(LevelManager::UNIT_SIZE),
+  flyPower(LevelManager::UNIT_SIZE*1.25),
   totalEnergies(1),
   renderCollectableLight(Gamedata::getInstance().getXmlBool("Player/collectableLight")),
   alive(true)
@@ -302,6 +302,7 @@ void Player::damagePlayer(){
     // lose collectable sound
     SDLSound::getInstance()[0];
   } else {
+    SDLSound::getInstance()[1];
     if(godMode) return; // maybe should be in damagePlayer
     // PLAYER IS DEAD!!!
     killPlayer();
@@ -310,7 +311,6 @@ void Player::damagePlayer(){
 
 void Player::killPlayer(){
   // player death sound
-  SDLSound::getInstance()[6];
   player.explode();
   alive = false;
 }

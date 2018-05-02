@@ -233,6 +233,7 @@ void Engine::update(Uint32 ticks) {
       tmp->addLines(s);
     }
   }
+  LevelManager::getInstance().getGoal()->update(ticks);
 
   background->update(ticks);
   viewport.update(); // always update viewport last
@@ -304,7 +305,7 @@ void Engine::play() {
           LevelManager::getInstance().loadLevel("levels/bigLevel");
           player->reset();
           for(auto c : LightRenderer::getInstance().getLights()) c->update();
-          
+
         }
       }
 

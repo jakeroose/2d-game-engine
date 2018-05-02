@@ -38,7 +38,7 @@ public:
   int getFreeCollectableCount() const { return (int)freeCollectables.size();}
   int getTotalLightIntersections() const;
   int getTotalFreeIntersections() const;
-  Sprite* getGoal() const { return goal; }
+  MultiSprite* getGoal() const { return goal; }
   bool getGoalReached() const { return goalReached; }
   void setGoalReached(bool g) { goalReached = g; }
 
@@ -77,7 +77,7 @@ private:
   std::vector<Collectable*> freeCollectables;
   std::vector<SmartSprite*> enemies;
   std::vector<SmartSprite*> freeEnemies;
-  Sprite* goal;
+  MultiSprite* goal;
   RectangularCollisionStrategy* strategy;
   Vector2f spawnPoint;
   LOADING_TYPE loadingType;

@@ -5,17 +5,16 @@ look into blitting light polygon shape onto an image to render on GPU
 - CUDA example from class
 https://stackoverflow.com/questions/20070155/how-to-set-a-pixel-in-a-sdl-surface
 
+Figure out what is slowing the game down so much! (it's def collision detection for lighting)
+
 Final Reqs:
-music
-sound
-ending sprite
-don't forget to display name for video
 enemies should appear in the right spot D:
 
 Polish:
 more ballanced jumping
 have lights follow player via some slerp function (flocking?)
 lights don't clip through walls
+player & enemies don't collide through walls
 cancel explosion method
 
 HUD:

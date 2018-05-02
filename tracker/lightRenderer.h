@@ -11,6 +11,8 @@ public:
   void addLight(Light* l){ lights.push_back(l); }
   void toggleDebug() { debug = !debug; }
   const std::vector<Light*>& getLights() { return lights; }
+  bool getRenderStatus() const { return renderLights; }
+  bool getDebugStatus() const { return debug; }
 
   void calculateBorder(Light* l) const;
 private:

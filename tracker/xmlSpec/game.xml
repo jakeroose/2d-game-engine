@@ -2,7 +2,7 @@
 <GameData>
 <!-- screenTitle is also used to identify you and your animation.
      So make sure to include your name as part of the screenTitle -->
-<title>Jacob's Labyrinth (Jake)</title>
+<title>Jacob's Labyrinth</title>
 <maxStringSize>50</maxStringSize>
 
 <frameCapOn>true</frameCapOn>
@@ -10,7 +10,7 @@
 
 <maxFrames>300</maxFrames>
 <username>jroose</username>
-<displayName>false</displayName>
+<displayName>true</displayName>
 <view>
   <width>900</width>
   <height>500</height>
@@ -20,7 +20,7 @@
   <width>3000</width>
   <height>3000</height>
   <unitSize>75</unitSize> <!-- length of 1 in game unit in pixels -->
-  <wallWidth>1</wallWidth>
+  <wallWidth>3</wallWidth>
 </world>
 
 <level>
@@ -136,5 +136,21 @@
   <speedY>0</speedY>
   <startLoc x="50" y="400"/>
 </Square1>
+
+<Goal>
+  <file>assets/finishDouble.png</file>
+  <startLoc x="64" y="192"/>
+  <frames>6</frames>
+  <frameInterval>250</frameInterval>
+  <speedX>150</speedX>
+  <speedY>150</speedY>
+  <transparency>false</transparency>
+  <chunk>
+    <size>20</size>
+    <distance>200</distance>
+    <lifespan>2000</lifespan>
+    <percentVariation>50</percentVariation>
+  </chunk>
+</Goal>
 
 </GameData>

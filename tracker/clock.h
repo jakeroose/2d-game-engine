@@ -7,7 +7,7 @@ class Clock {
 public:
   static Clock& getInstance();
   unsigned int getTicks() const;
-  int getFps() const;
+  int getFps();
   unsigned int getElapsedTicks();
 
 private:
@@ -20,6 +20,9 @@ private:
   const Uint32 PERIOD;
 
   unsigned int frames;
+  unsigned int framesThisSecond;
+  unsigned int framesLastSecond;
+  unsigned int currentSecond;
 
   unsigned int timeAtStart;
   unsigned int timeAtPause;
