@@ -74,8 +74,8 @@
   <speedY>150</speedY>
   <transparency>false</transparency>
   <flyPower></flyPower>
-  <noClip>true</noClip>
-  <godMode>true</godMode>
+  <noClip>false</noClip>
+  <godMode>false</godMode>
   <collectableLight>false</collectableLight>
   <chunk>
     <size>20</size>

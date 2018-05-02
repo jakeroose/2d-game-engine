@@ -64,7 +64,9 @@ public:
   void killPlayer();
   bool isDead() const { return !alive; }
   void toggleNoClip() { noClip = !noClip; }
+  bool getNoClip() const { return noClip; }
   void toggleGodMode() { godMode = !godMode; }
+  bool getGodMode() const { return godMode; }
 
 private:
   MultiSprite player;

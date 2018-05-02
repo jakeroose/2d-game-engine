@@ -42,15 +42,13 @@ Engine::Engine() :
   makeVideo( false ),
   displayName(Gamedata::getInstance().getXmlBool("displayName"))
 {
-  // hud.toggleDisplay();
+  // initialize everything
   player->respawn(LevelManager::getInstance().getSpawnPoint());
-
-  // initialize background
   background->initialize();
-
   hud.initialize(player);
-
+  hud.toggleDisplay();
   Viewport::getInstance().setObjectToTrack(player->getPlayer());
+
   // pre-emptively update all lights
   for(auto c : LightRenderer::getInstance().getLights()) c->update();
   std::cout << "Loading complete" << std::endl;
@@ -58,7 +56,10 @@ Engine::Engine() :
 
 // add sprite to ~(x,y) in the viewport
 void Engine::addSprite(int x, int y){
-  std::cout << "add enemy at " << (x + Viewport::getInstance().getX())/LevelManager::UNIT_SIZE << ", " << (y + Viewport::getInstance().getY())/LevelManager::UNIT_SIZE << std::endl;
+  std::cout << "add enemy at " << (x +
+    Viewport::getInstance().getX())/LevelManager::UNIT_SIZE << ", " <<
+    (y + Viewport::getInstance().getY())/LevelManager::UNIT_SIZE <<
+    std::endl;
   LevelManager::getInstance().addEnemy(
     (x + Viewport::getInstance().getX())/LevelManager::UNIT_SIZE,
     (y + Viewport::getInstance().getY())/LevelManager::UNIT_SIZE);
@@ -251,7 +252,7 @@ void Engine::play() {
   Uint32 ticks = clock.getElapsedTicks();
   FrameGenerator frameGen;
   // hud.toggleDisplay();
-  sound.toggleMusic();
+  // sound.toggleMusic();
 
   while ( !done ) {
     // The next loop polls for events, guarding against key bounce:
@@ -272,12 +273,14 @@ void Engine::play() {
         }
         if ( keystate[SDL_SCANCODE_N] ) {
           player->toggleNoClip();
+          std::cout << "NoClip: " << player->getNoClip() << std::endl;
         }
         if ( keystate[SDL_SCANCODE_M] ) {
           sound.toggleMusic();
         }
         if ( keystate[SDL_SCANCODE_G] ) {
           player->toggleGodMode();
+          std::cout << "GodMode: " << player->getGodMode() << std::endl;
         }
         if ( keystate[SDL_SCANCODE_F8]) {
           LevelManager::getInstance().toggleLevelEdit();
